@@ -31,21 +31,18 @@ type Value =
 type SExp =
     |Atom of Value
     |List of SExp list
+    |Quote of SExp
 
 let ws parser = parser .>> spaces
-
 let list,listRef = createParserForwardedToRef()
 let number = pfloat |>> Number
-
 let string =
     let normalChar = satisfy (fun c -> c <> '\"')
     between (pstring "\"")(pstring "\"") (manyChars normalChar) |>> String
-
 let symbol = (many1Chars (letter <|> digit <|> (pchar '-'))) |>> Symbol
-
 let atom =  (number <|> string <|> symbol) |>> Atom
-
-let listElement = choice [atom;list]
+let quote = (pstring "'") >>. choice [atom;list] |>> Quote
+let listElement = choice [atom;list;quote]
 let sexp = ws (pstring "(") >>. many (ws listElement) .>> ws (pstring ")") |>> List
 do listRef := sexp
 

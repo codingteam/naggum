@@ -23,14 +23,27 @@ module Naggum.Interactive
 open System
 open FParsec
 
+type Value =
+    |Number of float
+    |Symbol of string
+    |String of string
+
 type SExp =
-    |Atom of string
+    |Atom of Value
     |List of SExp list
 
 let ws parser = parser .>> spaces
 
 let list,listRef = createParserForwardedToRef()
-let atom = (many1Chars (letter <|> digit <|> (pchar '-'))) |>> Atom //should do something with this
+let number = pfloat |>> Number
+
+let string =
+    let normalChar = satisfy (fun c -> c <> '\"')
+    between (pstring "\"")(pstring "\"") (manyChars normalChar) |>> String
+
+let symbol = (many1Chars (letter <|> digit <|> (pchar '-'))) |>> Symbol
+
+let atom =  (number <|> string <|> symbol) |>> Atom
 
 let listElement = choice [atom;list]
 let sexp = ws (pstring "(") >>. many (ws listElement) .>> ws (pstring ")") |>> List

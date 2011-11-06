@@ -33,6 +33,14 @@ type SExp =
     |List of SExp list
     |Quote of SExp
 
+let rec eval sexp =
+    match sexp with
+    |Atom _ -> sexp
+    |List [] -> List [] //Special case for empty list
+    |List list -> List (List.map eval (List.tail list)) //here we should apply head (function name) to tail (args list)
+    |Quote (List []) -> List [] //special case for empty quoted list
+    |Quote literal -> literal
+
 let ws parser = parser .>> spaces
 let list,listRef = createParserForwardedToRef()
 let number = pfloat |>> Number
@@ -40,20 +48,21 @@ let string =
     let normalChar = satisfy (fun c -> c <> '\"')
     between (pstring "\"")(pstring "\"") (manyChars normalChar) |>> String
 let symbol = (many1Chars (letter <|> digit <|> (pchar '-'))) |>> Symbol
+
 let atom =  (number <|> string <|> symbol) |>> Atom
 let quote = (pstring "'") >>. choice [atom;list] |>> Quote
 let listElement = choice [atom;list;quote]
 let sexp = ws (pstring "(") >>. many (ws listElement) .>> ws (pstring ")") |>> List
+let parser = choice [atom;quote;sexp]
 do listRef := sexp
 
 let parse p str =
     let parse_result = run p str
-    match parse_result with
-    | Success(result, _, _)   -> printfn "Success: %A" result
-    | Failure(errorMsg, _, _) -> printfn "Failure: %s" errorMsg
     parse_result
 
 while true do
     Console.Out.Write "> "
     let expression = Console.In.ReadLine()
-    ignore (parse sexp expression)
+    match (parse parser expression) with
+    | Success(result, _, _)   -> printfn "Success:\n Form:\n%A\n Result:\n%A" result (eval result)
+    | Failure(errorMsg, _, _) -> printfn "Failure: %s" errorMsg

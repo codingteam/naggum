@@ -23,12 +23,43 @@ module Naggum.Interactive
 open System
 open FParsec
 open Types
+open Context
 
-let rec eval sexp =
+let context = Context []
+context.add (Symbol "add") (Function (fun (sexp) ->
+                              let args = List.map (fun (x) ->
+                                                        match x with
+                                                        |Atom (Number n) -> n
+                                                        |any ->
+                                                            eprintfn "Expected: Number\nGot: %A" any
+                                                            raise (new ArgumentException()))
+                                                        (match sexp with
+                                                         | List xs -> xs
+                                                         | Atom a -> [Atom a]
+                                                         | Quote q -> 
+                                                            eprintfn "Expected: Number\nGot: Quote %A" q
+                                                            raise (new ArgumentException()))
+                              List.reduce (+) args |> Number |> Atom))
+
+let apply (context:Context, fname_sexp:SExp, args:SExp) =
+    let fname = match fname_sexp with
+                | Atom (Symbol name) -> Symbol name
+                | any -> 
+                    eprintfn "Expected: Atom (Symbol)\nGot: %A" any
+                    raise (new ArgumentException())
+    let func = match context.get fname with
+               | Some (Function f) -> f
+               | Some (Value v) -> 
+                    eprintfn "Expected: Function\nGot: %A" (Value v)
+                    raise (new ArgumentException())
+               | None -> raise (new ArgumentException())
+    func args
+
+let rec eval context sexp =
     match sexp with
     |Atom _ -> sexp
     |List [] -> List [] //Special case for empty list
-    |List list -> List (List.map eval (List.tail list)) //here we should apply head (function name) to tail (args list)
+    |List list -> apply (context, (List.head list), (List (List.map (eval context) (List.tail list)))) //here we should apply head (function name) to tail (args list)
     |Quote (List []) -> List [] //special case for empty quoted list
     |Quote literal -> literal
 
@@ -55,5 +86,5 @@ while true do
     Console.Out.Write "> "
     let expression = Console.In.ReadLine()
     match (parse parser expression) with
-    | Success(result, _, _)   -> printfn "Success:\n Form:\n%A\n Result:\n%A" result (eval result)
+    | Success(result, _, _)   -> printfn "Success:\n Form:\n%A\n Result:\n%A" result (eval context result)
     | Failure(errorMsg, _, _) -> printfn "Failure: %s" errorMsg

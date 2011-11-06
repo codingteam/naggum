@@ -22,16 +22,7 @@ module Naggum.Interactive
 
 open System
 open FParsec
-
-type Value =
-    |Number of float
-    |Symbol of string
-    |String of string
-
-type SExp =
-    |Atom of Value
-    |List of SExp list
-    |Quote of SExp
+open Types
 
 let rec eval sexp =
     match sexp with

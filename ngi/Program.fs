@@ -41,7 +41,7 @@ context.add (Symbol "add") (Function (fun (sexp) ->
                                                             raise (new ArgumentException()))
                               List.reduce (+) args |> Number |> Atom))
 
-let apply (context:Context, fname_sexp:SExp, args:SExp) =
+let apply (context:Context) (fname_sexp:SExp) (args:SExp) =
     let fname = match fname_sexp with
                 | Atom (Symbol name) -> Symbol name
                 | any -> 
@@ -55,13 +55,37 @@ let apply (context:Context, fname_sexp:SExp, args:SExp) =
                | None -> raise (new ArgumentException())
     func args
 
-let rec eval context sexp =
-    match sexp with
-    |Atom _ -> sexp
+let eval_atom (context:Context) atom =
+    match atom with
+    | Atom (Symbol name) -> 
+        match context.get (Symbol name) with
+        | Some (Value value) ->Atom value
+        | Some (Function _) -> 
+            eprintf "Failure: procedural values not supported yet."
+            raise (new ArgumentException())
+        | None -> 
+            eprintf "Failure: %A not bound." atom
+            raise (new ArgumentException())
+    | _ -> atom //should not be matched, anyway
+
+let eval_list (context:Context) eval list =
+    match list with
     |List [] -> List [] //Special case for empty list
-    |List list -> apply (context, (List.head list), (List (List.map (eval context) (List.tail list)))) //here we should apply head (function name) to tail (args list)
+    // TODO differentiate this with branches to eval_let, eval_lambda, etc
+    |List list -> apply context (List.head list) (List (List.map (eval context) (List.tail list)))
+    | _ -> list
+
+let eval_quote quote =
+    match quote with
     |Quote (List []) -> List [] //special case for empty quoted list
     |Quote literal -> literal
+    | _ -> quote //should not be matched, anyway
+
+let rec eval context sexp =
+    match sexp with
+    |Atom _ -> eval_atom context sexp
+    |List _ -> eval_list context eval sexp
+    |Quote _ -> eval_quote sexp
 
 let ws parser = parser .>> spaces
 let list,listRef = createParserForwardedToRef()

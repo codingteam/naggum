@@ -68,10 +68,33 @@ let eval_atom (context:Context) atom =
             raise (new ArgumentException())
     | _ -> atom //should not be matched, anyway
 
+let eval_defun (gctx:Context) eval fname llist body =
+    let arity = List.length llist
+    let args = List.map (function |Atom v -> v| _ -> Symbol "nil") llist
+    gctx.add fname (Function (fun (sexp) ->
+                                match sexp with
+                                | List parms ->
+                                    if (List.length args) = arity then
+                                        let fctx = Context gctx.list
+                                        List.iter2 (fun s v -> 
+                                                        match v with
+                                                        | Atom value ->
+                                                            fctx.add s (Value value)) args parms
+                                        List (List.map (eval fctx) body)
+                                    else
+                                        eprintf "Funcntion %A expects %A args, received %A" fname arity (List.length args)
+                                        raise (new  ArgumentException())
+                                | _ ->
+                                    eprintf "Function %A expected a list of arguments, received %A" fname sexp
+                                    raise (new  ArgumentException())))
+
 let eval_list (context:Context) eval list =
     match list with
     |List [] -> List [] //Special case for empty list
     // TODO differentiate this with branches to eval_let, eval_lambda, etc
+    |List ( Atom (Symbol "defun") :: Atom fname :: List llist :: body) -> 
+        eval_defun context eval fname llist body
+        Atom fname
     |List list -> apply context (List.head list) (List (List.map (eval context) (List.tail list)))
     | _ -> list
 

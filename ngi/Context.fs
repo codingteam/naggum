@@ -45,6 +45,9 @@ type Context(init) =
             eprintfn "Expected: Symbol\nGot: %A" any
             None
 
+    member public this.list =
+        objects
+
     member public this.add symbol value =
         match symbol with
         |Symbol name -> objects <- List.append [(name,value)] objects

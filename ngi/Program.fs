@@ -24,22 +24,11 @@ open System
 open FParsec
 open Types
 open Context
+open Runtime
 
 let context = Context []
-context.add (Symbol "add") (Function (fun (sexp) ->
-                              let args = List.map (fun (x) ->
-                                                        match x with
-                                                        |Atom (Number n) -> n
-                                                        |any ->
-                                                            eprintfn "Expected: Number\nGot: %A" any
-                                                            raise (new ArgumentException()))
-                                                        (match sexp with
-                                                         | List xs -> xs
-                                                         | Atom a -> [Atom a]
-                                                         | Quote q -> 
-                                                            eprintfn "Expected: Number\nGot: Quote %A" q
-                                                            raise (new ArgumentException()))
-                              List.reduce (+) args |> Number |> Atom))
+
+load context
 
 let apply (context:Context) (fname_sexp:SExp) (args:SExp) =
     let fname = match fname_sexp with

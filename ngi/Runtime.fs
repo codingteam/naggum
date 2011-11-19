@@ -8,6 +8,7 @@ let add = fun (sexp) ->
             let args = List.map (fun (x) ->
                                     match x with
                                     |Atom (Number n) -> n
+                                    |List ([Atom (Number n)]) -> n
                                     |any ->
                                         eprintfn "Expected: Number\nGot: %A" any
                                         raise (new ArgumentException()))
@@ -23,6 +24,7 @@ let sub = fun (sexp) ->
             let args = List.map (fun (x) ->
                                     match x with
                                     |Atom (Number n) -> n
+                                    |List ([Atom (Number n)]) -> n
                                     |any ->
                                         eprintfn "Expected: Number\nGot: %A" any
                                         raise (new ArgumentException()))
@@ -38,6 +40,7 @@ let mul = fun (sexp) ->
             let args = List.map (fun (x) ->
                                     match x with
                                     |Atom (Number n) -> n
+                                    |List ([Atom (Number n)]) -> n
                                     |any ->
                                         eprintfn "Expected: Number\nGot: %A" any
                                         raise (new ArgumentException()))
@@ -53,6 +56,7 @@ let div = fun (sexp) ->
             let args = List.map (fun (x) ->
                                     match x with
                                     |Atom (Number n) -> n
+                                    |List ([Atom (Number n)]) -> n
                                     |any ->
                                         eprintfn "Expected: Number\nGot: %A" any
                                         raise (new ArgumentException()))

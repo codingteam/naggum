@@ -88,6 +88,12 @@ let eval_defun (gctx:Context) eval fname llist body =
                                     eprintf "Function %A expected a list of arguments, received %A" fname sexp
                                     raise (new  ArgumentException())))
 
+let eval_if (ctx:Context) eval condition if_true if_false =
+    match (eval ctx condition) with
+    | Atom (Symbol "nil") -> eval ctx if_false
+    | List [] -> eval ctx if_false
+    | _ -> eval ctx if_true
+
 let eval_list (context:Context) eval list =
     match list with
     |List [] -> List [] //Special case for empty list
@@ -95,6 +101,8 @@ let eval_list (context:Context) eval list =
     |List ( Atom (Symbol "defun") :: Atom fname :: List llist :: body) -> 
         eval_defun context eval fname llist body
         Atom fname
+    |List (Atom (Symbol "if") :: condition :: if_true :: if_false :: []) -> eval_if context eval condition if_true if_false
+    |List (Atom (Symbol "if") :: condition :: if_true :: []) -> eval_if context eval condition if_true (List [])
     |List list -> apply context (List.head list) (List (List.map (eval context) (List.tail list)))
     | _ -> list
 

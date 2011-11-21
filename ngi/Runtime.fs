@@ -79,9 +79,28 @@ let equal = fun (sexp) ->
             else
                 List []
 
+let cons = fun (sexp) ->
+            match sexp with
+            | List [car;cdr] ->
+                let car_val = match car with
+                                | Atom a -> a
+                                | any ->
+                                    eprintfn "Expected: value\nGot %A\n" any
+                                    raise (new ArgumentException())
+                let cdr_val = match cdr with
+                                | Atom a -> a
+                                | any ->
+                                    eprintfn "Expected: value\nGot %A\n" any
+                                    raise (new ArgumentException())
+                Cons (car_val,cdr_val) |> Atom
+            | any -> 
+                eprintfn "Expected: 2 values\nGot %A\n" any
+                raise (new ArgumentException())
+
 let load (ctx:Context) =
     ctx.add (Symbol "add") (Function add)
     ctx.add (Symbol "sub") (Function sub)
     ctx.add (Symbol "mul") (Function mul)
     ctx.add (Symbol "div") (Function div)
     ctx.add (Symbol "equal") (Function equal)
+    ctx.add (Symbol "cons") (Function cons)

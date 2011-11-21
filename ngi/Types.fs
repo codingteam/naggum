@@ -27,6 +27,13 @@ type Value =
     |Symbol of string
     |String of string
     |Cons of Value * Value
+    |EmptyList
+
+let rec is_list value =
+    match value with
+    | Cons (_,cdr) -> is_list cdr
+    | EmptyList -> true
+    | _ -> false
 
 type SExp =
     |Atom of Value

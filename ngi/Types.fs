@@ -26,6 +26,7 @@ type Value =
     |Number of float
     |Symbol of string
     |String of string
+    |Cons of Value * Value
 
 type SExp =
     |Atom of Value

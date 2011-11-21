@@ -28,7 +28,7 @@ open Runtime
 
 let context = Context []
 
-load context
+Runtime.load context
 
 let apply (context:Context) (fname_sexp:SExp) (args:SExp) =
     let fname = match fname_sexp with

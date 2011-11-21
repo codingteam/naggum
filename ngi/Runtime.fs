@@ -97,6 +97,20 @@ let cons = fun (sexp) ->
                 eprintfn "Expected: 2 values\nGot %A\n" any
                 raise (new ArgumentException())
 
+let car = fun (sexp) ->
+            match sexp with
+            | List [Atom (Cons (carval,_))] -> Atom carval
+            | any ->
+                eprintfn "Expected: Cons\nGot %A\n" any
+                raise (new ArgumentException())
+
+let cdr = fun (sexp) ->
+            match sexp with
+            | List [Atom (Cons (_,cdrval))] -> Atom cdrval
+            | any ->
+                eprintfn "Expected: Cons\nGot %A\n" any
+                raise (new ArgumentException())
+
 let load (ctx:Context) =
     ctx.add (Symbol "add") (Function add)
     ctx.add (Symbol "sub") (Function sub)
@@ -104,3 +118,5 @@ let load (ctx:Context) =
     ctx.add (Symbol "div") (Function div)
     ctx.add (Symbol "equal") (Function equal)
     ctx.add (Symbol "cons") (Function cons)
+    ctx.add (Symbol "car") (Function car)
+    ctx.add (Symbol "cdr") (Function cdr)

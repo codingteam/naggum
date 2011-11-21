@@ -30,6 +30,7 @@ let context = Context []
 
 Runtime.load context
 
+//Applies a function to parameters in given context
 let apply (context:Context) (fname_sexp:SExp) (args:SExp) =
     let fname = match fname_sexp with
                 | Atom (Symbol name) -> Symbol name
@@ -44,6 +45,7 @@ let apply (context:Context) (fname_sexp:SExp) (args:SExp) =
                | None -> raise (new ArgumentException())
     func args
 
+//Evaluates raw atom, like symbol or number
 let eval_atom (context:Context) atom =
     match atom with
     | Atom (Symbol name) -> 
@@ -57,6 +59,7 @@ let eval_atom (context:Context) atom =
             raise (new ArgumentException())
     | _ -> atom //should not be matched, anyway
 
+//Evaluates defun form
 let eval_defun (gctx:Context) eval fname llist body =
     let arity = List.length llist
     let args = List.map (function |Atom v -> v| _ -> Symbol "nil") llist
@@ -77,12 +80,14 @@ let eval_defun (gctx:Context) eval fname llist body =
                                     eprintf "Function %A expected a list of arguments, received %A" fname sexp
                                     raise (new  ArgumentException())))
 
+//Evaluates if form 
 let eval_if (ctx:Context) eval condition if_true if_false =
     match (eval ctx condition) with
     | Atom (Symbol "nil") -> eval ctx if_false
     | List [] -> eval ctx if_false
     | _ -> eval ctx if_true
 
+//Evaluates list exp
 let eval_list (context:Context) eval list =
     match list with
     |List [] -> List [] //Special case for empty list
@@ -95,12 +100,14 @@ let eval_list (context:Context) eval list =
     |List list -> apply context (List.head list) (List (List.map (eval context) (List.tail list)))
     | _ -> list
 
+//Evaluates quote exp
 let eval_quote quote =
     match quote with
     |Quote (List []) -> List [] //special case for empty quoted list
     |Quote literal -> literal
     | _ -> quote //should not be matched, anyway
 
+//generic evaluation
 let rec eval context sexp =
     match sexp with
     |Atom _ -> eval_atom context sexp

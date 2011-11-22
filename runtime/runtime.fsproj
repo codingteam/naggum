@@ -2,51 +2,41 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{e557eacb-0fc0-4deb-9426-188f2d3148f1}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>ngi</RootNamespace>
-    <AssemblyName>ngi</AssemblyName>
+    <ProjectGuid>{ab0df634-1c19-48cf-a635-02862807f67f}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>runtime</RootNamespace>
+    <AssemblyName>runtime</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
-    <Name>ngi</Name>
+    <Name>runtime</Name>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath>..\bin\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
-    <DocumentationFile>bin\Debug\ngi.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\runtime.XML</DocumentationFile>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <OutputPath>..\bin\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
-    <DocumentationFile>bin\Release\ngi.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\runtime.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|X64' ">
-    <OutputPath>..\bin\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|X64' ">
+    <NoWarn>
+    </NoWarn>
     <OutputPath>..\bin\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FParsec">
-      <HintPath>..\3rdparty\FParsec.dll</HintPath>
-    </Reference>
-    <Reference Include="FParsecCS">
-      <HintPath>..\3rdparty\FParsecCS.dll</HintPath>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
@@ -54,14 +44,9 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.fs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\runtime\runtime.fsproj">
-      <Name>runtime</Name>
-      <Project>{ab0df634-1c19-48cf-a635-02862807f67f}</Project>
-      <Private>True</Private>
-    </ProjectReference>
+    <Compile Include="Types.fs" />
+    <Compile Include="Context.fs" />
+    <Compile Include="Runtime.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />

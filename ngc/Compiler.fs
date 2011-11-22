@@ -28,4 +28,5 @@ open Naggum.CompilerBackend
 let fileName = Environment.GetCommandLineArgs().[1]
 let source = File.ReadAllText fileName
 
-compile source fileName |> ignore // TODO: Save file
+let assembly = compile source fileName 
+assembly.Save <| Path.GetFileName fileName

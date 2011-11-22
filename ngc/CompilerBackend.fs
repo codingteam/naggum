@@ -24,6 +24,13 @@ open System
 open System.Reflection
 open System.Reflection.Emit
 
+let private prologue (ilGen : ILGenerator) =
+    ilGen.BeginScope ()
+
+let private epilogue (ilGen : ILGenerator) =
+    ilGen.Emit OpCodes.Ret
+    ilGen.EndScope ()
+
 let compile (source : string) (name : string) : AssemblyBuilder =
     let assemblyName = new AssemblyName (name)
     let assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly (assemblyName, AssemblyBuilderAccess.Save)
@@ -34,6 +41,9 @@ let compile (source : string) (name : string) : AssemblyBuilder =
     assemblyBuilder.SetEntryPoint methodBuilder
     
     let ilGenerator = methodBuilder.GetILGenerator()
+
+    prologue ilGenerator
+    epilogue ilGenerator
 
     typeBuilder.CreateType()
     |> ignore

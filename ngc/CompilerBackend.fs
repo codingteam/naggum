@@ -18,14 +18,25 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. *)
 
-module Naggum.Compiler.Program
+module Naggum.CompilerBackend
 
 open System
-open System.IO
+open System.Reflection
+open System.Reflection.Emit
 
-open Naggum.Compiler
+let compile (source : string) (name : string) : AssemblyBuilder =
+    let assemblyName = new AssemblyName (name)
+    let assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly (assemblyName, AssemblyBuilderAccess.Save)
+    let moduleBuilder = assemblyBuilder.DefineDynamicModule (assemblyBuilder.GetName().Name)
+    let typeBuilder = moduleBuilder.DefineType ("Program", TypeAttributes.Public ||| TypeAttributes.Class ||| TypeAttributes.BeforeFieldInit)
+    let methodBuilder = typeBuilder.DefineMethod ("Main", MethodAttributes.Public ||| MethodAttributes.Static, typeof<Void>, [| |])
+    
+    assemblyBuilder.SetEntryPoint methodBuilder
+    
+    let ilGenerator = methodBuilder.GetILGenerator()
 
-let fileName = Environment.GetCommandLineArgs().[1]
-let source = File.ReadAllText fileName
+    // TODO: Check whether we need it.
+    // typeBuilder.CreateType()
+    // |> ignore
 
-compile source fileName |> ignore // TODO: Save file
+    assemblyBuilder

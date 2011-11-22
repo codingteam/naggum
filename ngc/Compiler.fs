@@ -21,22 +21,11 @@ THE SOFTWARE. *)
 module Naggum.Compiler
 
 open System
-open System.Reflection
-open System.Reflection.Emit
+open System.IO
 
-let compile (source : string) (name : string) : AssemblyBuilder =
-    let assemblyName = new AssemblyName (name)
-    let assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly (assemblyName, AssemblyBuilderAccess.Save)
-    let moduleBuilder = assemblyBuilder.DefineDynamicModule (assemblyBuilder.GetName().Name)
-    let typeBuilder = moduleBuilder.DefineType ("Program", TypeAttributes.Public ||| TypeAttributes.Class ||| TypeAttributes.BeforeFieldInit)
-    let methodBuilder = typeBuilder.DefineMethod ("Main", MethodAttributes.Public ||| MethodAttributes.Static, typeof<Void>, [| |])
-    
-    assemblyBuilder.SetEntryPoint methodBuilder
-    
-    let ilGenerator = methodBuilder.GetILGenerator()
+open Naggum.CompilerBackend
 
-    // TODO: Check whether we need it.
-    // typeBuilder.CreateType()
-    // |> ignore
+let fileName = Environment.GetCommandLineArgs().[1]
+let source = File.ReadAllText fileName
 
-    assemblyBuilder
+compile source fileName |> ignore // TODO: Save file

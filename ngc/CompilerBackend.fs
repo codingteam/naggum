@@ -35,8 +35,7 @@ let compile (source : string) (name : string) : AssemblyBuilder =
     
     let ilGenerator = methodBuilder.GetILGenerator()
 
-    // TODO: Check whether we need it.
-    // typeBuilder.CreateType()
-    // |> ignore
+    typeBuilder.CreateType()
+    |> ignore
 
     assemblyBuilder

@@ -24,7 +24,7 @@ open System
 open FParsec
 open Types
 open Context
-open Runtime
+open Naggum.Runtime
 
 let context = Context []
 
@@ -87,6 +87,27 @@ let eval_if (ctx:Context) eval condition if_true if_false =
     | List [] -> eval ctx if_false
     | _ -> eval ctx if_true
 
+let eval_let (gctx:Context) eval llist body =
+    let letctx = Context gctx.list
+    match llist with
+    | List binds -> List.iter (fun (bind) ->
+                                match bind with
+                                | List [Atom(Symbol name); bindval] ->
+                                    letctx.add (Symbol name)
+                                               (match (eval gctx bindval) with
+                                                | Atom a -> Value a
+                                                | List _ -> Value EmptyList
+                                                | Quote q -> Value EmptyList)
+                                | any ->
+                                    eprintf "Improper let binding: %A" any
+                                    raise (new ArgumentException()))
+                              binds
+                    List (List.map (eval letctx) body)
+    | any -> 
+        eprintf "Expected: List\nGot: %A" any
+        raise (new ArgumentException())
+                
+
 //Evaluates list exp
 let eval_list (context:Context) eval list =
     match list with
@@ -97,6 +118,7 @@ let eval_list (context:Context) eval list =
         Atom fname
     |List (Atom (Symbol "if") :: condition :: if_true :: if_false :: []) -> eval_if context eval condition if_true if_false
     |List (Atom (Symbol "if") :: condition :: if_true :: []) -> eval_if context eval condition if_true (List [])
+    |List (Atom (Symbol "let") :: llist :: body) -> eval_let context eval llist body
     |List list -> apply context (List.head list) (List (List.map (eval context) (List.tail list)))
     | _ -> list
 

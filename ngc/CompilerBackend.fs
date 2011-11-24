@@ -31,10 +31,10 @@ let private epilogue (ilGen : ILGenerator) =
     ilGen.Emit OpCodes.Ret
     ilGen.EndScope ()
 
-let compile (source : string) (name : string) : AssemblyBuilder =
-    let assemblyName = new AssemblyName (name)
+let compile (source : string) (assemblyName : string) (fileName : string) : unit =
+    let assemblyName = new AssemblyName (assemblyName)
     let assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly (assemblyName, AssemblyBuilderAccess.Save)
-    let moduleBuilder = assemblyBuilder.DefineDynamicModule (assemblyBuilder.GetName().Name)
+    let moduleBuilder = assemblyBuilder.DefineDynamicModule (assemblyBuilder.GetName().Name, fileName)
     let typeBuilder = moduleBuilder.DefineType ("Program", TypeAttributes.Public ||| TypeAttributes.Class ||| TypeAttributes.BeforeFieldInit)
     let methodBuilder = typeBuilder.DefineMethod ("Main", MethodAttributes.Public ||| MethodAttributes.Static, typeof<Void>, [| |])
     
@@ -48,4 +48,4 @@ let compile (source : string) (name : string) : AssemblyBuilder =
     typeBuilder.CreateType()
     |> ignore
 
-    assemblyBuilder
+    assemblyBuilder.Save fileName

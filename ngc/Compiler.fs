@@ -28,5 +28,5 @@ open Naggum.CompilerBackend
 let fileName = Environment.GetCommandLineArgs().[1]
 let source = File.ReadAllText fileName
 
-let assembly = compile source fileName 
-assembly.Save <| Path.GetFileName fileName
+let assemblyName = Path.GetFileNameWithoutExtension fileName
+compile source assemblyName (assemblyName + ".exe")

@@ -66,6 +66,13 @@
     <Compile Include="CompilerBackend.fs" />
     <Compile Include="Compiler.fs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\runtime\runtime.fsproj">
+      <Name>runtime</Name>
+      <Project>{ab0df634-1c19-48cf-a635-02862807f67f}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

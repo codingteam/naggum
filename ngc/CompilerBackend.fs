@@ -24,8 +24,22 @@ open System
 open System.Reflection
 open System.Reflection.Emit
 
+open Naggum.Context
+
+/// Returns local variable index for Context variable.
 let private prologue (ilGen : ILGenerator) =
+    let constructorInfo = typeof<Context>.GetConstructor [| typeof<List<string * ContextItem>> |]
+    
     ilGen.BeginScope ()
+    let contextIndex = ilGen.DeclareLocal typeof<Context>
+    
+    let initIndex = ilGen.DeclareLocal typeof<List<string * ContextItem>>
+    ilGen.Emit (OpCodes.Ldloc, initIndex)
+    ilGen.Emit (OpCodes.Newobj, constructorInfo)
+    
+    ilGen.Emit (OpCodes.Stloc, contextIndex)
+    
+    contextIndex
 
 let private epilogue (ilGen : ILGenerator) =
     ilGen.Emit OpCodes.Ret

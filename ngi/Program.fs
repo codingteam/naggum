@@ -136,6 +136,19 @@ let rec eval context sexp =
     |List _ -> eval_list context eval sexp
     |Quote _ -> eval_quote sexp
 
+let rec read_form (acc:string) balance =
+    let line = Console.In.ReadLine()
+    let delta = balance
+    String.iter (fun (c) ->
+                    match (c) with
+                    |'(' -> delta := !delta + 1
+                    |')' -> delta := !delta - 1
+                    |_ -> delta := !delta)
+                line
+    if !delta = 0 then
+        String.concat " " [acc;line]
+    else read_form (String.concat " " [acc; line]) delta
+
 let ws parser = parser .>> spaces
 let list,listRef = createParserForwardedToRef()
 let number = pfloat |>> Number
@@ -157,7 +170,7 @@ let parse p str =
 
 while true do
     Console.Out.Write "> "
-    let expression = Console.In.ReadLine()
+    let expression = (read_form "" (ref 0)).Trim()
     match (parse parser expression) with
     | Success(result, _, _)   -> printfn "Success:\n Form:\n%A\n Result:\n%A" result (eval context result)
     | Failure(errorMsg, _, _) -> printfn "Failure: %s" errorMsg

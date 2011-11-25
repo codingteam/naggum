@@ -21,10 +21,11 @@ THE SOFTWARE. *)
 module Naggum.Interactive
 
 open System
-open FParsec
 open Types
 open Context
+open FParsec
 open Naggum.Runtime
+open Naggum.Reader
 
 let context = Context []
 
@@ -71,7 +72,11 @@ let eval_defun (gctx:Context) eval fname llist body =
                                         List.iter2 (fun s v -> 
                                                         match v with
                                                         | Atom value ->
-                                                            fctx.add s (Value value)) args parms
+                                                            fctx.add s (Value value)
+                                                        | any ->
+                                                            eprintf "Unexpected %A in call to %A" any fname
+                                                            raise (new  ArgumentException()))
+                                                        args parms
                                         List (List.map (eval fctx) body)
                                     else
                                         eprintf "Funcntion %A expects %A args, received %A" fname arity (List.length args)
@@ -136,41 +141,11 @@ let rec eval context sexp =
     |List _ -> eval_list context eval sexp
     |Quote _ -> eval_quote sexp
 
-let rec read_form (acc:string) balance =
-    let line = Console.In.ReadLine()
-    let delta = balance
-    String.iter (fun (c) ->
-                    match (c) with
-                    |'(' -> delta := !delta + 1
-                    |')' -> delta := !delta - 1
-                    |_ -> delta := !delta)
-                line
-    if !delta = 0 then
-        String.concat " " [acc;line]
-    else read_form (String.concat " " [acc; line]) delta
 
-let ws parser = parser .>> spaces
-let list,listRef = createParserForwardedToRef()
-let number = pfloat |>> Number
-let string =
-    let normalChar = satisfy (fun c -> c <> '\"')
-    between (pstring "\"")(pstring "\"") (manyChars normalChar) |>> String
-let symbol = (many1Chars (letter <|> digit <|> (pchar '-'))) |>> Symbol
-
-let atom =  (number <|> string <|> symbol) |>> Atom
-let quote = (pstring "'") >>. choice [atom;list] |>> Quote
-let listElement = choice [atom;list;quote]
-let sexp = ws (pstring "(") >>. many (ws listElement) .>> ws (pstring ")") |>> List
-let parser = choice [atom;quote;sexp]
-do listRef := sexp
-
-let parse p str =
-    let parse_result = run p str
-    parse_result
 
 while true do
     Console.Out.Write "> "
-    let expression = (read_form "" (ref 0)).Trim()
-    match (parse parser expression) with
+    let expression = read()
+    match expression with
     | Success(result, _, _)   -> printfn "Success:\n Form:\n%A\n Result:\n%A" result (eval context result)
     | Failure(errorMsg, _, _) -> printfn "Failure: %s" errorMsg

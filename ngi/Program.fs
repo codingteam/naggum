@@ -146,6 +146,9 @@ let rec eval context sexp =
 while true do
     Console.Out.Write "> "
     let expression = read()
-    match expression with
-    | Success(result, _, _)   -> printfn "Success:\n Form:\n%A\n Result:\n%A" result (eval context result)
-    | Failure(errorMsg, _, _) -> printfn "Failure: %s" errorMsg
+    try
+        match expression with
+        | Success(result, _, _)   -> printfn "Success:\n Form:\n%A\n Result:\n%A" result (eval context result)
+        | Failure(errorMsg, _, _) -> printfn "Failure: %s" errorMsg
+    with
+    | :? ArgumentException as ex -> ex|>ignore

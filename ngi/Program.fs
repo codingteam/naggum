@@ -141,8 +141,6 @@ let rec eval context sexp =
     |List _ -> eval_list context eval sexp
     |Quote _ -> eval_quote sexp
 
-
-
 while true do
     Console.Out.Write "> "
     let expression = read()

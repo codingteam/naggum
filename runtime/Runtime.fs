@@ -2,6 +2,7 @@
 
 open System
 open Types
+open Error
 open Context
 
 let add = fun (sexp) ->
@@ -10,14 +11,12 @@ let add = fun (sexp) ->
                                     |Atom (Number n) -> n
                                     |List ([Atom (Number n)]) -> n
                                     |any ->
-                                        eprintfn "Expected: Number\nGot: %A" any
-                                        raise (new ArgumentException()))
+                                        raise (error (Symbol "parameter-error") (sprintf "Expected: Number\nGot: %A" sexp)))
                                 (match sexp with
                                     | List xs -> xs
                                     | Atom a -> [Atom a]
                                     | Quote q -> 
-                                        eprintfn "Expected: Number\nGot: Quote %A" q
-                                        raise (new ArgumentException()))
+                                        raise (error (Symbol "parameter-error") (sprintf "Expected: Number\nGot: %A" sexp)))
             List.reduce (+) args |> Number |> Atom
 
 let sub = fun (sexp) ->
@@ -26,14 +25,12 @@ let sub = fun (sexp) ->
                                     |Atom (Number n) -> n
                                     |List ([Atom (Number n)]) -> n
                                     |any ->
-                                        eprintfn "Expected: Number\nGot: %A" any
-                                        raise (new ArgumentException()))
+                                        raise (error (Symbol "parameter-error") (sprintf "Expected: Number\nGot: %A" sexp)))
                                 (match sexp with
                                     | List xs -> xs
                                     | Atom a -> [Atom a]
                                     | Quote q -> 
-                                        eprintfn "Expected: Number\nGot: Quote %A" q
-                                        raise (new ArgumentException()))
+                                        raise (error (Symbol "parameter-error") (sprintf "Expected: Number\nGot: %A" sexp)))
             List.reduce (-) args |> Number |> Atom
 
 let mul = fun (sexp) ->
@@ -42,14 +39,12 @@ let mul = fun (sexp) ->
                                     |Atom (Number n) -> n
                                     |List ([Atom (Number n)]) -> n
                                     |any ->
-                                        eprintfn "Expected: Number\nGot: %A" any
-                                        raise (new ArgumentException()))
+                                        raise (error (Symbol "parameter-error") (sprintf "Expected: Number\nGot: %A" sexp)))
                                 (match sexp with
                                     | List xs -> xs
                                     | Atom a -> [Atom a]
                                     | Quote q -> 
-                                        eprintfn "Expected: Number\nGot: Quote %A" q
-                                        raise (new ArgumentException()))
+                                        raise (error (Symbol "parameter-error") (sprintf "Expected: Number\nGot: %A" sexp)))
             List.reduce (*) args |> Number |> Atom
 
 let div = fun (sexp) ->
@@ -58,14 +53,12 @@ let div = fun (sexp) ->
                                     |Atom (Number n) -> n
                                     |List ([Atom (Number n)]) -> n
                                     |any ->
-                                        eprintfn "Expected: Number\nGot: %A" any
-                                        raise (new ArgumentException()))
+                                        raise (error (Symbol "parameter-error") (sprintf "Expected: Number\nGot: %A" sexp)))
                                 (match sexp with
                                     | List xs -> xs
                                     | Atom a -> [Atom a]
                                     | Quote q -> 
-                                        eprintfn "Expected: Number\nGot: Quote %A" q
-                                        raise (new ArgumentException()))
+                                        raise (error (Symbol "parameter-error") (sprintf "Expected: Number\nGot: %A" sexp)))
             List.reduce (/) args |> Number |> Atom
 
 let equal = fun (sexp) ->
@@ -85,31 +78,26 @@ let cons = fun (sexp) ->
                 let car_val = match car with
                                 | Atom a -> a
                                 | any ->
-                                    eprintfn "Expected: value\nGot %A\n" any
-                                    raise (new ArgumentException())
+                                    raise (error (Symbol "parameter-error") (sprintf "Expected: Value\nGot: %A" sexp))
                 let cdr_val = match cdr with
                                 | Atom a -> a
                                 | any ->
-                                    eprintfn "Expected: value\nGot %A\n" any
-                                    raise (new ArgumentException())
+                                    raise (error (Symbol "parameter-error") (sprintf "Expected: Value\nGot: %A" sexp))
                 Cons (car_val,cdr_val) |> Atom
             | any -> 
-                eprintfn "Expected: 2 values\nGot %A\n" any
-                raise (new ArgumentException())
+                raise (error (Symbol "parameter-error") (sprintf "Expected: 2 Values\nGot: %A" sexp))
 
 let car = fun (sexp) ->
             match sexp with
             | List [Atom (Cons (carval,_))] -> Atom carval
             | any ->
-                eprintfn "Expected: Cons\nGot %A\n" any
-                raise (new ArgumentException())
+                raise (error (Symbol "parameter-error") (sprintf "Expected: Cons\nGot: %A" sexp))
 
 let cdr = fun (sexp) ->
             match sexp with
             | List [Atom (Cons (_,cdrval))] -> Atom cdrval
             | any ->
-                eprintfn "Expected: Cons\nGot %A\n" any
-                raise (new ArgumentException())
+                raise (error (Symbol "parameter-error") (sprintf "Expected: Cons\nGot: %A" sexp))
 
 let load (ctx:Context) =
     ctx.add (Symbol "add") (Function add)

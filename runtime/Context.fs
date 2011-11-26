@@ -23,6 +23,7 @@ THE SOFTWARE. *)
 module Naggum.Context
 
 open Naggum.Types
+open Naggum.Error
 
 type ContextItem =
     |Value of Value
@@ -39,11 +40,9 @@ type Context(init) =
                 |(_,ci) -> Some ci
             with
                 | :? System.Collections.Generic.KeyNotFoundException ->
-                    eprintfn "%A is not defined." symbol
                     None
         |any ->
-            eprintfn "Expected: Symbol\nGot: %A" any
-            None
+            raise (error (Symbol "internal-error") (sprintf "Unable to get value from context:\nExpected: Symbol\nGot: %A" any))
 
     member public this.list =
         objects
@@ -51,5 +50,5 @@ type Context(init) =
     member public this.add symbol value =
         match symbol with
         |Symbol name -> objects <- List.append [(name,value)] objects
-        |any -> eprintfn "Expected: Symbol\nGot: %A" any
+        |any -> raise (error (Symbol "internal-error") (sprintf "Unable to add value to context:\nExpected: Symbol\nGot: %A" any))
 

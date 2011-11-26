@@ -24,9 +24,9 @@ open Types
 
 exception NaggumError of Value * string
 
-let error error_type message :unit =
+let error error_type message =
     match error_type with
-    | Symbol _ -> raise (NaggumError(error_type,message))
+    | Symbol _ -> NaggumError(error_type,message)
     | any -> raise (NaggumError(Symbol "error-raising-error",(sprintf "Unable to raise error:\n Expected: Symbol\nGot %A" any)))
 
 let print_error error =

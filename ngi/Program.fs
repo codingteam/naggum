@@ -21,10 +21,12 @@ THE SOFTWARE. *)
 module Naggum.Interactive
 
 open System
-open FParsec
 open Types
 open Context
+open FParsec
 open Naggum.Runtime
+open Naggum.Reader
+open Naggum.Error
 
 let context = Context []
 
@@ -35,13 +37,11 @@ let apply (context:Context) (fname_sexp:SExp) (args:SExp) =
     let fname = match fname_sexp with
                 | Atom (Symbol name) -> Symbol name
                 | any -> 
-                    eprintfn "Expected: Atom (Symbol)\nGot: %A" any
-                    raise (new ArgumentException())
+                    raise (error (Symbol "expression-error") (sprintf "Expected: Function\nGot: %A" any))
     let func = match context.get fname with
                | Some (Function f) -> f
                | Some (Value v) -> 
-                    eprintfn "Expected: Function\nGot: %A" (Value v)
-                    raise (new ArgumentException())
+                    raise (error (Symbol "value-error")(sprintf "Expected: Function\nGot: %A" (Value v)))
                | None -> raise (new ArgumentException())
     func args
 
@@ -52,11 +52,9 @@ let eval_atom (context:Context) atom =
         match context.get (Symbol name) with
         | Some (Value value) ->Atom value
         | Some (Function _) -> 
-            eprintf "Failure: procedural values not supported yet."
-            raise (new ArgumentException())
+            raise (error (Symbol "unsupported-operation") (sprintf "Failure: procedural values not supported yet."))
         | None -> 
-            eprintf "Failure: %A not bound." atom
-            raise (new ArgumentException())
+            raise (error (Symbol "context-error") (sprintf "Failure: %A not bound." atom))
     | _ -> atom //should not be matched, anyway
 
 //Evaluates defun form
@@ -71,14 +69,15 @@ let eval_defun (gctx:Context) eval fname llist body =
                                         List.iter2 (fun s v -> 
                                                         match v with
                                                         | Atom value ->
-                                                            fctx.add s (Value value)) args parms
+                                                            fctx.add s (Value value)
+                                                        | any ->
+                                                            raise (error (Symbol "call-error") (sprintf "Unexpected %A in call to %A" any fname)))
+                                                        args parms
                                         List (List.map (eval fctx) body)
                                     else
-                                        eprintf "Funcntion %A expects %A args, received %A" fname arity (List.length args)
-                                        raise (new  ArgumentException())
+                                        raise (error (Symbol "call-error") (sprintf "Funcntion %A expects %A arguments, received %A" fname arity (List.length args)))
                                 | _ ->
-                                    eprintf "Function %A expected a list of arguments, received %A" fname sexp
-                                    raise (new  ArgumentException())))
+                                    raise (error (Symbol "call-error") (sprintf "Function %A expected a list of arguments, received %A" fname sexp))))
 
 //Evaluates if form 
 let eval_if (ctx:Context) eval condition if_true if_false =
@@ -87,6 +86,7 @@ let eval_if (ctx:Context) eval condition if_true if_false =
     | List [] -> eval ctx if_false
     | _ -> eval ctx if_true
 
+///Evaluates let form
 let eval_let (gctx:Context) eval llist body =
     let letctx = Context gctx.list
     match llist with
@@ -99,14 +99,11 @@ let eval_let (gctx:Context) eval llist body =
                                                 | List _ -> Value EmptyList
                                                 | Quote q -> Value EmptyList)
                                 | any ->
-                                    eprintf "Improper let binding: %A" any
-                                    raise (new ArgumentException()))
+                                    raise (error (Symbol "expression-error") (sprintf "Improper let binding: %A" any)))
                               binds
                     List (List.map (eval letctx) body)
     | any -> 
-        eprintf "Expected: List\nGot: %A" any
-        raise (new ArgumentException())
-                
+        raise (error (Symbol "expression-error") (sprintf "Expected: List\nGot: %A" any))                
 
 //Evaluates list exp
 let eval_list (context:Context) eval list =
@@ -136,41 +133,12 @@ let rec eval context sexp =
     |List _ -> eval_list context eval sexp
     |Quote _ -> eval_quote sexp
 
-let rec read_form (acc:string) balance =
-    let line = Console.In.ReadLine()
-    let delta = balance
-    String.iter (fun (c) ->
-                    match (c) with
-                    |'(' -> delta := !delta + 1
-                    |')' -> delta := !delta - 1
-                    |_ -> delta := !delta)
-                line
-    if !delta = 0 then
-        String.concat " " [acc;line]
-    else read_form (String.concat " " [acc; line]) delta
-
-let ws parser = parser .>> spaces
-let list,listRef = createParserForwardedToRef()
-let number = pfloat |>> Number
-let string =
-    let normalChar = satisfy (fun c -> c <> '\"')
-    between (pstring "\"")(pstring "\"") (manyChars normalChar) |>> String
-let symbol = (many1Chars (letter <|> digit <|> (pchar '-'))) |>> Symbol
-
-let atom =  (number <|> string <|> symbol) |>> Atom
-let quote = (pstring "'") >>. choice [atom;list] |>> Quote
-let listElement = choice [atom;list;quote]
-let sexp = ws (pstring "(") >>. many (ws listElement) .>> ws (pstring ")") |>> List
-let parser = choice [atom;quote;sexp]
-do listRef := sexp
-
-let parse p str =
-    let parse_result = run p str
-    parse_result
-
 while true do
     Console.Out.Write "> "
-    let expression = (read_form "" (ref 0)).Trim()
-    match (parse parser expression) with
-    | Success(result, _, _)   -> printfn "Success:\n Form:\n%A\n Result:\n%A" result (eval context result)
-    | Failure(errorMsg, _, _) -> printfn "Failure: %s" errorMsg
+    try
+        let expression = read()
+        match expression with
+        | Success(result, _, _)   -> printfn "Success:\n Form:\n%A\n Result:\n%A" result (eval context result)
+        | Failure(errorMsg, _, _) -> raise (error (Symbol "parser-error") (sprintf "Failure: %s" errorMsg))
+    with
+    | :? NaggumError as ex -> print_error ex

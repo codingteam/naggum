@@ -62,4 +62,4 @@ let compile (source : string) (assemblyName : string) (fileName : string) : unit
     typeBuilder.CreateType()
     |> ignore
 
-    assemblyBuilder.Save (fileName, PortableExecutableKinds.Required32Bit, ImageFileMachine.I386)
+    assemblyBuilder.Save fileName

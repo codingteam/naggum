@@ -1,4 +1,4 @@
-﻿(*  Copyright (C) 2011 by Hagane
+﻿(*  Copyright (C) 2011 by Hagane, ForNeVeR
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,7 @@ THE SOFTWARE. *)
 module Naggum.Reader
 
 open System
+open System.IO
 open FParsec
 open Types
 
@@ -39,8 +40,8 @@ let sexp = ws (pstring "(") >>. many (ws listElement) .>> ws (pstring ")") |>> L
 let parser = choice [atom;quote;sexp]
 do listRef := sexp
 
-let rec read_form (acc:string) balance =
-    let line = Console.In.ReadLine()
+let rec read_form (stream : TextReader) (acc:string) balance =
+    let line = stream.ReadLine()
     let delta = balance
     String.iter (fun (c) ->
                     match (c) with
@@ -50,12 +51,13 @@ let rec read_form (acc:string) balance =
                 line
     if !delta = 0 then
         String.concat " " [acc;line]
-    else read_form (String.concat " " [acc; line]) delta
+    else read_form stream (String.concat " " [acc; line]) delta
 
 let parse p str =
     let parse_result = run p str
     parse_result
 
-let read = (fun () ->
-                let form = (read_form "" (ref 0)).Trim()
-                parse parser form)
+let read stream =
+    (fun () ->
+        let form = (read_form stream "" (ref 0)).Trim()
+        parse parser form)

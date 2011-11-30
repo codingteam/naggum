@@ -1,4 +1,4 @@
-﻿(*  Copyright (C) 2011 by Hagane
+﻿(*  Copyright (C) 2011 by Hagane, ForNeVeR
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -135,8 +135,9 @@ let rec eval context sexp =
 
 while true do
     Console.Out.Write "> "
+    let read = read Console.In
     try
-        let expression = read()
+        let expression = read ()
         match expression with
         | Success(result, _, _)   -> printfn "Success:\n Form:\n%A\n Result:\n%A" result (eval context result)
         | Failure(errorMsg, _, _) -> raise (error (Symbol "parser-error") (sprintf "Failure: %s" errorMsg))

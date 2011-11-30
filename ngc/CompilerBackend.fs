@@ -30,27 +30,27 @@ open Naggum.Context
 let private prologue (ilGen : ILGenerator) =
     let constructorInfo = typeof<Context>.GetConstructor [| typeof<List<string * ContextItem>> |]
     
-    ilGen.BeginScope ()
+    ilGen.BeginScope()
     let contextIndex = ilGen.DeclareLocal typeof<Context>
     
     let initIndex = ilGen.DeclareLocal typeof<List<string * ContextItem>>
-    ilGen.Emit (OpCodes.Ldloc, initIndex)
-    ilGen.Emit (OpCodes.Newobj, constructorInfo)
+    ilGen.Emit(OpCodes.Ldloc, initIndex)
+    ilGen.Emit(OpCodes.Newobj, constructorInfo)
     
-    ilGen.Emit (OpCodes.Stloc, contextIndex)
+    ilGen.Emit(OpCodes.Stloc, contextIndex)
     
     contextIndex
 
 let private epilogue (ilGen : ILGenerator) =
     ilGen.Emit OpCodes.Ret
-    ilGen.EndScope ()
+    ilGen.EndScope()
 
 let compile (source : string) (assemblyName : string) (fileName : string) : unit =
-    let assemblyName = new AssemblyName (assemblyName)
-    let assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly (assemblyName, AssemblyBuilderAccess.Save)
-    let moduleBuilder = assemblyBuilder.DefineDynamicModule (assemblyBuilder.GetName().Name, fileName)
-    let typeBuilder = moduleBuilder.DefineType ("Program", TypeAttributes.Public ||| TypeAttributes.Class ||| TypeAttributes.BeforeFieldInit)
-    let methodBuilder = typeBuilder.DefineMethod ("Main", MethodAttributes.Public ||| MethodAttributes.Static, typeof<Void>, [| |])
+    let assemblyName = new AssemblyName(assemblyName)
+    let assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Save)
+    let moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyBuilder.GetName().Name, fileName)
+    let typeBuilder = moduleBuilder.DefineType("Program", TypeAttributes.Public ||| TypeAttributes.Class ||| TypeAttributes.BeforeFieldInit)
+    let methodBuilder = typeBuilder.DefineMethod("Main", MethodAttributes.Public ||| MethodAttributes.Static, typeof<Void>, [| |])
     
     assemblyBuilder.SetEntryPoint methodBuilder
     

@@ -25,7 +25,6 @@ module Naggum.Types
 type Value =
     |Atom of obj
     |Cons of Value list
-    |EmptyList
 
 type Symbol (name:string) =
     member this.GetName() =

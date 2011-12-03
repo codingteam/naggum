@@ -27,17 +27,19 @@ open Types
 
 let ws parser = parser .>> spaces
 let list,listRef = createParserForwardedToRef()
-let number = pfloat |>> Number
+let float = pfloat |>> (fun (flt) -> flt :> obj)
+let int = pint32 |>> (fun (int) -> int :> obj)
+let number = int <|> float
 let string =
     let normalChar = satisfy (fun c -> c <> '\"')
-    between (pstring "\"")(pstring "\"") (manyChars normalChar) |>> String
-let symbol = (many1Chars (letter <|> digit <|> (pchar '-'))) |>> Symbol
+    between (pstring "\"")(pstring "\"") (manyChars normalChar) |>> (fun (str) -> str :> obj)
+let symbol = (many1Chars (letter <|> digit <|> (pchar '-'))) |>> (fun (name) -> (new Symbol (name)) :> obj)
 
 let atom =  (number <|> string <|> symbol) |>> Atom
-let quote = (pstring "'") >>. choice [atom;list] |>> Quote
-let listElement = choice [atom;list;quote]
-let sexp = ws (pstring "(") >>. many (ws listElement) .>> ws (pstring ")") |>> List
-let parser = choice [atom;quote;sexp]
+
+let listElement = choice [atom;list]
+let sexp = ws (pstring "(") >>. many (ws listElement) .>> ws (pstring ")") |>> Cons
+let parser = choice [atom;sexp]
 do listRef := sexp
 
 let rec read_form (stream : TextReader) (acc:string) balance =

@@ -23,20 +23,12 @@ THE SOFTWARE. *)
 module Naggum.Types
 
 type Value =
-    |Number of float
-    |Symbol of string
-    |String of string
-    |Cons of Value * Value
+    |Atom of obj
+    |Cons of Value list
     |EmptyList
 
-let rec is_list value =
-    match value with
-    | Cons (_,cdr) -> is_list cdr
-    | EmptyList -> true
-    | _ -> false
-
-type SExp =
-    |Atom of Value
-    |List of SExp list
-    |Quote of SExp
-
+type Symbol (name:string) =
+    member this.GetName() =
+        name
+    member this.Equals (other:Symbol) =
+        name = other.GetName()

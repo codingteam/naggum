@@ -31,3 +31,12 @@ type Symbol (name:string) =
         name
     member this.Equals (other:Symbol) =
         name = other.GetName()
+
+let is_symbol (o:obj) =
+    o.GetType().Name = "Symbol"
+
+let symbol_name (symbol:obj) =
+    if is_symbol symbol then
+        (symbol :?> Symbol).GetName()
+    else
+        ""

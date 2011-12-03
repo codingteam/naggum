@@ -26,25 +26,50 @@ open System.Reflection.Emit
 
 open Naggum.Context
 open Naggum.Reader
+open Naggum.Types
 
-/// Returns local variable index for Context variable.
+/// Returns local variable for Context object.
 let private prologue (ilGen : ILGenerator) =
     let constructorInfo = typeof<Context>.GetConstructor [| typeof<List<string * ContextItem>> |]
     
     ilGen.BeginScope()
-    let contextIndex = ilGen.DeclareLocal typeof<Context>
+    let contextVariable = ilGen.DeclareLocal typeof<Context>
     
-    let initIndex = ilGen.DeclareLocal typeof<List<string * ContextItem>>
-    ilGen.Emit(OpCodes.Ldloc, initIndex)
+    let initVariable = ilGen.DeclareLocal typeof<List<string * ContextItem>>
+    ilGen.Emit(OpCodes.Ldloc, initVariable)
     ilGen.Emit(OpCodes.Newobj, constructorInfo)
     
-    ilGen.Emit(OpCodes.Stloc, contextIndex)
+    ilGen.Emit(OpCodes.Stloc, contextVariable)
+    // TODO: Emit Runtime.Load(context) here.
     
-    contextIndex
+    contextVariable
 
 let private epilogue (ilGen : ILGenerator) =
+    // TODO: call main()
     ilGen.Emit OpCodes.Ret
     ilGen.EndScope()
+
+let rec private generate (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (form : SExp) (contextVar : LocalBuilder) =
+    match form with
+    | List list ->
+        match list with
+        | (Atom (Symbol "defun") :: Atom (Symbol name) :: List args :: body) ->
+            let argsDef = [| for i in [1..List.length args] do yield typeof<obj> |]
+            let methodGen = typeBuilder.DefineMethod (name, MethodAttributes.Public ||| MethodAttributes.Static, typeof<obj>, argsDef)
+            generateBody typeBuilder ilGen body contextVar
+            // TODO: produce delegate and add it to context.
+        | _ -> failwithf "%A not supported yet." list
+    | other     -> failwithf "%A form not supported yet." other
+and private generateBody (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (body : SExp list) (contextVar : LocalBuilder) =
+    match body with
+    | [] ->
+        ()
+    | [last] ->
+        // TODO: return last expression.
+        ()
+    | sexp :: rest ->
+        generate typeBuilder ilGen sexp contextVar
+        generateBody typeBuilder ilGen rest contextVar
 
 let compile (source : string) (assemblyName : string) (fileName : string) : unit =
     let assemblyName = new AssemblyName(assemblyName)
@@ -59,6 +84,8 @@ let compile (source : string) (assemblyName : string) (fileName : string) : unit
 
     let context = prologue ilGenerator
     let sexp = Reader.parse source
+    generate typeBuilder ilGenerator sexp context
+
     epilogue ilGenerator
 
     typeBuilder.CreateType()

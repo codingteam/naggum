@@ -66,7 +66,19 @@ let eval_list context eval sexp =
 let rec eval context sexp =
     match sexp with
     |Cons list -> eval_list context eval list
-    |Atom o -> Atom o
+    |Atom o -> 
+        if is_symbol o then
+            match context.get (unbox o) with
+            | None -> 
+                eprintfn "Symbol %A is not bound." ((o:?>Symbol).GetName())
+                Atom null
+            | Some (Function _) ->
+                eprintfn "Functional values are not supported yet."
+                Atom null
+            | Some (Value v) ->
+                v
+        else
+            Atom o
 
 while true do
     Console.Out.Write "> "

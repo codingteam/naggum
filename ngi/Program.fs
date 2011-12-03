@@ -31,14 +31,15 @@ let context = Context []
 
 Runtime.load context
 
-let undiscern list =
-    List.map
-        (function
-            |Atom a -> a
-            |Cons c -> c :> obj)
-        list
+let undiscern_val value =
+    match value with
+    |Atom a -> a
+    |Cons c -> c :> obj
 
-let apply (context:Context) (fname:Symbol) (args:obj list) =
+let undiscern_list list =
+    List.map undiscern_val list
+
+let apply (context:Context) (fname:Symbol) (args:Value list) =
     let func = context.get fname
     match func with
     | None -> 
@@ -47,23 +48,25 @@ let apply (context:Context) (fname:Symbol) (args:obj list) =
     | Some (Value _) ->
         eprintfn "%A is not a function." (fname.GetName())
         null
-    | Some (Function f) -> f args
+    | Some (Function f) ->
+        f (undiscern_list args)
 
 
 //Evaluates list exp
-let eval_list context sexp =
-    let head = List.head sexp
-    let tail = List.tail sexp
+let eval_list context eval sexp =
+    let head = undiscern_val (List.head sexp)
+    let tail = List.map (eval context) (List.tail sexp)
     if is_symbol head then
-        apply context (unbox head) tail
+        Atom (apply context (unbox head) tail)
     else
         eprintfn "Not a symbol: %A" head
-        null
+        Atom null
 
 //generic evaluation
 let rec eval context sexp =
     match sexp with
-    |Cons list -> eval_list context (undiscern list)
+    |Cons list -> eval_list context eval list
+    |Atom o -> Atom o
 
 while true do
     Console.Out.Write "> "

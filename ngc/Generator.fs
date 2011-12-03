@@ -54,7 +54,7 @@ let rec private generate (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (form
     | List list ->
         match list with
         | (Atom (Symbol "defun") :: Atom (Symbol name) :: List args :: body) ->
-            let argsDef = [| for i in [1..List.length args] do yield typeof<obj> |]
+            let argsDef = Array.create (List.length args) typeof<obj>
             let methodGen = typeBuilder.DefineMethod (name, MethodAttributes.Public ||| MethodAttributes.Static, typeof<obj>, argsDef)
             generateBody typeBuilder ilGen body contextVar
             // TODO: produce delegate and add it to context.

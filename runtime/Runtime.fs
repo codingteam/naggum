@@ -5,16 +5,16 @@ open Types
 open Context
 
 let add = fun (args: obj list) ->
-            List.reduce (+) (unbox args) :> obj
+            List.reduce (+) (List.map unbox args) :> obj
 
 let sub = fun (args: obj list) ->
-            List.reduce (-) (unbox args) :> obj
+            List.reduce (-) (List.map unbox args) :> obj
 
 let mul = fun (args: obj list) ->
-            List.reduce (*) (unbox args) :> obj
+            List.reduce (*) (List.map unbox args) :> obj
 
 let div = fun (args: obj list) ->
-            List.reduce (/) (unbox args) :> obj
+            List.reduce (/) (List.map unbox args) :> obj
 
 let rec equal = fun (args: obj list) ->
                 match args.Length with

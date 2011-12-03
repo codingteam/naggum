@@ -31,21 +31,39 @@ let context = Context []
 
 Runtime.load context
 
+let undiscern list =
+    List.map
+        (function
+            |Atom a -> a
+            |Cons c -> c :> obj)
+        list
+
+let apply (context:Context) (fname:Symbol) (args:obj list) =
+    let func = context.get fname
+    match func with
+    | None -> 
+        eprintfn "Symbol %A is not bound." (fname.GetName())
+        null
+    | Some (Value _) ->
+        eprintfn "%A is not a function." (fname.GetName())
+        null
+    | Some (Function f) -> f args
+
+
 //Evaluates list exp
-let eval_list context eval sexp =
+let eval_list context sexp =
     let head = List.head sexp
-    match head with
-    | Atom a ->
-        if is_symbol a then
-            let symbol = a :?> Symbol
-            printf "funcall: %A with %A" (symbol.GetName()) (List.tail sexp)
-        else
-            eprintf "Not a symbol: %A" head
+    let tail = List.tail sexp
+    if is_symbol head then
+        apply context (unbox head) tail
+    else
+        eprintfn "Not a symbol: %A" head
+        null
 
 //generic evaluation
 let rec eval context sexp =
     match sexp with
-    |Cons list -> eval_list context eval list
+    |Cons list -> eval_list context (undiscern list)
 
 while true do
     Console.Out.Write "> "

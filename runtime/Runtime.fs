@@ -6,16 +6,16 @@ open Error
 open Context
 
 let add = fun (args: obj list) ->
-            List.reduce (+) args
+            List.reduce (+) (unbox args) :> obj
 
 let sub = fun (args: obj list) ->
-            List.reduce (-) args
+            List.reduce (-) (unbox args) :> obj
 
 let mul = fun (args: obj list) ->
-            List.reduce (*) args
+            List.reduce (*) (unbox args) :> obj
 
 let div = fun (args: obj list) ->
-            List.reduce (/) args
+            List.reduce (/) (unbox args) :> obj
 
 let rec equal = fun (args: obj list) ->
                 match args.Length with

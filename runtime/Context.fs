@@ -23,7 +23,6 @@ THE SOFTWARE. *)
 module Naggum.Context
 
 open Naggum.Types
-open Naggum.Error
 
 type ContextItem =
     |Value of Value

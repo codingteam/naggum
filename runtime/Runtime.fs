@@ -2,7 +2,6 @@
 
 open System
 open Types
-open Error
 open Context
 
 let add = fun (args: obj list) ->

@@ -45,7 +45,7 @@ let private prologue (ilGen : ILGenerator) =
     contextVariable
 
 let private epilogue (ilGen : ILGenerator) =
-    // TODO: call main()
+    // TODO: call main ( () )
     ilGen.Emit OpCodes.Ret
     ilGen.EndScope()
 

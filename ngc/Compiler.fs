@@ -18,15 +18,49 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. *)
 
-module Naggum.Compiler
+module Naggum.Compiler.Compiler
 
 open System
-open System.IO
+open System.Reflection
+open System.Reflection.Emit
 
-open Naggum.CompilerBackend
+open Naggum.Context
+open Naggum.Reader
 
-let fileName = Environment.GetCommandLineArgs().[1]
-let source = File.ReadAllText fileName
+/// Returns local variable index for Context variable.
+let private prologue (ilGen : ILGenerator) =
+    let constructorInfo = typeof<Context>.GetConstructor [| typeof<List<string * ContextItem>> |]
+    
+    ilGen.BeginScope()
+    let contextIndex = ilGen.DeclareLocal typeof<Context>
+    
+    let initIndex = ilGen.DeclareLocal typeof<List<string * ContextItem>>
+    ilGen.Emit(OpCodes.Ldloc, initIndex)
+    ilGen.Emit(OpCodes.Newobj, constructorInfo)
+    
+    ilGen.Emit(OpCodes.Stloc, contextIndex)
+    
+    contextIndex
 
-let assemblyName = Path.GetFileNameWithoutExtension fileName
-compile source assemblyName (assemblyName + ".exe")
+let private epilogue (ilGen : ILGenerator) =
+    ilGen.Emit OpCodes.Ret
+    ilGen.EndScope()
+
+let compile (source : string) (assemblyName : string) (fileName : string) : unit =
+    let assemblyName = new AssemblyName(assemblyName)
+    let assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Save)
+    let moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyBuilder.GetName().Name, fileName)
+    let typeBuilder = moduleBuilder.DefineType("Program", TypeAttributes.Public ||| TypeAttributes.Class ||| TypeAttributes.BeforeFieldInit)
+    let methodBuilder = typeBuilder.DefineMethod("Main", MethodAttributes.Public ||| MethodAttributes.Static, typeof<Void>, [| |])
+    
+    assemblyBuilder.SetEntryPoint methodBuilder
+    
+    let ilGenerator = methodBuilder.GetILGenerator()
+
+    let context = prologue ilGenerator
+    epilogue ilGenerator
+
+    typeBuilder.CreateType()
+    |> ignore
+
+    assemblyBuilder.Save fileName

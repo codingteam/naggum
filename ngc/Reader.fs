@@ -18,5 +18,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. *)
 
-module Naggum.Compiler.Parser
+module Naggum.Compiler.Reader
 
+open FParsec.CharParsers
+
+open Naggum.Reader
+
+let parse (source : string) =
+    let form = parse parser source
+    match form with
+    | Success(result,   _, _) -> result
+    | Failure(errorMsg, _, _) -> failwithf "Failure: %s" errorMsg

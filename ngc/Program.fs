@@ -23,10 +23,8 @@ module Naggum.Compiler.Program
 open System
 open System.IO
 
-open Compiler
-
 let fileName = Environment.GetCommandLineArgs().[1]
 let source = File.ReadAllText fileName
 
 let assemblyName = Path.GetFileNameWithoutExtension fileName
-compile source assemblyName (assemblyName + ".exe")
+Generator.compile source assemblyName (assemblyName + ".exe")

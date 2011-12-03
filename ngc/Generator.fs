@@ -18,7 +18,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. *)
 
-module Naggum.Compiler.Compiler
+module Naggum.Compiler.Generator
 
 open System
 open System.Reflection
@@ -58,6 +58,7 @@ let compile (source : string) (assemblyName : string) (fileName : string) : unit
     let ilGenerator = methodBuilder.GetILGenerator()
 
     let context = prologue ilGenerator
+    let sexp = Reader.parse source
     epilogue ilGenerator
 
     typeBuilder.CreateType()

@@ -35,6 +35,12 @@
     <DocumentationFile>bin\Release\ngc.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FParsec">
+      <HintPath>..\3rdparty\FParsec.dll</HintPath>
+    </Reference>
+    <Reference Include="FParsecCS">
+      <HintPath>..\3rdparty\FParsecCS.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
@@ -42,9 +48,9 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Compiler.fs" />
+    <Compile Include="Reader.fs" />
+    <Compile Include="Generator.fs" />
     <Compile Include="Program.fs" />
-    <Compile Include="Parser.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\runtime\runtime.fsproj">

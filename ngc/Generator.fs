@@ -55,7 +55,7 @@ let rec private generate (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (form
         match list with
         | (Atom (Symbol "defun") :: Atom (Symbol name) :: List args :: body) ->
             let argsDef = Array.create (List.length args) typeof<obj>
-            let methodGen = typeBuilder.DefineMethod (name, MethodAttributes.Public ||| MethodAttributes.Static, typeof<obj>, argsDef)
+            let methodGen = typeBuilder.DefineMethod(name, MethodAttributes.Public ||| MethodAttributes.Static, typeof<obj>, argsDef)
             generateBody typeBuilder ilGen body contextVar
             // TODO: produce delegate and add it to context.
         | _ -> failwithf "%A not supported yet." list

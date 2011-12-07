@@ -23,27 +23,28 @@ open System
 open Types
 open Context
 
-let add = fun (args: obj list) ->
-            List.reduce (+) (List.map unbox args) :> obj
+type Runtime =
+    static member add = fun (args: obj list) ->
+                List.reduce (+) (List.map unbox args) :> obj
 
-let sub = fun (args: obj list) ->
-            List.reduce (-) (List.map unbox args) :> obj
+    static member sub = fun (args: obj list) ->
+                List.reduce (-) (List.map unbox args) :> obj
 
-let mul = fun (args: obj list) ->
-            List.reduce (*) (List.map unbox args) :> obj
+    static member mul = fun (args: obj list) ->
+                List.reduce (*) (List.map unbox args) :> obj
 
-let div = fun (args: obj list) ->
-            List.reduce (/) (List.map unbox args) :> obj
+    static member div = fun (args: obj list) ->
+                List.reduce (/) (List.map unbox args) :> obj
 
-let rec equal = fun (args: obj list) ->
-                match args.Length with
-                | 0 -> (false :> obj)
-                | 1 -> (true :> obj)
-                | any -> (List.forall (fun (a) -> a.Equals (args.Item 0)) args :> obj)
+    static member equal = fun (args: obj list) ->
+                    match args.Length with
+                    | 0 -> (false :> obj)
+                    | 1 -> (true :> obj)
+                    | any -> (List.forall (fun (a) -> a.Equals (args.Item 0)) args :> obj)
 
 let load (ctx:Context) =
-    ctx.add (Symbol "add") (Function add)
-    ctx.add (Symbol "sub") (Function sub)
-    ctx.add (Symbol "mul") (Function mul)
-    ctx.add (Symbol "div") (Function div)
-    ctx.add (Symbol "equal") (Function equal)
+    ctx.add (Symbol "add") (Function Runtime.add)
+    ctx.add (Symbol "sub") (Function Runtime.sub)
+    ctx.add (Symbol "mul") (Function Runtime.mul)
+    ctx.add (Symbol "div") (Function Runtime.div)
+    ctx.add (Symbol "equal") (Function Runtime.equal)

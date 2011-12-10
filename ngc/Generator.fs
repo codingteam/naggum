@@ -82,7 +82,7 @@ and private generateBody (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (body
         ()
     | sexp :: rest ->
         generate typeBuilder ilGen sexp contextVar
-        generateBody typeBuilder ilGen rest contextVar
+        generateBody typeBuilder ilGen rest contextVar  
 
 let compile (source : string) (assemblyName : string) (fileName : string) : unit =
     let assemblyName = new AssemblyName(assemblyName)

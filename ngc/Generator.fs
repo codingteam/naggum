@@ -90,7 +90,7 @@ and private pushValue (ilGen : ILGenerator) (value : Value) =
     match value with
     | Number n ->
         let numberCons = typeof<Value>.GetMethod "NewNumber"
-        ilGen.Emit(OpCodes.Ldc_R4,n)
+        ilGen.Emit(OpCodes.Ldc_R8,n)
         ilGen.Emit(OpCodes.Call,numberCons)
     | Symbol s ->
         let symbolCons = typeof<Value>.GetMethod "NewSymbol"

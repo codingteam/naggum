@@ -26,6 +26,7 @@ open System.Reflection.Emit
 
 open Naggum.Context
 open Naggum.Reader
+open Naggum.Runtime
 open Naggum.Types
 
 /// Returns local variable for Context object.
@@ -40,7 +41,9 @@ let private prologue (ilGen : ILGenerator) =
     ilGen.Emit(OpCodes.Newobj, constructorInfo)
     
     ilGen.Emit(OpCodes.Stloc, contextVariable)
-    // TODO: Emit Runtime.Load(context) here.
+    let loadInfo = typeof<Runtime>.GetMethod "load"
+    ilGen.Emit(OpCodes.Ldloc, contextVariable.LocalIndex)
+    ilGen.Emit(OpCodes.Call, loadInfo)
     
     contextVariable
 
@@ -63,6 +66,7 @@ let rec private generate (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (form
 and private generateBody (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (body : SExp list) (contextVar : LocalBuilder) =
     match body with
     | [] ->
+        // TODO: return empty list.
         ()
     | [last] ->
         // TODO: return last expression.

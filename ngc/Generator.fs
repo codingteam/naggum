@@ -140,9 +140,8 @@ let compile (source : string) (assemblyName : string) (fileName : string) : unit
     let ilGenerator = methodBuilder.GetILGenerator()
 
     let contextVar = prologue ilGenerator
-    // TODO: Uncomment
-    //let sexp = Reader.parse source
-    //generate typeBuilder ilGenerator sexp contextVar
+    let sexp = Reader.parse source
+    generate typeBuilder ilGenerator sexp contextVar
 
     epilogue contextVar ilGenerator
 

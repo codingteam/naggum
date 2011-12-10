@@ -69,6 +69,10 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
             generate context typeBuilder ilGen if_true
             ilGen.MarkLabel end_form
         | _ -> failwithf "%A not supported yet." list
+    | Atom a -> 
+        let atomCons = typeof<SExp>.GetMethod "NewAtom"
+        pushValue ilGen a
+        ilGen.Emit(OpCodes.Call, atomCons)
     | other     -> failwithf "%A form not supported yet." other
 and private generateBody context (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (body : SExp list) =
     match body with
@@ -82,6 +86,28 @@ and private generateBody context (typeBuilder : TypeBuilder) (ilGen : ILGenerato
     | sexp :: rest ->
         generate context typeBuilder ilGen sexp
         generateBody context typeBuilder ilGen rest
+and private pushValue (ilGen : ILGenerator) (value : Value) =
+    match value with
+    | Number n ->
+        let numberCons = typeof<Value>.GetMethod "NewNumber"
+        ilGen.Emit(OpCodes.Ldc_R4,n)
+        ilGen.Emit(OpCodes.Call,numberCons)
+    | Symbol s ->
+        let symbolCons = typeof<Value>.GetMethod "NewSymbol"
+        ilGen.Emit(OpCodes.Ldstr,s)
+        ilGen.Emit(OpCodes.Call,symbolCons)
+    | String s ->
+        let stringCons = typeof<Value>.GetMethod "NewString"
+        ilGen.Emit(OpCodes.Ldstr,s)
+        ilGen.Emit(OpCodes.Call,stringCons)
+    | Cons (carval,cdrval) ->
+        let consCons = typeof<Value>.GetMethod "NewCons"
+        pushValue ilGen carval
+        pushValue ilGen cdrval
+        ilGen.Emit(OpCodes.Call, consCons)
+    | EmptyList ->
+        let emptyCons = typeof<Value>.GetMethod "get_EmptyList"
+        ilGen.Emit(OpCodes.Call,emptyCons)
 
 let compile (source : string) (assemblyName : string) (fileName : string) : unit =
     let assemblyName = new AssemblyName(assemblyName)

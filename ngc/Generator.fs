@@ -54,7 +54,7 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
         | (Atom (Symbol "defun") :: Atom (Symbol name) :: List args :: body) ->
             let argsDef = Array.create (List.length args) typeof<obj>
             let methodGen = typeBuilder.DefineMethod(name, MethodAttributes.Public ||| MethodAttributes.Static, typeof<obj>, argsDef)
-            generateBody context typeBuilder ilGen body
+            generateBody context typeBuilder (methodGen.GetILGenerator()) body
 
             // Add function to context:
             context.[name] <- methodGen

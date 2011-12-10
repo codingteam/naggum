@@ -96,11 +96,12 @@ let rec private generate (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (form
 and private generateBody (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (body : SExp list) (contextVar : LocalBuilder) =
     match body with
     | [] ->
-        // TODO: return empty list.
-        ()
+        let emptyListGetter = typeof<Value>.GetMethod "get_EmptyList"
+        ilGen.Emit(OpCodes.Call, emptyListGetter)
+        ilGen.Emit(OpCodes.Ret)
     | [last] ->
-        // TODO: return last expression.
-        ()
+        generate typeBuilder ilGen last contextVar
+        ilGen.Emit(OpCodes.Ret)
     | sexp :: rest ->
         generate typeBuilder ilGen sexp contextVar
         generateBody typeBuilder ilGen rest contextVar  

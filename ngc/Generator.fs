@@ -31,20 +31,19 @@ open Naggum.Types
 
 /// Returns local variable for Context object.
 let private prologue (ilGen : ILGenerator) =
-    let constructorInfo = typeof<Context>.GetConstructor [| typeof<List<string * ContextItem>> |]
-    let listGetter = typeof<List<string * ContextItem>>.GetMethod "get_Empty"
+    let listGetterInfo = typeof<List<string * ContextItem>>.GetMethod "get_Empty"
+    let contextConstructorInfo = typeof<Context>.GetConstructor [| typeof<List<string * ContextItem>> |]
+    let runtimeLoadInfo = typeof<Runtime>.GetMethod "load"
 
     ilGen.BeginScope()
     let contextVariable = ilGen.DeclareLocal typeof<Context>
 
-    ilGen.Emit(OpCodes.Call, listGetter)
-    ilGen.Emit(OpCodes.Newobj, constructorInfo)
+    ilGen.Emit(OpCodes.Call, listGetterInfo)
+    ilGen.Emit(OpCodes.Newobj, contextConstructorInfo)
     ilGen.Emit(OpCodes.Stloc, contextVariable)
-
-    let loadInfo = typeof<Runtime>.GetMethod "load"
     ilGen.Emit(OpCodes.Ldloc, contextVariable.LocalIndex)
-    ilGen.Emit(OpCodes.Call, loadInfo)
-    
+    ilGen.Emit(OpCodes.Call, runtimeLoadInfo)
+
     contextVariable
 
 let private epilogue (ilGen : ILGenerator) =

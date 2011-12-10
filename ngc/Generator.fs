@@ -32,15 +32,15 @@ open Naggum.Types
 /// Returns local variable for Context object.
 let private prologue (ilGen : ILGenerator) =
     let constructorInfo = typeof<Context>.GetConstructor [| typeof<List<string * ContextItem>> |]
-    
+    let listGetter = typeof<List<string * ContextItem>>.GetMethod "get_Empty"
+
     ilGen.BeginScope()
     let contextVariable = ilGen.DeclareLocal typeof<Context>
-    
-    let initVariable = ilGen.DeclareLocal typeof<List<string * ContextItem>>
-    ilGen.Emit(OpCodes.Ldloc, initVariable)
+
+    ilGen.Emit(OpCodes.Call, listGetter)
     ilGen.Emit(OpCodes.Newobj, constructorInfo)
-    
     ilGen.Emit(OpCodes.Stloc, contextVariable)
+
     let loadInfo = typeof<Runtime>.GetMethod "load"
     ilGen.Emit(OpCodes.Ldloc, contextVariable.LocalIndex)
     ilGen.Emit(OpCodes.Call, loadInfo)
@@ -87,8 +87,9 @@ let compile (source : string) (assemblyName : string) (fileName : string) : unit
     let ilGenerator = methodBuilder.GetILGenerator()
 
     let context = prologue ilGenerator
-    let sexp = Reader.parse source
-    generate typeBuilder ilGenerator sexp context
+    // TODO: Uncomment
+    //let sexp = Reader.parse source
+    //generate typeBuilder ilGenerator sexp context
 
     epilogue ilGenerator
 

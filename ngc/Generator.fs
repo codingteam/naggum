@@ -46,7 +46,7 @@ let private epilogue context (ilGen : ILGenerator) =
 
     ilGen.Emit OpCodes.Ret
     ilGen.EndScope()
-
+//TODO: Split this to generate_if, generate_let, generate_etc
 let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (form : SExp) =
     match form with
     | List list ->
@@ -78,6 +78,19 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
             ilGen.MarkLabel if_true_lbl
             generate context typeBuilder ilGen if_true
             ilGen.MarkLabel end_form
+        | Atom (Symbol "let") :: bindings :: body -> //let form
+            ilGen.BeginScope()
+            //TODO: Check for errors here
+            match bindings with
+            | List list ->
+                for binding in list do
+                    match binding with
+                    | List [(Atom (Symbol name)); form] ->
+                        let local = ilGen.DeclareLocal(typeof<SExp>)
+                        generate context typeBuilder ilGen form
+                        ilGen.Emit (OpCodes.Stloc,local)
+            generateBody context typeBuilder ilGen body
+            ilGen.EndScope()
         | _ -> failwithf "%A not supported yet." list
     | Atom a -> 
         let atomCons = typeof<SExp>.GetMethod "NewAtom"
@@ -102,7 +115,7 @@ and private pushValue (ilGen : ILGenerator) (value : Value) =
         let numberCons = typeof<Value>.GetMethod "NewNumber"
         ilGen.Emit(OpCodes.Ldc_R8,n)
         ilGen.Emit(OpCodes.Call,numberCons)
-    | Symbol s ->
+    | Symbol s -> //TODO: This should look up a local var with name s and push its value onto stack
         let symbolCons = typeof<Value>.GetMethod "NewSymbol"
         ilGen.Emit(OpCodes.Ldstr,s)
         ilGen.Emit(OpCodes.Call,symbolCons)

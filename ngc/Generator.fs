@@ -60,6 +60,16 @@ let rec private generate (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (form
             let methodGen = typeBuilder.DefineMethod(name, MethodAttributes.Public ||| MethodAttributes.Static, typeof<obj>, argsDef)
             generateBody typeBuilder ilGen body contextVar
             // TODO: produce delegate and add it to context.
+        | Atom (Symbol "if") :: condition :: if_true :: if_false :: [] ->
+            generate typeBuilder ilGen condition contextVar
+            let if_true_lbl = ilGen.DefineLabel()
+            let end_form = ilGen.DefineLabel()
+            ilGen.Emit (OpCodes.Brtrue, if_true_lbl)
+            generate typeBuilder ilGen if_false contextVar
+            ilGen.Emit (OpCodes.Br,end_form)
+            ilGen.MarkLabel if_true_lbl
+            generate typeBuilder ilGen if_true contextVar
+            ilGen.MarkLabel end_form
         | _ -> failwithf "%A not supported yet." list
     | other     -> failwithf "%A form not supported yet." other
 and private generateBody (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (body : SExp list) (contextVar : LocalBuilder) =

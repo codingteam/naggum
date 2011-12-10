@@ -58,12 +58,22 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
 
             // Add function to context:
             context.[name] <- methodGen
-        | Atom (Symbol "if") :: condition :: if_true :: if_false :: [] ->
+        | Atom (Symbol "if") :: condition :: if_true :: if_false :: [] -> //full if form
             generate context typeBuilder ilGen condition
             let if_true_lbl = ilGen.DefineLabel()
             let end_form = ilGen.DefineLabel()
             ilGen.Emit (OpCodes.Brtrue, if_true_lbl)
             generate context typeBuilder ilGen if_false
+            ilGen.Emit (OpCodes.Br,end_form)
+            ilGen.MarkLabel if_true_lbl
+            generate context typeBuilder ilGen if_true
+            ilGen.MarkLabel end_form
+        | Atom (Symbol "if") :: condition :: if_true :: [] -> //reduced if form
+            generate context typeBuilder ilGen condition
+            let if_true_lbl = ilGen.DefineLabel()
+            let end_form = ilGen.DefineLabel()
+            ilGen.Emit (OpCodes.Brtrue, if_true_lbl)
+            ilGen.Emit OpCodes.Ldnull
             ilGen.Emit (OpCodes.Br,end_form)
             ilGen.MarkLabel if_true_lbl
             generate context typeBuilder ilGen if_true

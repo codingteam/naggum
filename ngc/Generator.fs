@@ -31,23 +31,44 @@ open Naggum.Types
 
 /// Returns local variable for Context object.
 let private prologue (ilGen : ILGenerator) =
-    let listGetterInfo = typeof<List<string * ContextItem>>.GetMethod "get_Empty"
-    let contextConstructorInfo = typeof<Context>.GetConstructor [| typeof<List<string * ContextItem>> |]
-    let runtimeLoadInfo = typeof<Runtime>.GetMethod "load"
+    let listGetter = typeof<List<string * ContextItem>>.GetMethod "get_Empty"
+    let contextConstructor = typeof<Context>.GetConstructor [| typeof<List<string * ContextItem>> |]
+    let runtimeLoad = typeof<Runtime>.GetMethod "load"
 
     ilGen.BeginScope()
-    let contextVariable = ilGen.DeclareLocal typeof<Context>
+    let contextVar = ilGen.DeclareLocal typeof<Context>
 
-    ilGen.Emit(OpCodes.Call, listGetterInfo)
-    ilGen.Emit(OpCodes.Newobj, contextConstructorInfo)
-    ilGen.Emit(OpCodes.Stloc, contextVariable)
-    ilGen.Emit(OpCodes.Ldloc, contextVariable.LocalIndex)
-    ilGen.Emit(OpCodes.Call, runtimeLoadInfo)
+    ilGen.Emit(OpCodes.Call, listGetter)
+    ilGen.Emit(OpCodes.Newobj, contextConstructor)
+    ilGen.Emit(OpCodes.Stloc, contextVar)
+    ilGen.Emit(OpCodes.Ldloc, contextVar.LocalIndex)
+    ilGen.Emit(OpCodes.Call, runtimeLoad)
 
-    contextVariable
+    contextVar
 
-let private epilogue (ilGen : ILGenerator) =
-    // TODO: call main ( () )
+let private genApply (contextVar : LocalBuilder) (funcName : string) (ilGen : ILGenerator) : unit =
+    let newSymbol = typeof<Value>.GetMethod "NewSymbol"
+    let contextGet = typeof<Context>.GetMethod "get"
+    let valueGetter = typeof<ContextItem option>.GetMethod "get_Value"
+    let functionType = typeof<ContextItem>.GetNestedType "Function"
+    let functionItemGetter = functionType.GetMethod "get_Item"
+    let funcInvoke = typeof<SExp -> SExp>.GetMethod "Invoke"
+
+    ilGen.Emit(OpCodes.Ldloc, contextVar.LocalIndex)
+    ilGen.Emit(OpCodes.Ldstr, funcName)
+    ilGen.Emit(OpCodes.Call, newSymbol)
+    ilGen.Emit(OpCodes.Call, contextGet)
+    ilGen.Emit(OpCodes.Call, valueGetter)
+    ilGen.Emit(OpCodes.Castclass, functionType)
+    ilGen.Emit(OpCodes.Call, functionItemGetter)
+    ilGen.Emit(OpCodes.Call, funcInvoke)
+
+let private epilogue contextVar (ilGen : ILGenerator) =
+    let argGetter = typeof<Value>.GetMethod "get_EmptyList"
+
+    ilGen.Emit(OpCodes.Call, argGetter)
+    genApply contextVar "main" ilGen
+
     ilGen.Emit OpCodes.Ret
     ilGen.EndScope()
 
@@ -95,12 +116,12 @@ let compile (source : string) (assemblyName : string) (fileName : string) : unit
     
     let ilGenerator = methodBuilder.GetILGenerator()
 
-    let context = prologue ilGenerator
+    let contextVar = prologue ilGenerator
     // TODO: Uncomment
     //let sexp = Reader.parse source
-    //generate typeBuilder ilGenerator sexp context
+    //generate typeBuilder ilGenerator sexp contextVar
 
-    epilogue ilGenerator
+    epilogue contextVar ilGenerator
 
     typeBuilder.CreateType()
     |> ignore

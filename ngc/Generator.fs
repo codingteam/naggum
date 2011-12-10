@@ -80,7 +80,29 @@ let rec private generate (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (form
             let argsDef = Array.create (List.length args) typeof<obj>
             let methodGen = typeBuilder.DefineMethod(name, MethodAttributes.Public ||| MethodAttributes.Static, typeof<obj>, argsDef)
             generateBody typeBuilder ilGen body contextVar
-            // TODO: produce delegate and add it to context.
+
+            // Add function to context:
+            let newSymbol = typeof<Value>.GetMethod "NewSymbol"
+            let converterConstructor = typeof<Converter<SExp, SExp>>.GetConstructor [| typeof<obj>; typeof<nativeint> |]
+            let fSharpFuncFromConverter = typeof<SExp -> SExp>.GetMethod "FromConverter"
+            let newFunction = typeof<ContextItem>.GetMethod "NewFunction"
+            let contextAdd = typeof<Context>.GetMethod "add"
+
+            ilGen.Emit(OpCodes.Ldloc, contextVar.LocalIndex) // Context
+
+            ilGen.Emit(OpCodes.Ldstr, name)
+            ilGen.Emit(OpCodes.Call, newSymbol) // Context, Symbol
+
+            // Generate Converter instance:
+            ilGen.Emit(OpCodes.Ldnull) // Context, Symbol, null
+            ilGen.Emit(OpCodes.Ldftn, methodGen) // Context, Symbol, null, method
+            ilGen.Emit(OpCodes.Newobj, converterConstructor) // Context, Symbol, Converter
+
+            // Generate FSharpFunc:            
+            ilGen.Emit(OpCodes.Call, fSharpFuncFromConverter)
+            ilGen.Emit(OpCodes.Call, newFunction) // Context, Symbol, Function
+
+            ilGen.Emit(OpCodes.Call, contextAdd)
         | Atom (Symbol "if") :: condition :: if_true :: if_false :: [] ->
             generate typeBuilder ilGen condition contextVar
             let if_true_lbl = ilGen.DefineLabel()

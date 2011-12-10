@@ -1,4 +1,4 @@
-﻿(*  Copyright (C) 2011 by ForNeVeR
+﻿(*  Copyright (C) 2011 by ForNeVeR, Hagane
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ open Naggum.Reader
 open Naggum.Runtime
 open Naggum.Types
 
-type private Context = Dictionary<string, MethodInfo>
+open Context
 
 let private prologue (ilGen : ILGenerator) =
     ilGen.BeginScope()
@@ -94,7 +94,7 @@ let compile (source : string) (assemblyName : string) (fileName : string) : unit
     
     let ilGenerator = methodBuilder.GetILGenerator()
 
-    let context = new Context()
+    let context = Context.create ()
     prologue ilGenerator
     let sexp = Reader.parse source
     generate context typeBuilder ilGenerator sexp

@@ -35,7 +35,7 @@ let private prologue (ilGen : ILGenerator) =
     ilGen.BeginScope()
 
 let private genApply (funcName : string) (context : Context) (ilGen : ILGenerator) : unit =
-    let func = context.[funcName]
+    let func = context.functions.[funcName]
     ilGen.Emit(OpCodes.Call, func)
 
 let private epilogue context (ilGen : ILGenerator) =
@@ -57,7 +57,7 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
             generateBody context typeBuilder (methodGen.GetILGenerator()) body
 
             // Add function to context:
-            context.[name] <- methodGen
+            context.functions.[name] <- methodGen
         | Atom (Symbol "if") :: condition :: if_true :: if_false :: [] -> //full if form
             generate context typeBuilder ilGen condition
             let if_true_lbl = ilGen.DefineLabel()

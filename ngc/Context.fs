@@ -22,19 +22,28 @@ module Naggum.Compiler.Context
 
 open System.Collections.Generic
 open System.Reflection
+open System.Reflection.Emit
 
 open Naggum.Runtime
 
-type Context = Dictionary<string, MethodInfo>
+type Context =
+    val functions : Dictionary<string, MethodInfo>
+    val locals : Dictionary<string,LocalBuilder>
+    new (f,l) =
+        { functions = f; locals = l}
+    new() =
+        let f = new Dictionary<string, MethodInfo>()
+        let l = new Dictionary<string,LocalBuilder>()
+        new Context (f,l)
 
 let create () =
     let context = new Context()
-    context.["add"]   <- typeof<Runtime>.GetMethod "add"
-    context.["sub"]   <- typeof<Runtime>.GetMethod "sub"
-    context.["mul"]   <- typeof<Runtime>.GetMethod "mul"
-    context.["div"]   <- typeof<Runtime>.GetMethod "div"
-    context.["equal"] <- typeof<Runtime>.GetMethod "equal"
-    context.["cons"]  <- typeof<Runtime>.GetMethod "cons"
-    context.["car"]   <- typeof<Runtime>.GetMethod "car"
-    context.["cdr"]   <- typeof<Runtime>.GetMethod "cdr"
+    context.functions.["add"]   <- typeof<Runtime>.GetMethod "add"
+    context.functions.["sub"]   <- typeof<Runtime>.GetMethod "sub"
+    context.functions.["mul"]   <- typeof<Runtime>.GetMethod "mul"
+    context.functions.["div"]   <- typeof<Runtime>.GetMethod "div"
+    context.functions.["equal"] <- typeof<Runtime>.GetMethod "equal"
+    context.functions.["cons"]  <- typeof<Runtime>.GetMethod "cons"
+    context.functions.["car"]   <- typeof<Runtime>.GetMethod "car"
+    context.functions.["cdr"]   <- typeof<Runtime>.GetMethod "cdr"
     context

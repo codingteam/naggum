@@ -40,10 +40,58 @@ let private genApply (funcName : string) (context : Context) (ilGen : ILGenerato
 
 let private epilogue context (ilGen : ILGenerator) =
     let argGetter = typeof<Value>.GetMethod "get_EmptyList"
+    let isAtomGetter = typeof<SExp>.GetMethod "get_IsAtom"
+    let atomItemGetter = typeof<SExp>.GetNestedType("Atom").GetMethod "get_Item"
+    let isNumberGetter = typeof<Value>.GetMethod "get_IsNumber"
+    let numberItemGetter = typeof<Value>.GetNestedType("Number").GetMethod "get_Item"
 
     ilGen.Emit(OpCodes.Call, argGetter)
     genApply "main" context ilGen
 
+    // Analyze value returned from main:
+    let sexp = ilGen.DeclareLocal(typeof<SExp>)
+    let value = ilGen.DeclareLocal(typeof<Value>)
+
+    let returnZero = ilGen.DefineLabel()
+    let ``return`` = ilGen.DefineLabel()
+    
+    // Get SExp:
+    ilGen.Emit(OpCodes.Castclass, typeof<SExp>)
+    ilGen.Emit(OpCodes.Stloc, sexp.LocalIndex)
+
+    // Check whether SExp is SExp.Atom:
+    ilGen.Emit(OpCodes.Ldloc, sexp.LocalIndex)
+    ilGen.Emit(OpCodes.Call, isAtomGetter)
+    ilGen.Emit(OpCodes.Brfalse, returnZero)
+
+    // Cast SExp to SExp.Atom:
+    ilGen.Emit(OpCodes.Ldloc, sexp.LocalIndex)
+    ilGen.Emit(OpCodes.Castclass, typeof<SExp>.GetNestedType("Atom"))
+    
+    // Get Value:
+    ilGen.Emit(OpCodes.Call, atomItemGetter)
+    ilGen.Emit(OpCodes.Stloc, value.LocalIndex)
+    
+    // Check whether Value is Number:
+    ilGen.Emit(OpCodes.Ldloc, value.LocalIndex)
+    ilGen.Emit(OpCodes.Call, isNumberGetter)
+    ilGen.Emit(OpCodes.Brfalse, returnZero)
+    
+    // Cast Value to Number:
+    ilGen.Emit(OpCodes.Ldloc, value.LocalIndex)
+    ilGen.Emit(OpCodes.Castclass, typeof<Value>.GetNestedType("Number"))
+    
+    // Get float64 value:
+    ilGen.Emit(OpCodes.Call, numberItemGetter)
+ 
+    // Convert to int32:
+    ilGen.Emit(OpCodes.Conv_I4)
+    ilGen.Emit(OpCodes.Br, ``return``)
+    
+    ilGen.MarkLabel returnZero
+    ilGen.Emit(OpCodes.Ldc_I4, 0)
+
+    ilGen.MarkLabel ``return``
     ilGen.Emit OpCodes.Ret
     ilGen.EndScope()
 //TODO: Split this to generate_if, generate_let, generate_etc
@@ -142,7 +190,7 @@ let compile (source : string) (assemblyName : string) (fileName : string) : unit
     let assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Save)
     let moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyBuilder.GetName().Name, fileName)
     let typeBuilder = moduleBuilder.DefineType("Program", TypeAttributes.Public ||| TypeAttributes.Class ||| TypeAttributes.BeforeFieldInit)
-    let methodBuilder = typeBuilder.DefineMethod("Main", MethodAttributes.Public ||| MethodAttributes.Static, typeof<Void>, [| |])
+    let methodBuilder = typeBuilder.DefineMethod("Main", MethodAttributes.Public ||| MethodAttributes.Static, typeof<int>, [| |])
     
     assemblyBuilder.SetEntryPoint methodBuilder
     

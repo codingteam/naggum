@@ -80,6 +80,7 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
             ilGen.MarkLabel end_form
         | Atom (Symbol "let") :: bindings :: body -> //let form
             ilGen.BeginScope()
+            let scope_subctx = new Context (context)
             //TODO: Check for errors here
             match bindings with
             | List list ->
@@ -89,6 +90,7 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
                         let local = ilGen.DeclareLocal(typeof<SExp>)
                         generate context typeBuilder ilGen form
                         ilGen.Emit (OpCodes.Stloc,local)
+                        scope_subctx.locals.[name] <- local
             generateBody context typeBuilder ilGen body
             ilGen.EndScope()
         | _ -> failwithf "%A not supported yet." list

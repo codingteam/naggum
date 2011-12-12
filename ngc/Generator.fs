@@ -102,8 +102,9 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
         | (Atom (Symbol "defun") :: Atom (Symbol name) :: List args :: body) ->
             let argsDef = Array.create (List.length args) typeof<obj>
             let methodGen = typeBuilder.DefineMethod(name, MethodAttributes.Public ||| MethodAttributes.Static, typeof<obj>, argsDef)
-            generateBody context typeBuilder (methodGen.GetILGenerator()) body
-
+            let methodILGen = (methodGen.GetILGenerator())
+            generateBody context typeBuilder methodILGen body
+            methodILGen.Emit(OpCodes.Ret)
             // Add function to context:
             context.functions.[name] <- methodGen
         | Atom (Symbol "if") :: condition :: if_true :: if_false :: [] -> //full if form
@@ -153,10 +154,8 @@ and private generateBody context (typeBuilder : TypeBuilder) (ilGen : ILGenerato
     | [] ->
         let emptyListGetter = typeof<Value>.GetMethod "get_EmptyList"
         ilGen.Emit(OpCodes.Call, emptyListGetter)
-        ilGen.Emit(OpCodes.Ret)
     | [last] ->
         generate context typeBuilder ilGen last
-        ilGen.Emit(OpCodes.Ret)
     | sexp :: rest ->
         generate context typeBuilder ilGen sexp
         generateBody context typeBuilder ilGen rest

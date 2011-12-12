@@ -91,12 +91,12 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
                         generate context typeBuilder ilGen form
                         ilGen.Emit (OpCodes.Stloc,local)
                         scope_subctx.locals.[name] <- local
-            generateBody context typeBuilder ilGen body
+            generateBody scope_subctx typeBuilder ilGen body
             ilGen.EndScope()
         | _ -> failwithf "%A not supported yet." list
     | Atom a -> 
         let atomCons = typeof<SExp>.GetMethod "NewAtom"
-        pushValue ilGen a
+        pushValue context ilGen a
         ilGen.Emit(OpCodes.Call, atomCons)
     | other     -> failwithf "%A form not supported yet." other
 and private generateBody context (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (body : SExp list) =
@@ -111,24 +111,26 @@ and private generateBody context (typeBuilder : TypeBuilder) (ilGen : ILGenerato
     | sexp :: rest ->
         generate context typeBuilder ilGen sexp
         generateBody context typeBuilder ilGen rest
-and private pushValue (ilGen : ILGenerator) (value : Value) =
+and private pushValue (context : Context) (ilGen : ILGenerator) (value : Value) =
     match value with
     | Number n ->
         let numberCons = typeof<Value>.GetMethod "NewNumber"
         ilGen.Emit(OpCodes.Ldc_R8,n)
         ilGen.Emit(OpCodes.Call,numberCons)
-    | Symbol s -> //TODO: This should look up a local var with name s and push its value onto stack
-        let symbolCons = typeof<Value>.GetMethod "NewSymbol"
-        ilGen.Emit(OpCodes.Ldstr,s)
-        ilGen.Emit(OpCodes.Call,symbolCons)
+    | Symbol name ->
+        try
+            let local = context.locals.[name]
+            ilGen.Emit(OpCodes.Ldloc,local)
+        with
+        | :? KeyNotFoundException -> failwithf "Symbol %A not bound." name
     | String s ->
         let stringCons = typeof<Value>.GetMethod "NewString"
         ilGen.Emit(OpCodes.Ldstr,s)
         ilGen.Emit(OpCodes.Call,stringCons)
     | Cons (carval,cdrval) ->
         let consCons = typeof<Value>.GetMethod "NewCons"
-        pushValue ilGen carval
-        pushValue ilGen cdrval
+        pushValue context ilGen carval
+        pushValue context ilGen cdrval
         ilGen.Emit(OpCodes.Call, consCons)
     | EmptyList ->
         let emptyCons = typeof<Value>.GetMethod "get_EmptyList"

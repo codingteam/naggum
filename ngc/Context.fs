@@ -31,6 +31,10 @@ type Context =
     val locals : Dictionary<string,LocalBuilder>
     new (f,l) =
         { functions = f; locals = l}
+    new (ctx : Context) =
+        let f = new Dictionary<string, MethodInfo>(ctx.functions)
+        let l = new Dictionary<string,LocalBuilder>(ctx.locals)
+        new Context (f,l)
     new() =
         let f = new Dictionary<string, MethodInfo>()
         let l = new Dictionary<string,LocalBuilder>()

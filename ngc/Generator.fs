@@ -81,7 +81,6 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
         | Atom (Symbol "let") :: bindings :: body -> //let form
             ilGen.BeginScope()
             let scope_subctx = new Context (context)
-            //TODO: Check for errors here
             match bindings with
             | List list ->
                 for binding in list do
@@ -91,6 +90,8 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
                         generate context typeBuilder ilGen form
                         ilGen.Emit (OpCodes.Stloc,local)
                         scope_subctx.locals.[name] <- local
+                    | other -> failwithf "In let bindings: Expected: (name (form))\nGot: %A\n" other
+            | other -> failwithf "In let form: expected: list of bindings\nGot: %A" other
             generateBody scope_subctx typeBuilder ilGen body
             ilGen.EndScope()
         | _ -> failwithf "%A not supported yet." list

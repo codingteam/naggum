@@ -1,4 +1,4 @@
-﻿module Generator
+﻿module Naggum.Generator
 
 open IGenerator
 open NumberGen

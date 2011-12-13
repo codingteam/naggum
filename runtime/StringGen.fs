@@ -1,4 +1,4 @@
-﻿module StringGen
+﻿module Naggum.StringGen
 
 open IGenerator
 open System

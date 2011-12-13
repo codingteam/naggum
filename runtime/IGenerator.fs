@@ -1,4 +1,4 @@
-﻿module IGenerator
+﻿module Naggum.IGenerator
 
 open System.Reflection
 open System.Reflection.Emit

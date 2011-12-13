@@ -1,4 +1,4 @@
-﻿(*  Copyright (C) 2011 by ForNeVeR
+﻿(*  Copyright (C) 2011 by ForNeVeR,Hagane
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

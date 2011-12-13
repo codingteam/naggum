@@ -23,7 +23,14 @@ module Naggum.Reader
 open System
 open System.IO
 open FParsec
-open Types
+
+type Value =
+    |Object of obj
+    |Symbol of string
+
+type SExp =
+    | Atom of Value
+    | List of SExp list
 
 let ws parser = parser .>> spaces
 let list,listRef = createParserForwardedToRef()
@@ -38,7 +45,7 @@ let symbol = (many1Chars (letter <|> digit <|> (pchar '-'))) |>> (fun (name) -> 
 let atom =  (number <|> string <|> symbol) |>> Atom
 
 let listElement = choice [atom;list]
-let sexp = ws (pstring "(") >>. many (ws listElement) .>> ws (pstring ")") |>> Cons
+let sexp = ws (pstring "(") >>. many (ws listElement) .>> ws (pstring ")") |>> List
 let parser = choice [atom;sexp]
 do listRef := sexp
 

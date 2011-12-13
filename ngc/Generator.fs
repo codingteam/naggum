@@ -25,6 +25,7 @@ open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
 
+open Naggum.Generator
 open Naggum.Reader
 open Naggum.Runtime
 
@@ -38,15 +39,15 @@ let private genApply (funcName : string) (context : Context) (ilGen : ILGenerato
     ilGen.Emit(OpCodes.Call, func)
 
 let private epilogue context (ilGen : ILGenerator) =
-    let argGetter = typeof<Value>.GetMethod "get_EmptyList"
+    (* let argGetter = typeof<Value>.GetMethod "get_EmptyList"
     let isAtomGetter = typeof<SExp>.GetMethod "get_IsAtom"
     let atomItemGetter = typeof<SExp>.GetNestedType("Atom").GetMethod "get_Item"
     let isNumberGetter = typeof<Value>.GetMethod "get_IsNumber"
-    let numberItemGetter = typeof<Value>.GetNestedType("Number").GetMethod "get_Item"
+    let numberItemGetter = typeof<Value>.GetNestedType("Number").GetMethod "get_Item" *)
 
-    ilGen.Emit(OpCodes.Call, argGetter)
+    //ilGen.Emit(OpCodes.Call, argGetter)
     genApply "main" context ilGen
-
+    (*
     // Analyze value returned from main:
     let sexp = ilGen.DeclareLocal(typeof<SExp>)
     let value = ilGen.DeclareLocal(typeof<Value>)
@@ -91,6 +92,7 @@ let private epilogue context (ilGen : ILGenerator) =
     ilGen.Emit(OpCodes.Ldc_I4, 0)
 
     ilGen.MarkLabel ``return``
+    *)
     ilGen.Emit OpCodes.Ret
     ilGen.EndScope()
 //TODO: Split this to generate_if, generate_let, generate_etc
@@ -144,9 +146,7 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
             ilGen.EndScope()
         | _ -> failwithf "%A not supported yet." list
     | Atom a -> 
-        let atomCons = typeof<SExp>.GetMethod "NewAtom"
         pushValue context ilGen a
-        ilGen.Emit(OpCodes.Call, atomCons)
     | other     -> failwithf "%A form not supported yet." other
 and private generateBody context (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (body : SExp list) =
     match body with
@@ -160,28 +160,15 @@ and private generateBody context (typeBuilder : TypeBuilder) (ilGen : ILGenerato
         generateBody context typeBuilder ilGen rest
 and private pushValue (context : Context) (ilGen : ILGenerator) (value : Value) =
     match value with
-    | Number n ->
-        let numberCons = typeof<Value>.GetMethod "NewNumber"
-        ilGen.Emit(OpCodes.Ldc_R8,n)
-        ilGen.Emit(OpCodes.Call,numberCons)
+    | Object o ->
+        let gen = generator o
+        gen.Generate ilGen
     | Symbol name ->
         try
             let local = context.locals.[name]
             ilGen.Emit(OpCodes.Ldloc,local)
         with
         | :? KeyNotFoundException -> failwithf "Symbol %A not bound." name
-    | String s ->
-        let stringCons = typeof<Value>.GetMethod "NewString"
-        ilGen.Emit(OpCodes.Ldstr,s)
-        ilGen.Emit(OpCodes.Call,stringCons)
-    | Cons (carval,cdrval) ->
-        let consCons = typeof<Value>.GetMethod "NewCons"
-        pushValue context ilGen carval
-        pushValue context ilGen cdrval
-        ilGen.Emit(OpCodes.Call, consCons)
-    | EmptyList ->
-        let emptyCons = typeof<Value>.GetMethod "get_EmptyList"
-        ilGen.Emit(OpCodes.Call,emptyCons)
 
 let compile (source : string) (assemblyName : string) (fileName : string) : unit =
     let assemblyName = new AssemblyName(assemblyName)

@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2972575D-A421-4759-AE89-57560E0224AE}"
 	ProjectSection(SolutionItems) = preProject
 		tests\if.naggum = tests\if.naggum
+		tests\let.naggum = tests\let.naggum
 		tests\minimal.naggum = tests\minimal.naggum
 	EndProjectSection
 EndProject

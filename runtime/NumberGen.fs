@@ -1,6 +1,6 @@
 ﻿module Number
 
-open Generator
+open IGenerator
 open System
 open System.Reflection
 open System.Reflection.Emit

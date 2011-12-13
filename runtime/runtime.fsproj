@@ -45,6 +45,9 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Generator.fs" />
+    <Compile Include="NumberGen.fs" />
+    <Compile Include="StringGen.fs" />
     <Compile Include="Reader.fs" />
     <Compile Include="Runtime.fs" />
   </ItemGroup>

@@ -20,7 +20,7 @@ THE SOFTWARE. *)
 module Naggum.Runtime
 
 open System
-open Types
+open Reader
 open Context
 
 type Runtime =

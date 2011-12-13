@@ -27,7 +27,6 @@ open System.Reflection.Emit
 
 open Naggum.Reader
 open Naggum.Runtime
-open Naggum.Types
 
 open Context
 

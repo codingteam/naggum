@@ -45,7 +45,6 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Types.fs" />
     <Compile Include="Context.fs" />
     <Compile Include="Runtime.fs" />
     <Compile Include="Reader.fs" />

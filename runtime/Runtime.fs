@@ -21,7 +21,6 @@ module Naggum.Runtime
 
 open System
 open Reader
-open Context
 
 type Runtime =
     static member add = fun (args: obj list) ->
@@ -41,10 +40,3 @@ type Runtime =
                     | 0 -> (false :> obj)
                     | 1 -> (true :> obj)
                     | any -> (List.forall (fun (a) -> a.Equals (args.Item 0)) args :> obj)
-
-let load (ctx:Context) =
-    ctx.add (Symbol "add") (Function Runtime.add)
-    ctx.add (Symbol "sub") (Function Runtime.sub)
-    ctx.add (Symbol "mul") (Function Runtime.mul)
-    ctx.add (Symbol "div") (Function Runtime.div)
-    ctx.add (Symbol "equal") (Function Runtime.equal)

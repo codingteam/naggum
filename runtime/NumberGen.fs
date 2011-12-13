@@ -1,4 +1,4 @@
-﻿module Number
+﻿module NumberGen
 
 open IGenerator
 open System

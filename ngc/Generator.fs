@@ -80,6 +80,9 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
             | other -> failwithf "In let form: expected: list of bindings\nGot: %A" other
             generateBody scope_subctx typeBuilder ilGen body
             ilGen.EndScope()
+
+        | Atom (Symbol fname) :: args -> //generic funcall pattern
+            genApply fname context typeBuilder ilGen args
         | _ -> failwithf "%A not supported yet." list
     | Atom a -> 
         pushValue context ilGen a
@@ -87,8 +90,7 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
 and private generateBody context (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (body : SExp list) =
     match body with
     | [] ->
-        let emptyListGetter = typeof<Value>.GetMethod "get_EmptyList"
-        ilGen.Emit(OpCodes.Call, emptyListGetter)
+        ilGen.Emit(OpCodes.Ldnull)
     | [last] ->
         generate context typeBuilder ilGen last
     | sexp :: rest ->
@@ -121,7 +123,7 @@ let private epilogue context typeBuilder (ilGen : ILGenerator) =
     let numberItemGetter = typeof<Value>.GetNestedType("Number").GetMethod "get_Item" *)
 
     //ilGen.Emit(OpCodes.Call, argGetter)
-    genApply "main" context typeBuilder ilGen ([Atom (Object 0)])
+    genApply "main" context typeBuilder ilGen ([])
     (*
     // Analyze value returned from main:
     let sexp = ilGen.DeclareLocal(typeof<SExp>)

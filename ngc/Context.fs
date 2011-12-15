@@ -25,6 +25,7 @@ open System.Reflection
 open System.Reflection.Emit
 
 open Naggum.Runtime
+open Naggum.Writer
 
 type Context =
     val functions : Dictionary<string, MethodInfo>
@@ -47,6 +48,6 @@ let create () =
     context.functions.["mul"]   <- typeof<Runtime>.GetMethod "mul"
     context.functions.["div"]   <- typeof<Runtime>.GetMethod "div"
     context.functions.["equal"] <- typeof<Runtime>.GetMethod "equal"
-    context.functions.["write"] <- typeof<Runtime>.GetMethod "write"
-    context.functions.["writeln"] <- typeof<Runtime>.GetMethod "writeln"
+    context.functions.["write"] <- typeof<Writer>.GetMethod "write"
+    context.functions.["writeln"] <- typeof<Writer>.GetMethod "writeln"
     context

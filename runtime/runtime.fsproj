@@ -49,6 +49,7 @@
     <Compile Include="NumberGen.fs" />
     <Compile Include="StringGen.fs" />
     <Compile Include="Generator.fs" />
+    <Compile Include="Writer.fs" />
     <Compile Include="Reader.fs" />
     <Compile Include="Runtime.fs" />
   </ItemGroup>

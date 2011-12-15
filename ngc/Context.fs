@@ -47,7 +47,4 @@ let create () =
     context.functions.["mul"]   <- typeof<Runtime>.GetMethod "mul"
     context.functions.["div"]   <- typeof<Runtime>.GetMethod "div"
     context.functions.["equal"] <- typeof<Runtime>.GetMethod "equal"
-    context.functions.["cons"]  <- typeof<Runtime>.GetMethod "cons"
-    context.functions.["car"]   <- typeof<Runtime>.GetMethod "car"
-    context.functions.["cdr"]   <- typeof<Runtime>.GetMethod "cdr"
     context

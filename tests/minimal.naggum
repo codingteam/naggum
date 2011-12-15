@@ -1,2 +1,2 @@
 (defun main (args)
-       1)
+       (write "Hello, World"))

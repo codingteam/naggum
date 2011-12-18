@@ -43,11 +43,11 @@ type Context =
 
 let create () =
     let context = new Context()
-    context.functions.["add"]   <- typeof<Runtime>.GetMethod "add"
-    context.functions.["sub"]   <- typeof<Runtime>.GetMethod "sub"
-    context.functions.["mul"]   <- typeof<Runtime>.GetMethod "mul"
-    context.functions.["div"]   <- typeof<Runtime>.GetMethod "div"
-    context.functions.["equal"] <- typeof<Runtime>.GetMethod "equal"
+    context.functions.["add"]   <- typeof<Math>.GetMethod "add"
+    context.functions.["sub"]   <- typeof<Math>.GetMethod "sub"
+    context.functions.["mul"]   <- typeof<Math>.GetMethod "mul"
+    context.functions.["div"]   <- typeof<Math>.GetMethod "div"
+    context.functions.["equal"] <- typeof<Math>.GetMethod "equal"
     context.functions.["write"] <- typeof<Writer>.GetMethod "write"
     context.functions.["writeln"] <- typeof<Writer>.GetMethod "writeln"
     context

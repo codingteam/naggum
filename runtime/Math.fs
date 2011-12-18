@@ -22,7 +22,7 @@ module Naggum.Runtime
 open System
 open Reader
 
-type Runtime =
+type Math =
     static member add = fun (args: obj list) ->
                 List.reduce (+) (List.map unbox args) :> obj
 

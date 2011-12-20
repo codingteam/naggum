@@ -108,9 +108,12 @@ and private pushValue (context : Context) (ilGen : ILGenerator) (value : Value) 
         with
         | :? KeyNotFoundException -> failwithf "Symbol %A not bound." name
 and private genApply (funcName : string) (context : Context) (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (argList: SExp list) : unit =
-    let func = context.functions.[funcName]
-    generateBody context typeBuilder ilGen argList
-    ilGen.Emit(OpCodes.Call, func)
+    try
+        let func = context.functions.[funcName]
+        generateBody context typeBuilder ilGen argList
+        ilGen.Emit(OpCodes.Call, func)
+    with
+    | :? KeyNotFoundException -> failwithf "Function %A not found." funcName
 
 let private prologue (ilGen : ILGenerator) =
     ilGen.BeginScope()

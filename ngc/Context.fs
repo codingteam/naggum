@@ -26,6 +26,7 @@ open System.Reflection.Emit
 
 open Naggum.Runtime
 open Naggum.Writer
+open Naggum.Types.Cons
 
 type Context =
     val functions : Dictionary<string, MethodInfo>
@@ -50,4 +51,7 @@ let create () =
     context.functions.["equal"] <- typeof<Math>.GetMethod "equal"
     context.functions.["write"] <- typeof<Writer>.GetMethod "write"
     context.functions.["writeln"] <- typeof<Writer>.GetMethod "writeln"
+    context.functions.["Cons"] <- typeof<Cons>.GetMethod "Cons"
+    context.functions.["Car"] <- typeof<Cons>.GetMethod "Car"
+    context.functions.["Cdr"] <- typeof<Cons>.GetMethod "Cdr"
     context

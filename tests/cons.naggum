@@ -1,0 +1,2 @@
+(defun main ()
+	(Cons "a" "b"))

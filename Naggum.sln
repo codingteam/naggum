@@ -5,7 +5,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ngc", "ngc\ngc.fsproj", "{A
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "runtime", "runtime\runtime.fsproj", "{AB0DF634-1C19-48CF-A635-02862807F67F}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2972575D-A421-4759-AE89-57560E0224AE}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test programs", "Test programs", "{2972575D-A421-4759-AE89-57560E0224AE}"
 	ProjectSection(SolutionItems) = preProject
 		tests\cons.naggum = tests\cons.naggum
 		tests\if.naggum = tests\if.naggum

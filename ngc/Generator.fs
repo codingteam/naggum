@@ -95,6 +95,16 @@ and private generateBody context (typeBuilder : TypeBuilder) (ilGen : ILGenerato
         generate context typeBuilder ilGen last
     | sexp :: rest ->
         generate context typeBuilder ilGen sexp
+        ilGen.Emit(OpCodes.Pop)
+        generateBody context typeBuilder ilGen rest
+and private generateSeq context (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (seq : SExp list) =
+    match seq with
+    | [] ->
+        ilGen.Emit(OpCodes.Ldnull)
+    | [last] ->
+        generate context typeBuilder ilGen last
+    | sexp :: rest ->
+        generate context typeBuilder ilGen sexp
         generateBody context typeBuilder ilGen rest
 and private pushValue (context : Context) (ilGen : ILGenerator) (value : Value) =
     match value with
@@ -110,7 +120,7 @@ and private pushValue (context : Context) (ilGen : ILGenerator) (value : Value) 
 and private genApply (funcName : string) (context : Context) (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (argList: SExp list) : unit =
     try
         let func = context.functions.[funcName]
-        generateBody context typeBuilder ilGen argList
+        generateSeq context typeBuilder ilGen argList
         ilGen.Emit(OpCodes.Call, func)
     with
     | :? KeyNotFoundException -> failwithf "Function %A not found." funcName

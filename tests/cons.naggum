@@ -1,2 +1,4 @@
-(defun main ()
-	(Cons "a" "b"))
+(defun main (args)
+	(let ((c (Cons "car" "cdr")))
+		(write "Car: ") (writeln (Car c))
+		(write "Cdr: ") (writeln (Cdr c))))

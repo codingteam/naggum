@@ -17,12 +17,21 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. *)
-module Naggum.IGenerator
+module Naggum.Compiler.IGenerator
 
 open System.Reflection
 open System.Reflection.Emit
 
+open Naggum.Reader
+open Naggum.Compiler.Context
+
+
 type IGenerator =
     interface
         abstract Generate : ILGenerator -> unit
+    end
+
+type IGeneratorFactory =
+    interface
+        abstract MakeGenerator : SExp -> IGenerator
     end

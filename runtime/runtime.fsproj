@@ -46,7 +46,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cons.fs" />
-    <Compile Include="GeneratorFactory.fs" />
     <Compile Include="Writer.fs" />
     <Compile Include="Reader.fs" />
     <Compile Include="Math.fs" />

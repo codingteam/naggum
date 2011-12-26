@@ -23,9 +23,8 @@ open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
 open Naggum.Reader
-open Naggum.IGenerator
+open Naggum.Compiler.IGenerator
 open Naggum.Compiler.Context
-open Naggum.Generator
 
 type FormGenerator() =
     interface IGenerator
@@ -46,9 +45,31 @@ type SymbolGenerator(context:Context,name:string) =
                 with
                 | :? KeyNotFoundException -> failwithf "Symbol %A not bound." name
 
-type ConstantGenerator(context:Context,o:obj) =
-    inherit ValueGenerator(context,Object o)
+type SequenceGenerator(context:Context,typeBuilder:TypeBuilder,seq:SExp list, gf:IGeneratorFactory) =
     interface IGenerator with
         member this.Generate ilGen =
-            let gen = generator o
-            gen.Generate ilGen
+            match seq with
+            | [] -> ilGen.Emit(OpCodes.Ldnull)
+            | [last] ->
+                let gen = gf.MakeGenerator(last)
+                gen.Generate ilGen
+            | sexp :: rest ->
+                let gen = gf.MakeGenerator(sexp)
+                let rest_gen = (new SequenceGenerator(context,typeBuilder,rest,gf)) :> IGenerator
+                gen.Generate ilGen
+                rest_gen.Generate ilGen
+
+type BodyGenerator(context:Context,typeBuilder:TypeBuilder,body:SExp list, gf:IGeneratorFactory) =
+    interface IGenerator with
+        member this.Generate ilGen =
+            match body with
+            | [] -> ilGen.Emit(OpCodes.Ldnull)
+            | [last] ->
+                let gen = gf.MakeGenerator(last)
+                gen.Generate ilGen
+            | sexp :: rest ->
+                let gen = gf.MakeGenerator(sexp)
+                let rest_gen = (new SequenceGenerator(context,typeBuilder,rest,gf)) :> IGenerator
+                gen.Generate ilGen
+                ilGen.Emit(OpCodes.Pop)
+                rest_gen.Generate ilGen

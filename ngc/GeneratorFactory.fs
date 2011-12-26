@@ -22,20 +22,35 @@ module Naggum.Compiler.GeneratorFactory
 open IGenerator
 open NumberGen
 open StringGen
+open FormGenerator
+open Context
+open Naggum.Reader
 open System
 open System.Reflection
 open System.Reflection.Emit
 
-let generator(o : obj) =
-    match o with
-    | :? System.Int32 ->
-        (new Int32Gen(o :?> System.Int32)) :> IGenerator
-    | :? System.Int64 ->
-        (new Int64Gen(o :?> System.Int64)) :> IGenerator
-    | :? System.Single ->
-        (new SingleGen(o :?> System.Single)) :> IGenerator
-    | :? System.Double ->
-        (new DoubleGen(o :?> System.Double)) :> IGenerator
-    | :? System.String ->
-        (new StringGen(o :?> System.String)) :> IGenerator
-    | other -> failwithf "Not a basic value: %A\n" other
+type GeneratorFactory(context:Context,typeBldr:TypeBuilder) =
+    member private this.makeObjectGenerator(o:obj) =
+        match o with
+        | :? System.Int32 ->
+            (new Int32Gen(o :?> System.Int32)) :> IGenerator
+        | :? System.Int64 ->
+            (new Int64Gen(o :?> System.Int64)) :> IGenerator
+        | :? System.Single ->
+            (new SingleGen(o :?> System.Single)) :> IGenerator
+        | :? System.Double ->
+            (new DoubleGen(o :?> System.Double)) :> IGenerator
+        | :? System.String ->
+            (new StringGen(o :?> System.String)) :> IGenerator
+        | other -> failwithf "Not a basic value: %A\n" other
+
+    member private this.makeValueGenerator (value:Value) =
+        match value with
+        | Symbol name ->
+            (new SymbolGenerator(context,name)) :> IGenerator
+        | Object o -> this.makeObjectGenerator o
+
+    interface IGeneratorFactory with
+        member this.MakeGenerator sexp =
+            match sexp with
+            | Atom value -> this.makeValueGenerator value

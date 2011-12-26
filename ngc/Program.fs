@@ -22,6 +22,7 @@ module Naggum.Compiler.Program
 
 open System
 open System.IO
+open Naggum.Compiler.Generator
 
 let fileName = Environment.GetCommandLineArgs().[1]
 let source = File.ReadAllText fileName

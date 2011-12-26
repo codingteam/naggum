@@ -25,7 +25,8 @@ open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
 
-open Naggum.Generator
+open Naggum.Compiler.IGenerator
+open Naggum.Compiler.GeneratorFactory
 open Naggum.Reader
 open Naggum.Runtime
 
@@ -85,7 +86,9 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
             genApply fname context typeBuilder ilGen args
         | _ -> failwithf "%A not supported yet." list
     | Atom a -> 
-        pushValue context ilGen a
+        let genf = new GeneratorFactory(context,typeBuilder) :> IGeneratorFactory
+        let gen = genf.MakeGenerator(Atom a)
+        gen.Generate ilGen
     | other     -> failwithf "%A form not supported yet." other
 and private generateBody context (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (body : SExp list) =
     match body with
@@ -106,17 +109,6 @@ and private generateSeq context (typeBuilder : TypeBuilder) (ilGen : ILGenerator
     | sexp :: rest ->
         generate context typeBuilder ilGen sexp
         generateBody context typeBuilder ilGen rest
-and private pushValue (context : Context) (ilGen : ILGenerator) (value : Value) =
-    match value with
-    | Object o ->
-        let gen = generator o
-        gen.Generate ilGen
-    | Symbol name ->
-        try
-            let local = context.locals.[name]
-            ilGen.Emit(OpCodes.Ldloc,local)
-        with
-        | :? KeyNotFoundException -> failwithf "Symbol %A not bound." name
 and private genApply (funcName : string) (context : Context) (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (argList: SExp list) : unit =
     try
         let func = context.functions.[funcName]

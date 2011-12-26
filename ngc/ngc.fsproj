@@ -39,9 +39,12 @@
   <ItemGroup>
     <Compile Include="Reader.fs" />
     <Compile Include="Context.fs" />
-    <Compile Include="Generator.fs" />
     <Compile Include="Program.fs" />
     <Compile Include="FormGenerator.fs" />
+    <Compile Include="IGenerator.fs" />
+    <Compile Include="NumberGen.fs" />
+    <Compile Include="StringGen.fs" />
+    <Compile Include="Generator.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FParsec">

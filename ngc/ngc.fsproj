@@ -41,6 +41,7 @@
     <Compile Include="Context.fs" />
     <Compile Include="Generator.fs" />
     <Compile Include="Program.fs" />
+    <Compile Include="FormGenerator.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FParsec">

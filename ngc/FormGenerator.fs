@@ -46,30 +46,30 @@ type SymbolGenerator(context:Context,name:string) =
                 | :? KeyNotFoundException -> failwithf "Symbol %A not bound." name
 
 type SequenceGenerator(context:Context,typeBuilder:TypeBuilder,seq:SExp list, gf:IGeneratorFactory) =
-    interface IGenerator with
-        member this.Generate ilGen =
-            match seq with
+    member private this.gen_seq (ilGen:ILGenerator,seq:SExp list) =
+        match seq with
             | [] -> ilGen.Emit(OpCodes.Ldnull)
             | [last] ->
                 let gen = gf.MakeGenerator(last)
                 gen.Generate ilGen
             | sexp :: rest ->
                 let gen = gf.MakeGenerator(sexp)
-                let rest_gen = (new SequenceGenerator(context,typeBuilder,rest,gf)) :> IGenerator
                 gen.Generate ilGen
-                rest_gen.Generate ilGen
+                this.gen_seq (ilGen, rest)
+    interface IGenerator with
+        member this.Generate ilGen = this.gen_seq (ilGen,seq)
 
 type BodyGenerator(context:Context,typeBuilder:TypeBuilder,body:SExp list, gf:IGeneratorFactory) =
-    interface IGenerator with
-        member this.Generate ilGen =
-            match body with
+    member private this.gen_body (ilGen:ILGenerator,body:SExp list) =
+        match body with
             | [] -> ilGen.Emit(OpCodes.Ldnull)
             | [last] ->
                 let gen = gf.MakeGenerator(last)
                 gen.Generate ilGen
             | sexp :: rest ->
                 let gen = gf.MakeGenerator(sexp)
-                let rest_gen = (new SequenceGenerator(context,typeBuilder,rest,gf)) :> IGenerator
                 gen.Generate ilGen
                 ilGen.Emit(OpCodes.Pop)
-                rest_gen.Generate ilGen
+                this.gen_body (ilGen,body)
+    interface IGenerator with
+        member this.Generate ilGen = this.gen_body (ilGen,body)

@@ -50,7 +50,17 @@ type GeneratorFactory(context:Context,typeBldr:TypeBuilder) =
             (new SymbolGenerator(context,name)) :> IGenerator
         | Object o -> this.makeObjectGenerator o
 
+    member private this.makeSequenceGenerator(seq:SExp list) =
+        new SequenceGenerator(context,typeBldr,seq,(this :> IGeneratorFactory))
+
+    member private this.makeBodyGenerator(body:SExp list) =
+        new BodyGenerator(context,typeBldr,body,(this :> IGeneratorFactory))
+
     interface IGeneratorFactory with
         member this.MakeGenerator sexp =
             match sexp with
             | Atom value -> this.makeValueGenerator value
+
+        member this.MakeSequence seq = this.makeSequenceGenerator seq :> IGenerator
+
+        member this.MakeBody body = this.makeBodyGenerator body :> IGenerator

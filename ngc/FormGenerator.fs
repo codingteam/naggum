@@ -73,3 +73,13 @@ type BodyGenerator(context:Context,typeBuilder:TypeBuilder,body:SExp list, gf:IG
                 this.gen_body (ilGen,body)
     interface IGenerator with
         member this.Generate ilGen = this.gen_body (ilGen,body)
+
+type DefunGenerator(context:Context,typeBuilder:TypeBuilder,name:string,args:string list,body:SExp list,gf:IGeneratorFactory) =
+    interface IGenerator with
+        member this.Generate ilGen =
+            let argsDef = Array.create (List.length args) typeof<obj>
+            let methodGen = typeBuilder.DefineMethod(name, MethodAttributes.Public ||| MethodAttributes.Static, typeof<obj>, argsDef)
+            context.functions.[name] <- methodGen //should be before method body generation!
+            let methodILGen = (methodGen.GetILGenerator())
+            let bodyGen = gf.MakeBody body
+            bodyGen.Generate methodILGen

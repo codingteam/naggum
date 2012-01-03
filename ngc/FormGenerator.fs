@@ -83,3 +83,24 @@ type DefunGenerator(context:Context,typeBuilder:TypeBuilder,name:string,args:str
             let methodILGen = (methodGen.GetILGenerator())
             let bodyGen = gf.MakeBody body
             bodyGen.Generate methodILGen
+
+type LetGenerator(context:Context,typeBuilder:TypeBuilder,bindings:SExp,body:SExp list,gf:IGeneratorFactory) =
+    interface IGenerator with
+        member this.Generate ilGen =
+            ilGen.BeginScope()
+            let scope_subctx = new Context (context)
+            match bindings with
+            | List list ->
+                for binding in list do
+                    match binding with
+                    | List [(Atom (Symbol name)); form] ->
+                        let local = ilGen.DeclareLocal(typeof<SExp>)
+                        scope_subctx.locals.[name] <- local
+                        let generator = gf.MakeGenerator form
+                        generator.Generate ilGen
+                        ilGen.Emit (OpCodes.Stloc,local)
+                    | other -> failwithf "In let bindings: Expected: (name (form))\nGot: %A\n" other
+            | other -> failwithf "In let form: expected: list of bindings\nGot: %A" other
+            let bodyGen = (new BodyGenerator (scope_subctx,typeBuilder,body,gf) :> IGenerator)
+            bodyGen.Generate ilGen
+            ilGen.EndScope()

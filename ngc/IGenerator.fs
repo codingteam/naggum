@@ -33,7 +33,7 @@ type IGenerator =
 
 type IGeneratorFactory =
     interface
-        abstract MakeGenerator : SExp -> IGenerator
-        abstract MakeSequence : SExp list -> IGenerator
-        abstract MakeBody : SExp list -> IGenerator
+        abstract MakeGenerator : Context -> SExp -> IGenerator
+        abstract MakeSequence : Context -> SExp list -> IGenerator
+        abstract MakeBody : Context -> SExp list -> IGenerator
     end

@@ -50,10 +50,10 @@ type SequenceGenerator(context:Context,typeBuilder:TypeBuilder,seq:SExp list, gf
         match seq with
             | [] -> ilGen.Emit(OpCodes.Ldnull)
             | [last] ->
-                let gen = gf.MakeGenerator(last)
+                let gen = gf.MakeGenerator context last
                 gen.Generate ilGen
             | sexp :: rest ->
-                let gen = gf.MakeGenerator(sexp)
+                let gen = gf.MakeGenerator context sexp
                 gen.Generate ilGen
                 this.gen_seq (ilGen, rest)
     interface IGenerator with
@@ -64,10 +64,10 @@ type BodyGenerator(context:Context,typeBuilder:TypeBuilder,body:SExp list, gf:IG
         match body with
             | [] -> ilGen.Emit(OpCodes.Ldnull)
             | [last] ->
-                let gen = gf.MakeGenerator(last)
+                let gen = gf.MakeGenerator context last
                 gen.Generate ilGen
             | sexp :: rest ->
-                let gen = gf.MakeGenerator(sexp)
+                let gen = gf.MakeGenerator context sexp
                 gen.Generate ilGen
                 ilGen.Emit(OpCodes.Pop)
                 this.gen_body (ilGen,body)
@@ -81,7 +81,7 @@ type DefunGenerator(context:Context,typeBuilder:TypeBuilder,name:string,args:str
             let methodGen = typeBuilder.DefineMethod(name, MethodAttributes.Public ||| MethodAttributes.Static, typeof<obj>, argsDef)
             context.functions.[name] <- methodGen //should be before method body generation!
             let methodILGen = (methodGen.GetILGenerator())
-            let bodyGen = gf.MakeBody body
+            let bodyGen = gf.MakeBody context body
             bodyGen.Generate methodILGen
 
 type LetGenerator(context:Context,typeBuilder:TypeBuilder,bindings:SExp,body:SExp list,gf:IGeneratorFactory) =
@@ -96,7 +96,7 @@ type LetGenerator(context:Context,typeBuilder:TypeBuilder,bindings:SExp,body:SEx
                     | List [(Atom (Symbol name)); form] ->
                         let local = ilGen.DeclareLocal(typeof<SExp>)
                         scope_subctx.locals.[name] <- local
-                        let generator = gf.MakeGenerator form
+                        let generator = gf.MakeGenerator scope_subctx form
                         generator.Generate ilGen
                         ilGen.Emit (OpCodes.Stloc,local)
                     | other -> failwithf "In let bindings: Expected: (name (form))\nGot: %A\n" other

@@ -29,7 +29,7 @@ open System
 open System.Reflection
 open System.Reflection.Emit
 
-type GeneratorFactory(context:Context,typeBldr:TypeBuilder) =
+type GeneratorFactory(typeBldr:TypeBuilder) =
     member private this.makeObjectGenerator(o:obj) =
         match o with
         | :? System.Int32 ->
@@ -44,23 +44,23 @@ type GeneratorFactory(context:Context,typeBldr:TypeBuilder) =
             (new StringGen(o :?> System.String)) :> IGenerator
         | other -> failwithf "Not a basic value: %A\n" other
 
-    member private this.makeValueGenerator (value:Value) =
+    member private this.makeValueGenerator (context: Context, value:Value) =
         match value with
         | Symbol name ->
             (new SymbolGenerator(context,name)) :> IGenerator
         | Object o -> this.makeObjectGenerator o
 
-    member private this.makeSequenceGenerator(seq:SExp list) =
+    member private this.makeSequenceGenerator(context: Context,seq:SExp list) =
         new SequenceGenerator(context,typeBldr,seq,(this :> IGeneratorFactory))
 
-    member private this.makeBodyGenerator(body:SExp list) =
+    member private this.makeBodyGenerator(context: Context,body:SExp list) =
         new BodyGenerator(context,typeBldr,body,(this :> IGeneratorFactory))
 
     interface IGeneratorFactory with
-        member this.MakeGenerator sexp =
+        member this.MakeGenerator context sexp =
             match sexp with
-            | Atom value -> this.makeValueGenerator value
+            | Atom value -> this.makeValueGenerator (context, value)
 
-        member this.MakeSequence seq = this.makeSequenceGenerator seq :> IGenerator
+        member this.MakeSequence context seq = this.makeSequenceGenerator (context,seq) :> IGenerator
 
-        member this.MakeBody body = this.makeBodyGenerator body :> IGenerator
+        member this.MakeBody context body = this.makeBodyGenerator (context,body) :> IGenerator

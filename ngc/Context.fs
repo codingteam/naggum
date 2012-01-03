@@ -28,18 +28,22 @@ open Naggum.Runtime
 open Naggum.Writer
 open Naggum.Types.Cons
 
+type ContextValue =
+    |Local of LocalBuilder
+    |Arg of int
+
 type Context =
     val functions : Dictionary<string, MethodInfo>
-    val locals : Dictionary<string,LocalBuilder>
+    val locals : Dictionary<string,ContextValue>
     new (f,l) =
         { functions = f; locals = l}
     new (ctx : Context) =
         let f = new Dictionary<string, MethodInfo>(ctx.functions)
-        let l = new Dictionary<string,LocalBuilder>(ctx.locals)
+        let l = new Dictionary<string,ContextValue>(ctx.locals)
         new Context (f,l)
     new() =
         let f = new Dictionary<string, MethodInfo>()
-        let l = new Dictionary<string,LocalBuilder>()
+        let l = new Dictionary<string,ContextValue>()
         new Context (f,l)
 
 let create () =

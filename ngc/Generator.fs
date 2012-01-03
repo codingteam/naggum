@@ -76,7 +76,7 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
                         let local = ilGen.DeclareLocal(typeof<SExp>)
                         generate context typeBuilder ilGen form
                         ilGen.Emit (OpCodes.Stloc,local)
-                        scope_subctx.locals.[name] <- local
+                        scope_subctx.locals.[name] <- Local local
                     | other -> failwithf "In let bindings: Expected: (name (form))\nGot: %A\n" other
             | other -> failwithf "In let form: expected: list of bindings\nGot: %A" other
             generateBody scope_subctx typeBuilder ilGen body

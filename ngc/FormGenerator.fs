@@ -40,8 +40,12 @@ type SymbolGenerator(context:Context,name:string) =
     interface IGenerator
         with member this.Generate ilGen =
                 try
-                    let local = context.locals.[name]
-                    ilGen.Emit(OpCodes.Ldloc,local)
+                    let ctxval = context.locals.[name]
+                    match ctxval with
+                    |Local local ->
+                        ilGen.Emit(OpCodes.Ldloc,local)
+                    |Arg index ->
+                        ilGen.Emit(OpCodes.Ldarg,(int16 index))
                 with
                 | :? KeyNotFoundException -> failwithf "Symbol %A not bound." name
 

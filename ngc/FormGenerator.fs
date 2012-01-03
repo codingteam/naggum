@@ -104,3 +104,34 @@ type LetGenerator(context:Context,typeBuilder:TypeBuilder,bindings:SExp,body:SEx
             let bodyGen = (new BodyGenerator (scope_subctx,typeBuilder,body,gf) :> IGenerator)
             bodyGen.Generate ilGen
             ilGen.EndScope()
+
+type ReducedIfGenerator(context:Context,typeBuilder:TypeBuilder,condition:SExp,if_true:SExp,gf:IGeneratorFactory) =
+    interface IGenerator with
+        member this.Generate ilGen =
+            let cond_gen = gf.MakeGenerator context condition
+            let if_true_gen = gf.MakeGenerator context if_true
+            let if_true_lbl = ilGen.DefineLabel()
+            let end_form = ilGen.DefineLabel()
+            cond_gen.Generate ilGen
+            ilGen.Emit (OpCodes.Brtrue, if_true_lbl)
+            ilGen.Emit OpCodes.Ldnull
+            ilGen.Emit (OpCodes.Br,end_form)
+            ilGen.MarkLabel if_true_lbl
+            if_true_gen.Generate ilGen
+            ilGen.MarkLabel end_form
+
+type FullIfGenerator(context:Context,typeBuilder:TypeBuilder,condition:SExp,if_true:SExp,if_false:SExp,gf:IGeneratorFactory) =
+    interface IGenerator with
+        member this.Generate ilGen =
+            let cond_gen = gf.MakeGenerator context condition
+            let if_true_gen = gf.MakeGenerator context if_true
+            let if_false_gen = gf.MakeGenerator context if_false
+            let if_true_lbl = ilGen.DefineLabel()
+            let end_form = ilGen.DefineLabel()
+            cond_gen.Generate ilGen
+            ilGen.Emit (OpCodes.Brtrue, if_true_lbl)
+            if_false_gen.Generate ilGen
+            ilGen.Emit (OpCodes.Br,end_form)
+            ilGen.MarkLabel if_true_lbl
+            if_true_gen.Generate ilGen
+            ilGen.MarkLabel end_form

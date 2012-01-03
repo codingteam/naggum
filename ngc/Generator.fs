@@ -86,8 +86,8 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
             genApply fname context typeBuilder ilGen args
         | _ -> failwithf "%A not supported yet." list
     | Atom a -> 
-        let genf = new GeneratorFactory(context,typeBuilder) :> IGeneratorFactory
-        let gen = genf.MakeGenerator(Atom a)
+        let genf = new GeneratorFactory(typeBuilder) :> IGeneratorFactory
+        let gen = genf.MakeGenerator context (Atom a)
         gen.Generate ilGen
     | other     -> failwithf "%A form not supported yet." other
 and private generateBody context (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (body : SExp list) =

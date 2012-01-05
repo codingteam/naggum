@@ -99,7 +99,7 @@ type LetGenerator(context:Context,typeBuilder:TypeBuilder,bindings:SExp,body:SEx
                     match binding with
                     | List [(Atom (Symbol name)); form] ->
                         let local = ilGen.DeclareLocal(typeof<SExp>)
-                        scope_subctx.locals.[name] <- local
+                        scope_subctx.locals.[name] <- Local local
                         let generator = gf.MakeGenerator scope_subctx form
                         generator.Generate ilGen
                         ilGen.Emit (OpCodes.Stloc,local)

@@ -139,3 +139,11 @@ type FullIfGenerator(context:Context,typeBuilder:TypeBuilder,condition:SExp,if_t
             ilGen.MarkLabel if_true_lbl
             if_true_gen.Generate ilGen
             ilGen.MarkLabel end_form
+
+type FunCallGenerator(context:Context,typeBuilder:TypeBuilder,fname:string,arguments:SExp list,gf:IGeneratorFactory) =
+    interface IGenerator with
+        member this.Generate ilGen =
+            let func = context.functions.[fname]
+            let args_seq = gf.MakeSequence context arguments
+            args_seq.Generate ilGen
+            ilGen.Emit(OpCodes.Call,func)

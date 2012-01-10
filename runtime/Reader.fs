@@ -67,6 +67,5 @@ let parse p str =
     parse_result
 
 let read stream =
-    (fun () ->
-        let form = (read_form stream "" (ref 0)).Trim()
-        parse parser form)
+    let form = (read_form stream "" (ref 0)).Trim()
+    parse parser form

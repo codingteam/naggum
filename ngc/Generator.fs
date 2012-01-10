@@ -21,6 +21,7 @@ THE SOFTWARE. *)
 module Naggum.Compiler.Generator
 
 open System
+open System.IO
 open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
@@ -32,7 +33,7 @@ open Naggum.Runtime
 
 open Context
 
-//TODO: Split this to generate_if, generate_let, generate_etc
+//TODO: Shoot that putrid shit and throw it out.
 let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (form : SExp) =
     match form with
     | List list ->
@@ -178,21 +179,25 @@ let private epilogue context typeBuilder (ilGen : ILGenerator) =
     ilGen.Emit OpCodes.Ret
     ilGen.EndScope()
 
-let compile (source : string) (assemblyName : string) (fileName : string) : unit =
+let compile (source : StreamReader) (assemblyName : string) (fileName : string) : unit =
     let assemblyName = new AssemblyName(assemblyName)
     let assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Save)
     let moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyBuilder.GetName().Name, fileName)
     let typeBuilder = moduleBuilder.DefineType("Program", TypeAttributes.Public ||| TypeAttributes.Class ||| TypeAttributes.BeforeFieldInit)
     let methodBuilder = typeBuilder.DefineMethod("Main", MethodAttributes.Public ||| MethodAttributes.Static, typeof<int>, [| |])
     
+    let gf = new GeneratorFactory(typeBuilder) :> IGeneratorFactory
     assemblyBuilder.SetEntryPoint methodBuilder
     
     let ilGenerator = methodBuilder.GetILGenerator()
 
     let context = Context.create ()
     prologue ilGenerator
-    let sexp = Reader.parse source
-    generate context typeBuilder ilGenerator sexp
+    while not source.EndOfStream do
+        let sexp = Reader.parse source
+        let gen = gf.MakeGenerator context sexp
+        gen.Generate ilGenerator
+        //generate context typeBuilder ilGenerator sexp
 
     epilogue context typeBuilder ilGenerator
 

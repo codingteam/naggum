@@ -74,7 +74,7 @@ type BodyGenerator(context:Context,typeBuilder:TypeBuilder,body:SExp list, gf:IG
                 let gen = gf.MakeGenerator context sexp
                 gen.Generate ilGen
                 ilGen.Emit(OpCodes.Pop)
-                this.gen_body (ilGen,body)
+                this.gen_body (ilGen,rest)
     interface IGenerator with
         member this.Generate ilGen = this.gen_body (ilGen,body)
 

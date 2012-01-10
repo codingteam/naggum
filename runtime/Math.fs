@@ -23,20 +23,20 @@ open System
 open Reader
 
 type Math =
-    static member add = fun (args: obj list) ->
-                List.reduce (+) (List.map unbox args) :> obj
+    static member public add (args: obj list) =
+        List.reduce (+) (List.map unbox args) :> obj
 
-    static member sub = fun (args: obj list) ->
-                List.reduce (-) (List.map unbox args) :> obj
+    static member public sub (args: obj list) =
+        List.reduce (-) (List.map unbox args) :> obj
 
-    static member mul = fun (args: obj list) ->
-                List.reduce (*) (List.map unbox args) :> obj
+    static member public mul (args: obj list) =
+        List.reduce (*) (List.map unbox args) :> obj
 
-    static member div = fun (args: obj list) ->
-                List.reduce (/) (List.map unbox args) :> obj
+    static member public div (args: obj list) =
+        List.reduce (/) (List.map unbox args) :> obj
 
-    static member equal = fun (args: obj list) ->
-                    match args.Length with
-                    | 0 -> (false :> obj)
-                    | 1 -> (true :> obj)
-                    | any -> (List.forall (fun (a) -> a.Equals (args.Item 0)) args :> obj)
+    static member public equal(args: obj list) =
+        match args.Length with
+        | 0 -> (false :> obj)
+        | 1 -> (true :> obj)
+        | any -> (List.forall (fun (a) -> a.Equals (args.Item 0)) args :> obj)

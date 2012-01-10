@@ -50,6 +50,20 @@ type GeneratorFactory(typeBldr:TypeBuilder) =
             (new SymbolGenerator(context,name)) :> IGenerator
         | Object o -> this.makeObjectGenerator o
 
+    member private this.MakeFormGenerator (context:Context, form:SExp list) =
+        match form with
+        | (Atom (Symbol "defun") :: Atom (Symbol name) :: List args :: body) ->
+            new DefunGenerator(context,typeBldr,name,args,body,this) :> IGenerator
+        | Atom (Symbol "if") :: condition :: if_true :: if_false :: [] -> //full if form
+            new FullIfGenerator(context,typeBldr,condition,if_true,if_false,this) :> IGenerator
+        | Atom (Symbol "if") :: condition :: if_true :: [] -> //reduced if form
+            new ReducedIfGenerator(context,typeBldr,condition,if_true,this) :> IGenerator
+        | Atom (Symbol "let") :: bindings :: body -> //let form
+            new LetGenerator(context,typeBldr,bindings,body,this) :> IGenerator
+        | Atom (Symbol fname) :: args -> //generic funcall pattern
+            new FunCallGenerator(context,typeBldr,fname,args,this) :> IGenerator
+        | _ -> failwithf "Form %A is not supported yet" list
+
     member private this.makeSequenceGenerator(context: Context,seq:SExp list) =
         new SequenceGenerator(context,typeBldr,seq,(this :> IGeneratorFactory))
 
@@ -60,6 +74,7 @@ type GeneratorFactory(typeBldr:TypeBuilder) =
         member this.MakeGenerator context sexp =
             match sexp with
             | Atom value -> this.makeValueGenerator (context, value)
+            | List form -> this.MakeFormGenerator (context,form)
 
         member this.MakeSequence context seq = this.makeSequenceGenerator (context,seq) :> IGenerator
 

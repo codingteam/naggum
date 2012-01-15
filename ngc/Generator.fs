@@ -81,7 +81,12 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
             | other -> failwithf "In let form: expected: list of bindings\nGot: %A" other
             generateBody scope_subctx typeBuilder ilGen body
             ilGen.EndScope()
-
+        | Atom (Symbol "clr-strong-static-call") :: Atom (Object className) :: Atom (Symbol methodName) :: paramList ->
+            let ``type`` = Type.GetType (className :?> string)
+            let ``method`` = ``type``.GetMethod(methodName, [| |])
+            ilGen.Emit(OpCodes.Ldnull)
+            ilGen.EmitCall(OpCodes.Call, ``method``, [| |])
+            // TODO: do something with paramList.
         | Atom (Symbol fname) :: args -> //generic funcall pattern
             genApply fname context typeBuilder ilGen args
         | _ -> failwithf "%A not supported yet." list

@@ -1,0 +1,2 @@
+(defun main (args)
+       (clr-strong-static-call "System.Console" WriteLine))

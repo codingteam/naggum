@@ -20,12 +20,13 @@ THE SOFTWARE. *)
 
 module Naggum.Compiler.Reader
 
+open System.IO
 open FParsec.CharParsers
 
 open Naggum.Reader
 
-let parse (source : string) =
-    let form = parse parser source
+let parse (source : StreamReader) =
+    let form = read source
     match form with
     | Success(result,   _, _) -> result
     | Failure(errorMsg, _, _) -> failwithf "Failure: %s" errorMsg

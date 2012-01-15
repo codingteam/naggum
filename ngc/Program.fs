@@ -25,7 +25,7 @@ open System.IO
 open Naggum.Compiler.Generator
 
 let fileName = Environment.GetCommandLineArgs().[1]
-let source = File.ReadAllText fileName
+let source = new StreamReader(File.Open (fileName,FileMode.Open))
 
 let assemblyName = Path.GetFileNameWithoutExtension fileName
 Generator.compile source assemblyName (assemblyName + ".exe")

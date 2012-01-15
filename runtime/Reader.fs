@@ -58,7 +58,7 @@ let rec read_form (stream : TextReader) (acc:string) balance =
                     |')' -> delta := !delta - 1
                     |_ -> delta := !delta)
                 line
-    if !delta = 0 then
+    if !delta = 0 && not(acc.Trim() = "")then
         String.concat " " [acc;line]
     else read_form stream (String.concat " " [acc; line]) delta
 
@@ -67,6 +67,5 @@ let parse p str =
     parse_result
 
 let read stream =
-    (fun () ->
-        let form = (read_form stream "" (ref 0)).Trim()
-        parse parser form)
+    let form = (read_form stream "" (ref 0)).Trim()
+    parse parser form

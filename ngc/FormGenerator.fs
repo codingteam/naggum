@@ -74,19 +74,9 @@ type BodyGenerator(context:Context,typeBuilder:TypeBuilder,body:SExp list, gf:IG
                 let gen = gf.MakeGenerator context sexp
                 gen.Generate ilGen
                 ilGen.Emit(OpCodes.Pop)
-                this.gen_body (ilGen,body)
+                this.gen_body (ilGen,rest)
     interface IGenerator with
         member this.Generate ilGen = this.gen_body (ilGen,body)
-
-type DefunGenerator(context:Context,typeBuilder:TypeBuilder,name:string,args:string list,body:SExp list,gf:IGeneratorFactory) =
-    interface IGenerator with
-        member this.Generate ilGen =
-            let argsDef = Array.create (List.length args) typeof<obj>
-            let methodGen = typeBuilder.DefineMethod(name, MethodAttributes.Public ||| MethodAttributes.Static, typeof<obj>, argsDef)
-            context.functions.[name] <- methodGen //should be before method body generation!
-            let methodILGen = (methodGen.GetILGenerator())
-            let bodyGen = gf.MakeBody context body
-            bodyGen.Generate methodILGen
 
 type LetGenerator(context:Context,typeBuilder:TypeBuilder,bindings:SExp,body:SExp list,gf:IGeneratorFactory) =
     interface IGenerator with
@@ -139,3 +129,27 @@ type FullIfGenerator(context:Context,typeBuilder:TypeBuilder,condition:SExp,if_t
             ilGen.MarkLabel if_true_lbl
             if_true_gen.Generate ilGen
             ilGen.MarkLabel end_form
+
+type FunCallGenerator(context:Context,typeBuilder:TypeBuilder,fname:string,arguments:SExp list,gf:IGeneratorFactory) =
+    interface IGenerator with
+        member this.Generate ilGen =
+            let func = context.functions.[fname]
+            let args_seq = gf.MakeSequence context arguments
+            args_seq.Generate ilGen
+            ilGen.Emit(OpCodes.Call,func)
+
+type DefunGenerator(context:Context,typeBuilder:TypeBuilder,fname:string,parameters:SExp list,body:SExp list,gf:IGeneratorFactory) =
+    interface IGenerator with
+        member this.Generate ilGen =
+            let argsDef = Array.create (List.length parameters) typeof<obj>
+            let methodGen = typeBuilder.DefineMethod(fname, MethodAttributes.Public ||| MethodAttributes.Static, typeof<obj>, argsDef)
+            let methodILGen = (methodGen.GetILGenerator())
+            context.functions.[fname] <- methodGen
+            let fun_ctx = new Context(context)
+            for parm in parameters do
+                match parm with
+                | Atom(Symbol parm_name) -> fun_ctx.locals.[parm_name] <- Arg (List.findIndex (fun (p) -> p = parm) parameters)
+                | other -> failwithf "In function %A parameter definition:\nExpected: Atom(Symbol)\nGot: %A" fname parm
+            let bodyGen = gf.MakeBody fun_ctx body
+            bodyGen.Generate methodILGen
+            methodILGen.Emit(OpCodes.Ret)

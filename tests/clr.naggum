@@ -1,2 +1,2 @@
 (defun main (args)
-       (clr-strong-static-call "System.Console" WriteLine))
+  (clr-static-call "System.Console" WriteLine "Shit!"))

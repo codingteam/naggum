@@ -19,6 +19,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. *)
 module Naggum.Compiler.FormGenerator
 
+open System
 open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
@@ -153,3 +154,19 @@ type DefunGenerator(context:Context,typeBuilder:TypeBuilder,fname:string,paramet
             let bodyGen = gf.MakeBody fun_ctx body
             bodyGen.Generate methodILGen
             methodILGen.Emit(OpCodes.Ret)
+
+type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, className : string, methodName : string, arguments : SExp list,
+                      gf : IGeneratorFactory) =
+    interface IGenerator with
+        member this.Generate ilGen =
+            let clrType = Type.GetType className
+            let argTypes = arguments
+                           |> List.map (fun sexp -> match sexp with
+                                                    | Atom (Object arg) -> arg.GetType()
+                                                    | any               -> failwithf "Cannot use %A in CLR call." any)
+                           |> List.toArray
+            let clrMethod = clrType.GetMethod(methodName, argTypes)
+            ilGen.Emit(OpCodes.Ldnull)
+            let args_seq = gf.MakeSequence context arguments
+            args_seq.Generate ilGen            
+            ilGen.EmitCall(OpCodes.Call, clrMethod, [| |])

@@ -177,11 +177,12 @@ type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, className : 
             else
                 Seq.zip availableTypes methodTypes
                 |> Seq.map distanceBetweenTypes
-                |> Seq.fold (fun state option -> match state with
-                                                 | None          -> None
-                                                 | Some stateNum -> match option with
-                                                                    | None           -> None
-                                                                    | Some optionNum -> Some (stateNum + optionNum)) (Some 0)
+                |> Seq.fold (fun state option ->
+                                maybe {
+                                    let! stateNum = state
+                                    let! optionNum = option
+                                    return stateNum + optionNum
+                                }) (Some 0)
         let clrType = Type.GetType typeName
         let methods = clrType.GetMethods() |> Seq.filter (fun clrMethod -> clrMethod.Name = methodName)
         let methodsAndDistances = methods

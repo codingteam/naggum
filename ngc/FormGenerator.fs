@@ -157,16 +157,56 @@ type DefunGenerator(context:Context,typeBuilder:TypeBuilder,fname:string,paramet
 
 type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, className : string, methodName : string, arguments : SExp list,
                       gf : IGeneratorFactory) =
+    let nearestOverload typeName methodName types =
+        let rec distanceBetweenTypes (derivedType : Type, baseType) =
+            match derivedType with
+            | null -> None
+            | clrType
+              when clrType = baseType -> Some 0
+            | _                       -> match distanceBetweenTypes (derivedType.BaseType, baseType) with
+                                         | None          -> None
+                                         | Some distance -> Some (distance + 1)
+        let distance (availableTypes : Type list) (methodTypes : Type list) =
+            if availableTypes.Length <> methodTypes.Length then
+                None
+            else
+                Seq.zip availableTypes methodTypes
+                |> Seq.map distanceBetweenTypes
+                |> Seq.fold (fun state option -> match state with
+                                                 | None          -> None
+                                                 | Some stateNum -> match option with
+                                                                    | None           -> None
+                                                                    | Some optionNum -> Some (stateNum + optionNum)) (Some 0)
+        let clrType = Type.GetType typeName
+        let methods = clrType.GetMethods() |> Seq.filter (fun clrMethod -> clrMethod.Name = methodName)
+        let methodsAndDistances = methods
+                                  |> Seq.map (fun clrMethod -> clrMethod,
+                                                               distance types (clrMethod.GetParameters()
+                                                                               |> Array.map (fun parameter ->
+                                                                                             parameter.ParameterType)
+                                                                               |> Array.toList))
+                                  |> Seq.filter (snd >> Option.isSome)
+                                  |> Seq.map (fun (clrMethod, distance) -> clrMethod, Option.get distance)
+                                  |> Seq.toList
+        if methodsAndDistances.IsEmpty then
+            None
+        else
+            let minDistance = methodsAndDistances |> List.minBy snd |> snd
+            let methods = methodsAndDistances |> List.filter (snd >> (fun d -> d = minDistance))
+                                              |> List.map fst
+            if methods.IsEmpty then
+                None
+            else
+                Some (List.head methods)
+    
     interface IGenerator with
         member this.Generate ilGen =
-            let clrType = Type.GetType className
             let argTypes = arguments
                            |> List.map (fun sexp -> match sexp with
                                                     | Atom (Object arg) -> arg.GetType()
                                                     | any               -> failwithf "Cannot use %A in CLR call." any)
-                           |> List.toArray
-            let clrMethod = clrType.GetMethod(methodName, argTypes)
+            let clrMethod = nearestOverload className methodName argTypes
             ilGen.Emit(OpCodes.Ldnull)
             let args_seq = gf.MakeSequence context arguments
             args_seq.Generate ilGen            
-            ilGen.EmitCall(OpCodes.Call, clrMethod, [| |])
+            ilGen.EmitCall(OpCodes.Call, Option.get clrMethod, [| |])

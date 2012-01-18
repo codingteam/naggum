@@ -28,7 +28,7 @@ namespace Naggum.Runtime
     /// <summary>
     /// Cons-cell and basic cons manipulation functions.
     /// </summary>
-    public class Cons
+    public class Cons : IEquatable<Cons>
     {
         public Object pCar { get; set; }
         public Object pCdr { get; set; }
@@ -74,6 +74,10 @@ namespace Naggum.Runtime
             else return false; //If it's not null or not a list head, then it's definitely not a list.
         }
 
+        /// <summary>
+        /// Converts cons-cell to string representation.
+        /// </summary>
+        /// <returns>String representation of cons-cell.</returns>
         public override String ToString()
         {
             StringBuilder buffer = new StringBuilder("");
@@ -92,6 +96,16 @@ namespace Naggum.Runtime
             }
             buffer.Append(")");
             return buffer.ToString();
+        }
+
+        /// <summary>
+        /// Checks cons cell for equality with other cell.
+        /// </summary>
+        /// <param name="other">Other cons cell</param>
+        /// <returns>True if other cell is equal to this; false otherwise.</returns>
+        bool IEquatable<Cons>.Equals(Cons other)
+        {
+            return pCar == other.pCar && pCdr == other.pCdr;
         }
     }
 }

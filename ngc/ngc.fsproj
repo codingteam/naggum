@@ -42,6 +42,7 @@
     <Compile Include="IGenerator.fs" />
     <Compile Include="NumberGen.fs" />
     <Compile Include="StringGen.fs" />
+    <Compile Include="MaybeMonad.fs" />
     <Compile Include="FormGenerator.fs" />
     <Compile Include="GeneratorFactory.fs" />
     <Compile Include="Generator.fs" />

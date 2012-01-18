@@ -23,9 +23,10 @@ open System
 open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
-open Naggum.Reader
-open Naggum.Compiler.IGenerator
 open Naggum.Compiler.Context
+open Naggum.Compiler.IGenerator
+open Naggum.MaybeMonad
+open Naggum.Reader
 
 type FormGenerator() =
     interface IGenerator
@@ -157,15 +158,19 @@ type DefunGenerator(context:Context,typeBuilder:TypeBuilder,fname:string,paramet
 
 type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, className : string, methodName : string, arguments : SExp list,
                       gf : IGeneratorFactory) =
+    let maybe = new MaybeMonad()
+
     let nearestOverload typeName methodName types =
         let rec distanceBetweenTypes (derivedType : Type, baseType) =
             match derivedType with
             | null -> None
             | clrType
               when clrType = baseType -> Some 0
-            | _                       -> match distanceBetweenTypes (derivedType.BaseType, baseType) with
-                                         | None          -> None
-                                         | Some distance -> Some (distance + 1)
+            | _                       ->
+                maybe {
+                    let! distance = distanceBetweenTypes (derivedType.BaseType, baseType)
+                    return distance + 1
+                }
         let distance (availableTypes : Type list) (methodTypes : Type list) =
             if availableTypes.Length <> methodTypes.Length then
                 None

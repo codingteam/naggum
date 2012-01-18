@@ -22,7 +22,7 @@ module Naggum.Compiler.IGenerator
 open System.Reflection
 open System.Reflection.Emit
 
-open Naggum.Reader
+open Naggum.Compiler.Reader
 open Naggum.Compiler.Context
 
 

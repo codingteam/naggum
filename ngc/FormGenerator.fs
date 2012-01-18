@@ -22,7 +22,7 @@ module Naggum.Compiler.FormGenerator
 open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
-open Naggum.Reader
+open Naggum.Compiler.Reader
 open Naggum.Compiler.IGenerator
 open Naggum.Compiler.Context
 

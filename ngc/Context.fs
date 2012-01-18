@@ -24,9 +24,7 @@ open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
 
-open Naggum.Runtime
-open Naggum.Writer
-open Naggum.Types.Cons
+open Naggum.Compiler.Reader
 
 type ContextValue =
     |Local of LocalBuilder

@@ -158,8 +158,6 @@ type DefunGenerator(context:Context,typeBuilder:TypeBuilder,fname:string,paramet
 
 type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, className : string, methodName : string, arguments : SExp list,
                       gf : IGeneratorFactory) =
-    let maybe = new MaybeMonad()
-
     let nearestOverload typeName methodName types =
         let rec distanceBetweenTypes (derivedType : Type, baseType) =
             match derivedType with

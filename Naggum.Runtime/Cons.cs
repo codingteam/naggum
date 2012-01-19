@@ -69,7 +69,8 @@ namespace Naggum.Runtime
         /// False otherwise.</returns>
         public static bool IsList(Cons aCons)
         {
-            if (aCons.pCdr == null) return true; //Empty list is still a list.
+            if (aCons == null) return true; //Empty list is still a list.
+            if (aCons.pCdr == null) return true; //List with one element is a list;
             else if (aCons.pCdr.GetType() == typeof(Cons)) return IsList((Cons)aCons.pCdr);
             else return false; //If it's not null or not a list head, then it's definitely not a list.
         }

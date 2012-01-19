@@ -107,5 +107,21 @@ namespace Naggum.Runtime
         {
             return pCar == other.pCar && pCdr == other.pCdr;
         }
+
+        /// <summary>
+        /// Constructs a list.
+        /// </summary>
+        /// <param name="elements">Elements of a list.</param>
+        /// <returns>List with given elements.</returns>
+        public static Cons List(params object[] elements)
+        {
+            Cons list = null;
+            foreach (var element in (elements.Reverse()))
+            {
+                var tmp = new Cons(element, list);
+                list = tmp;
+            }
+            return list;
+        }
     }
 }

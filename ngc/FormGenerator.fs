@@ -156,15 +156,15 @@ type DefunGenerator(context:Context,typeBuilder:TypeBuilder,fname:string,paramet
             bodyGen.Generate methodILGen
             methodILGen.Emit(OpCodes.Ret)
 
-type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, className : string, methodName : string, arguments : SExp list,
+type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Type, methodName : string, arguments : SExp list,
                       gf : IGeneratorFactory) =
-    let nearestOverload typeName methodName types =
+    let nearestOverload (clrType : Type) methodName types =
         let rec distanceBetweenTypes (derivedType : Type, baseType) =
             match derivedType with
-            | null -> None
-            | clrType
-              when clrType = baseType -> Some 0
-            | _                       ->
+            | null                     -> None
+            | someType
+              when someType = baseType -> Some 0
+            | _                        ->
                 maybe {
                     let! distance = distanceBetweenTypes (derivedType.BaseType, baseType)
                     return distance + 1
@@ -181,7 +181,6 @@ type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, className : 
                                     let! optionNum = option
                                     return stateNum + optionNum
                                 }) (Some 0)
-        let clrType = Type.GetType typeName
         let methods = clrType.GetMethods() |> Seq.filter (fun clrMethod -> clrMethod.Name = methodName)
         let methodsAndDistances = methods
                                   |> Seq.map (fun clrMethod -> clrMethod,
@@ -209,7 +208,7 @@ type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, className : 
                            |> List.map (fun sexp -> match sexp with
                                                     | Atom (Object arg) -> arg.GetType()
                                                     | any               -> failwithf "Cannot use %A in CLR call." any)
-            let clrMethod = nearestOverload className methodName argTypes
+            let clrMethod = nearestOverload clrType methodName argTypes
             ilGen.Emit(OpCodes.Ldnull)
             let args_seq = gf.MakeSequence context arguments
             args_seq.Generate ilGen            

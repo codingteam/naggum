@@ -24,10 +24,12 @@ open NumberGen
 open StringGen
 open FormGenerator
 open Context
+open Naggum.MaybeMonad
 open Naggum.Reader
 open System
 open System.Reflection
 open System.Reflection.Emit
+open System.Text.RegularExpressions
 
 type GeneratorFactory(typeBldr:TypeBuilder) =
     member private this.makeObjectGenerator(o:obj) =
@@ -60,10 +62,26 @@ type GeneratorFactory(typeBldr:TypeBuilder) =
             new ReducedIfGenerator(context,typeBldr,condition,if_true,this) :> IGenerator
         | Atom (Symbol "let") :: bindings :: body -> //let form
             new LetGenerator(context,typeBldr,bindings,body,this) :> IGenerator
-        | Atom (Symbol "clr-static-call") :: Atom (Object className) :: Atom (Symbol methodName) :: args ->
-            new ClrCallGenerator(context, typeBldr, className :?> string, methodName, args, this) :> IGenerator
         | Atom (Symbol fname) :: args -> //generic funcall pattern
-            new FunCallGenerator(context,typeBldr,fname,args,this) :> IGenerator
+            let tryGetType typeName =
+                try Some (Type.GetType typeName) with
+                | _ -> None
+            
+            let callRegex = new Regex(@"([\w\.]+)\.(\w+)", RegexOptions.Compiled)
+            let callMatch = callRegex.Match fname
+            let maybeClrType =
+                maybe {
+                    let! typeName = if callMatch.Success then Some callMatch.Groups.[1].Value else None
+                    let! clrType = tryGetType typeName
+                    return clrType
+                }
+
+            if Option.isSome maybeClrType then
+                let clrType = Option.get maybeClrType
+                let methodName = callMatch.Groups.[2].Value
+                new ClrCallGenerator(context, typeBldr, clrType, methodName, args, this) :> IGenerator
+            else
+                new FunCallGenerator(context,typeBldr,fname,args,this) :> IGenerator            
         | _ -> failwithf "Form %A is not supported yet" list
 
     member private this.makeSequenceGenerator(context: Context,seq:SExp list) =

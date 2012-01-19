@@ -40,7 +40,7 @@ let number = int <|> float |>> Object
 let string =
     let normalChar = satisfy (fun c -> c <> '\"')
     between (pstring "\"")(pstring "\"") (manyChars normalChar) |>> (fun (str) -> str :> obj) |>> Object
-let symbol = (many1Chars (letter <|> digit <|> (pchar '-'))) |>> Symbol
+let symbol = (many1Chars (letter <|> digit <|> pchar '-' <|> pchar '.')) |>> Symbol
 
 let atom =  (number <|> string <|> symbol) |>> Atom
 

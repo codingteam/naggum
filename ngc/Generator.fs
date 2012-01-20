@@ -28,7 +28,7 @@ open System.Reflection.Emit
 
 open Naggum.Compiler.IGenerator
 open Naggum.Compiler.GeneratorFactory
-open Naggum.Reader
+open Naggum.Compiler.Reader
 open Naggum.Runtime
 
 open Context

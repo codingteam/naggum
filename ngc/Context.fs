@@ -24,9 +24,7 @@ open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
 
-open Naggum.Runtime
-open Naggum.Writer
-open Naggum.Types.Cons
+open Naggum.Compiler.Reader
 
 type ContextValue =
     |Local of LocalBuilder
@@ -48,14 +46,4 @@ type Context =
 
 let create () =
     let context = new Context()
-    context.functions.["add"]   <- typeof<Math>.GetMethod "add"
-    context.functions.["sub"]   <- typeof<Math>.GetMethod "sub"
-    context.functions.["mul"]   <- typeof<Math>.GetMethod "mul"
-    context.functions.["div"]   <- typeof<Math>.GetMethod "div"
-    context.functions.["equal"] <- typeof<Math>.GetMethod "equal"
-    context.functions.["write"] <- typeof<Writer>.GetMethod "write"
-    context.functions.["writeln"] <- typeof<Writer>.GetMethod "writeln"
-    context.functions.["Cons"] <- typeof<Cons>.GetMethod "Cons"
-    context.functions.["Car"] <- typeof<Cons>.GetMethod "Car"
-    context.functions.["Cdr"] <- typeof<Cons>.GetMethod "Cdr"
     context

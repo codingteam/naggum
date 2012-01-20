@@ -24,7 +24,7 @@ open NumberGen
 open StringGen
 open FormGenerator
 open Context
-open Naggum.Reader
+open Naggum.Compiler.Reader
 open System
 open System.Reflection
 open System.Reflection.Emit

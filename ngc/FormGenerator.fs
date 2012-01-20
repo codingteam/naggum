@@ -23,6 +23,7 @@ open System
 open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
+open Naggum.Compiler.Reader
 open Naggum.Compiler.Context
 open Naggum.Compiler.IGenerator
 open Naggum.MaybeMonad

@@ -25,7 +25,7 @@ open StringGen
 open FormGenerator
 open Context
 open Naggum.MaybeMonad
-open Naggum.Reader
+open Naggum.Compiler.Reader
 open System
 open System.Reflection
 open System.Reflection.Emit

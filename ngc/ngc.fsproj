@@ -60,9 +60,11 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\runtime\runtime.fsproj">
-      <Name>runtime</Name>
-      <Project>{ab0df634-1c19-48cf-a635-02862807f67f}</Project>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Naggum.Runtime\Naggum.Runtime.csproj">
+      <Name>Naggum.Runtime</Name>
+      <Project>{402b5e79-e063-4833-ae4b-2986aeec1d75}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

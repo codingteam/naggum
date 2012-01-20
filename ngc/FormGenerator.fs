@@ -27,7 +27,7 @@ open Naggum.Compiler.Reader
 open Naggum.Compiler.Context
 open Naggum.Compiler.IGenerator
 open Naggum.MaybeMonad
-open Naggum.Reader
+open Naggum.Compiler.Reader
 
 type FormGenerator() =
     interface IGenerator

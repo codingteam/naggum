@@ -48,6 +48,10 @@ type Context =
         let l = new Dictionary<string,ContextValue>()
         new Context (t,f,l)
 
+    member public this.loadAssembly(asm:Assembly) =
+        let types = List.ofArray (asm.GetTypes())
+        List.iter (fun (t:Type) -> this.types.Add(t.FullName,t)) types
+
 let create () =
     let context = new Context()
     context

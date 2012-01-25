@@ -191,6 +191,11 @@ let compile (source : StreamReader) (assemblyName : string) (fileName : string) 
     let ilGenerator = methodBuilder.GetILGenerator()
 
     let context = Context.create ()
+
+    //loading language runtime
+    let rta = Assembly.LoadFrom("Naggum.Runtime.dll")
+    context.loadAssembly rta
+
     prologue ilGenerator
     while not source.EndOfStream do
         let sexp = Reader.parse source

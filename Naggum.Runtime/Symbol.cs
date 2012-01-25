@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Naggum.Runtime
 {
-    class Symbol : IEquatable<Symbol>
+    public class Symbol : IEquatable<Symbol>
     {
         public String Name { get; set; }
         /// <summary>

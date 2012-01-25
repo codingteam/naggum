@@ -62,6 +62,8 @@ type GeneratorFactory(typeBldr:TypeBuilder) =
             new ReducedIfGenerator(context,typeBldr,condition,if_true,this) :> IGenerator
         | Atom (Symbol "let") :: bindings :: body -> //let form
             new LetGenerator(context,typeBldr,bindings,body,this) :> IGenerator
+        | Atom (Symbol "new") :: Atom (Symbol typeName) :: args ->
+            new NewObjGenerator(context,typeBldr,typeName,args,this) :> IGenerator
         | Atom (Symbol fname) :: args -> //generic funcall pattern
             let tryGetType typeName =
                 try Some (Type.GetType typeName) with

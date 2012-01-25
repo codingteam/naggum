@@ -214,3 +214,15 @@ type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Ty
             let args_seq = gf.MakeSequence context arguments
             args_seq.Generate ilGen            
             ilGen.EmitCall(OpCodes.Call, Option.get clrMethod, [| |])
+
+type NewObjGenerator(context : Context, typeBuilder : TypeBuilder, typeName : string, arguments : SExp list, gf : IGeneratorFactory) =
+    interface IGenerator with
+        member this.Generate ilGen =
+            let argTypes = arguments
+                           |> List.map (fun sexp -> match sexp with
+                                                    | Atom (Object arg) -> arg.GetType()
+                                                    | any               -> failwithf "Cannot use %A in CLR call." any)
+            let args_gen = gf.MakeSequence context arguments
+            let objType = context.types.[typeName]
+            args_gen.Generate ilGen
+            ilGen.Emit(OpCodes.Newobj,objType.GetConstructor(Array.ofList argTypes))

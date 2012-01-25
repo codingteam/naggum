@@ -160,17 +160,18 @@ type QuoteGenerator(context:Context,typeBuilder:TypeBuilder,quotedExp:SExp,gf:IG
         let generator = gf.MakeGenerator context (Atom (Object o))
         generator.Generate ilGen
     let generate_symbol (ilGen:ILGenerator) (name:string) =
+        let cons = (typeof<Naggum.Runtime.Symbol>).GetConstructor [|typeof<string>|]
         ilGen.Emit(OpCodes.Ldstr,name)
-        ilGen.Emit(OpCodes.Call,(typeof<Naggum.Runtime.Symbol>).GetConstructor([|typeof<string>|]))
+        ilGen.Emit(OpCodes.Newobj,cons)
     let rec generate_list (ilGen:ILGenerator) (elements:SExp list) =
-        let consMethod = (typeof<Naggum.Runtime.Cons>).GetMethod("Cons",(Array.create 2 typeof<obj>))
+        let cons = (typeof<Naggum.Runtime.Cons>).GetConstructor(Array.create 2 typeof<obj>)
         ilGen.Emit(OpCodes.Ldnull) //list terminator
         List.iter (fun (e) ->
                         match e with
                         |List l -> generate_list ilGen l
                         |Atom (Object o) -> generate_object ilGen o
                         |Atom (Symbol s) -> generate_symbol ilGen s
-                        ilGen.Emit(OpCodes.Call,consMethod))
+                        ilGen.Emit(OpCodes.Newobj,cons))
                   (List.rev elements)
     interface IGenerator with
         member this.Generate ilGen =

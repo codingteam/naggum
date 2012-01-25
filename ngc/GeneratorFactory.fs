@@ -60,6 +60,8 @@ type GeneratorFactory(typeBldr:TypeBuilder) =
             new ReducedIfGenerator(context,typeBldr,condition,if_true,this) :> IGenerator
         | Atom (Symbol "let") :: bindings :: body -> //let form
             new LetGenerator(context,typeBldr,bindings,body,this) :> IGenerator
+        | Atom (Symbol "quote") :: quotedExp :: [] ->
+            new QuoteGenerator(context,typeBldr,quotedExp,this) :> IGenerator
         | Atom (Symbol fname) :: args -> //generic funcall pattern
             new FunCallGenerator(context,typeBldr,fname,args,this) :> IGenerator
         | _ -> failwithf "Form %A is not supported yet" list

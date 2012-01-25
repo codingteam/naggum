@@ -22,6 +22,7 @@ module Naggum.Compiler.FormGenerator
 open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
+open Naggum.Runtime
 open Naggum.Compiler.Reader
 open Naggum.Compiler.IGenerator
 open Naggum.Compiler.Context
@@ -153,3 +154,27 @@ type DefunGenerator(context:Context,typeBuilder:TypeBuilder,fname:string,paramet
             let bodyGen = gf.MakeBody fun_ctx body
             bodyGen.Generate methodILGen
             methodILGen.Emit(OpCodes.Ret)
+
+type QuoteGenerator(context:Context,typeBuilder:TypeBuilder,quotedExp:SExp,gf:IGeneratorFactory) =
+    let generate_object (ilGen:ILGenerator) (o:obj) =
+        let generator = gf.MakeGenerator context (Atom (Object o))
+        generator.Generate ilGen
+    let generate_symbol (ilGen:ILGenerator) (name:string) =
+        ilGen.Emit(OpCodes.Ldstr,name)
+        ilGen.Emit(OpCodes.Call,(typeof<Naggum.Runtime.Symbol>).GetConstructor([|typeof<string>|]))
+    let rec generate_list (ilGen:ILGenerator) (elements:SExp list) =
+        let consMethod = (typeof<Naggum.Runtime.Cons>).GetMethod("Cons",(Array.create 2 typeof<obj>))
+        ilGen.Emit(OpCodes.Ldnull) //list terminator
+        List.iter (fun (e) ->
+                        match e with
+                        |List l -> generate_list ilGen l
+                        |Atom (Object o) -> generate_object ilGen o
+                        |Atom (Symbol s) -> generate_symbol ilGen s
+                        ilGen.Emit(OpCodes.Call,consMethod))
+                  (List.rev elements)
+    interface IGenerator with
+        member this.Generate ilGen =
+            match quotedExp with
+            |List l -> generate_list ilGen l
+            |Atom (Object o) -> generate_object ilGen o
+            |Atom (Symbol s) -> generate_symbol ilGen s

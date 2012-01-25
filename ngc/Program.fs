@@ -28,4 +28,4 @@ let fileName = Environment.GetCommandLineArgs().[1]
 let source = new StreamReader(File.Open (fileName,FileMode.Open))
 
 let assemblyName = Path.GetFileNameWithoutExtension fileName
-Generator.compile source assemblyName (assemblyName + ".exe")
+Generator.compile source assemblyName (assemblyName + ".exe") []

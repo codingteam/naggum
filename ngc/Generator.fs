@@ -178,7 +178,7 @@ let private epilogue context typeBuilder (ilGen : ILGenerator) =
     ilGen.Emit OpCodes.Ret
     ilGen.EndScope()
 
-let compile (source : StreamReader) (assemblyName : string) (fileName : string) : unit =
+let compile (source : StreamReader) (assemblyName : string) (fileName : string) (asmRefs:string list): unit =
     let assemblyName = new AssemblyName(assemblyName)
     let assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Save)
     let moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyBuilder.GetName().Name, fileName)
@@ -195,6 +195,8 @@ let compile (source : StreamReader) (assemblyName : string) (fileName : string) 
     //loading language runtime
     let rta = Assembly.LoadFrom("Naggum.Runtime.dll")
     context.loadAssembly rta
+
+    List.iter context.loadAssembly (List.map Assembly.LoadFrom asmRefs)
 
     prologue ilGenerator
     while not source.EndOfStream do

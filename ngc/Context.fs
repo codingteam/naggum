@@ -20,6 +20,7 @@ THE SOFTWARE. *)
 
 module Naggum.Compiler.Context
 
+open System
 open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
@@ -31,18 +32,21 @@ type ContextValue =
     |Arg of int
 
 type Context =
+    val types : Dictionary<string,Type>
     val functions : Dictionary<string, MethodInfo>
     val locals : Dictionary<string,ContextValue>
-    new (f,l) =
-        { functions = f; locals = l}
+    new (t,f,l) =
+        {types = t; functions = f; locals = l}
     new (ctx : Context) =
+        let t = new Dictionary<string, Type>(ctx.types)
         let f = new Dictionary<string, MethodInfo>(ctx.functions)
         let l = new Dictionary<string,ContextValue>(ctx.locals)
-        new Context (f,l)
+        new Context (t,f,l)
     new() =
+        let t = new Dictionary<string, Type>()
         let f = new Dictionary<string, MethodInfo>()
         let l = new Dictionary<string,ContextValue>()
-        new Context (f,l)
+        new Context (t,f,l)
 
 let create () =
     let context = new Context()

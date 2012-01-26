@@ -1,0 +1,2 @@
+(defun main (args)
+  (System.Console.WriteLine "Shit!"))

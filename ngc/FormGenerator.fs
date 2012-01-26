@@ -19,13 +19,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. *)
 module Naggum.Compiler.FormGenerator
 
+open System
 open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
 open Naggum.Runtime
 open Naggum.Compiler.Reader
-open Naggum.Compiler.IGenerator
 open Naggum.Compiler.Context
+open Naggum.Compiler.IGenerator
+open Naggum.MaybeMonad
+open Naggum.Compiler.Reader
 
 type FormGenerator() =
     interface IGenerator
@@ -89,7 +92,7 @@ type LetGenerator(context:Context,typeBuilder:TypeBuilder,bindings:SExp,body:SEx
                 for binding in list do
                     match binding with
                     | List [(Atom (Symbol name)); form] ->
-                        let local = ilGen.DeclareLocal(typeof<SExp>)
+                        let local = ilGen.DeclareLocal(typeof<obj>)
                         scope_subctx.locals.[name] <- Local local
                         let generator = gf.MakeGenerator scope_subctx form
                         generator.Generate ilGen
@@ -179,3 +182,76 @@ type QuoteGenerator(context:Context,typeBuilder:TypeBuilder,quotedExp:SExp,gf:IG
             |List l -> generate_list ilGen l
             |Atom (Object o) -> generate_object ilGen o
             |Atom (Symbol s) -> generate_symbol ilGen s
+
+type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Type, methodName : string, arguments : SExp list,
+                      gf : IGeneratorFactory) =
+    let nearestOverload (clrType : Type) methodName types =
+        let rec distanceBetweenTypes (derivedType : Type, baseType) =
+            match derivedType with
+            | null                     -> None
+            | someType
+              when someType = baseType -> Some 0
+            | _                        ->
+                maybe {
+                    let! distance = distanceBetweenTypes (derivedType.BaseType, baseType)
+                    return distance + 1
+                }
+        let distance (availableTypes : Type list) (methodTypes : Type list) =
+            if availableTypes.Length <> methodTypes.Length then
+                None
+            else
+                Seq.zip methodTypes availableTypes
+                |> Seq.map distanceBetweenTypes
+                |> Seq.fold (fun state option ->
+                                maybe {
+                                    let! stateNum = state
+                                    let! optionNum = option
+                                    return stateNum + optionNum
+                                }) (Some 0)
+        let methods = clrType.GetMethods() |> Seq.filter (fun clrMethod -> clrMethod.Name = methodName)
+        let methodsAndDistances = methods
+                                  |> Seq.map (fun clrMethod -> clrMethod,
+                                                               distance types (clrMethod.GetParameters()
+                                                                               |> Array.map (fun parameter ->
+                                                                                             parameter.ParameterType)
+                                                                               |> Array.toList))
+                                  |> Seq.filter (snd >> Option.isSome)
+                                  |> Seq.map (fun (clrMethod, distance) -> clrMethod, Option.get distance)
+                                  |> Seq.toList
+        if methodsAndDistances.IsEmpty then
+            None
+        else
+            let minDistance = methodsAndDistances |> List.minBy snd |> snd
+            let methods = methodsAndDistances |> List.filter (snd >> (fun d -> d = minDistance))
+                                              |> List.map fst
+            if methods.IsEmpty then
+                None
+            else
+                Some (List.head methods)
+    
+    interface IGenerator with
+        member this.Generate ilGen =
+            let argTypes = arguments
+                           |> List.map (fun sexp -> match sexp with
+                                                    | Atom (Object arg) -> arg.GetType()
+                                                    | Atom (Symbol _)   -> typeof<obj>
+                                                    | List _            -> typeof<obj>
+                                                    | any               -> failwithf "Cannot use %A in CLR call." any)
+            let clrMethod = nearestOverload clrType methodName argTypes
+            let args_seq = gf.MakeSequence context arguments
+            args_seq.Generate ilGen            
+            ilGen.Emit(OpCodes.Call, Option.get clrMethod)
+            if (Option.get clrMethod).ReturnType = typeof<System.Void> then
+                ilGen.Emit(OpCodes.Ldnull)
+
+type NewObjGenerator(context : Context, typeBuilder : TypeBuilder, typeName : string, arguments : SExp list, gf : IGeneratorFactory) =
+    interface IGenerator with
+        member this.Generate ilGen =
+            let argTypes = arguments
+                           |> List.map (fun sexp -> match sexp with
+                                                    | Atom (Object arg) -> arg.GetType()
+                                                    | any               -> failwithf "Cannot use %A in CLR call." any)
+            let args_gen = gf.MakeSequence context arguments
+            let objType = context.types.[typeName]
+            args_gen.Generate ilGen
+            ilGen.Emit(OpCodes.Newobj,objType.GetConstructor(Array.ofList argTypes))

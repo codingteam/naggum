@@ -1,4 +1,4 @@
 (defun main (args)
-	(let ((c (Cons "car" "cdr")))
-		(write "Car: ") (writeln (Car c))
-		(write "Cdr: ") (writeln (Cdr c))))
+	(let ((c (new Naggum.Runtime.Cons "car" "cdr")))
+		(System.Console.Write "Car: ") (System.Console.WriteLine (Naggum.Runtime.Cons.Car c))
+		(System.Console.Write "Cdr: ") (System.Console.WriteLine (Naggum.Runtime.Cons.Cdr c))))

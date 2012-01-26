@@ -82,7 +82,6 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
             | other -> failwithf "In let form: expected: list of bindings\nGot: %A" other
             generateBody scope_subctx typeBuilder ilGen body
             ilGen.EndScope()
-
         | Atom (Symbol fname) :: args -> //generic funcall pattern
             genApply fname context typeBuilder ilGen args
         | _ -> failwithf "%A not supported yet." list
@@ -179,7 +178,7 @@ let private epilogue context typeBuilder (ilGen : ILGenerator) =
     ilGen.Emit OpCodes.Ret
     ilGen.EndScope()
 
-let compile (source : StreamReader) (assemblyName : string) (fileName : string) : unit =
+let compile (source : StreamReader) (assemblyName : string) (fileName : string) (asmRefs:string list): unit =
     let assemblyName = new AssemblyName(assemblyName)
     let assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Save)
     let moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyBuilder.GetName().Name, fileName)
@@ -192,6 +191,13 @@ let compile (source : StreamReader) (assemblyName : string) (fileName : string) 
     let ilGenerator = methodBuilder.GetILGenerator()
 
     let context = Context.create ()
+
+    //loading language runtime
+    let rta = Assembly.LoadFrom("Naggum.Runtime.dll")
+    context.loadAssembly rta
+
+    List.iter context.loadAssembly (List.map Assembly.LoadFrom asmRefs)
+
     prologue ilGenerator
     while not source.EndOfStream do
         let sexp = Reader.parse source

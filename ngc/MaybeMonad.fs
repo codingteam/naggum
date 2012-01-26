@@ -1,4 +1,4 @@
-﻿(*  Copyright (C) 2011-2012 by ForNeVeR
+﻿(*  Copyright (C) 2012 by ForNeVeR, Hagane
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -18,21 +18,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. *)
 
-module Naggum.Compiler.Program
+module Naggum.MaybeMonad
 
-open System
-open System.IO
-open Naggum.Compiler.Generator
+type MaybeMonad() =
+    member x.Bind(m, f) =
+        match m with
+        | Some v -> f v
+        | None   -> None
 
-let args = List.ofArray (Environment.GetCommandLineArgs())
-let mutable sources = []
-let mutable asmRefs = []
-for arg in (List.tail args) do
-    if arg.StartsWith "/r:" then
-        asmRefs <- arg.Replace("/r:","") :: asmRefs
-    else
-        sources <- arg :: sources
-for fileName in sources do
-    let source = new StreamReader(File.Open (fileName,FileMode.Open))
-    let assemblyName = Path.GetFileNameWithoutExtension fileName
-    Generator.compile source assemblyName (assemblyName + ".exe") asmRefs
+    member x.Return v = Some v
+
+let maybe = new MaybeMonad()

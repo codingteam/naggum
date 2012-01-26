@@ -91,7 +91,7 @@ type LetGenerator(context:Context,typeBuilder:TypeBuilder,bindings:SExp,body:SEx
                 for binding in list do
                     match binding with
                     | List [(Atom (Symbol name)); form] ->
-                        let local = ilGen.DeclareLocal(typeof<SExp>)
+                        let local = ilGen.DeclareLocal(typeof<obj>)
                         scope_subctx.locals.[name] <- Local local
                         let generator = gf.MakeGenerator scope_subctx form
                         generator.Generate ilGen
@@ -174,7 +174,7 @@ type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Ty
             if availableTypes.Length <> methodTypes.Length then
                 None
             else
-                Seq.zip availableTypes methodTypes
+                Seq.zip methodTypes availableTypes
                 |> Seq.map distanceBetweenTypes
                 |> Seq.fold (fun state option ->
                                 maybe {
@@ -212,10 +212,11 @@ type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Ty
                                                     | List _            -> typeof<obj>
                                                     | any               -> failwithf "Cannot use %A in CLR call." any)
             let clrMethod = nearestOverload clrType methodName argTypes
-            ilGen.Emit(OpCodes.Ldnull)
             let args_seq = gf.MakeSequence context arguments
             args_seq.Generate ilGen            
             ilGen.Emit(OpCodes.Call, Option.get clrMethod)
+            if (Option.get clrMethod).ReturnType = typeof<System.Void> then
+                ilGen.Emit(OpCodes.Ldnull)
 
 type NewObjGenerator(context : Context, typeBuilder : TypeBuilder, typeName : string, arguments : SExp list, gf : IGeneratorFactory) =
     interface IGenerator with

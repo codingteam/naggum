@@ -66,8 +66,11 @@ type GeneratorFactory(typeBldr:TypeBuilder) =
             new NewObjGenerator(context,typeBldr,typeName,args,this) :> IGenerator
         | Atom (Symbol fname) :: args -> //generic funcall pattern
             let tryGetType typeName =
-                try Some (Type.GetType typeName) with
-                | _ -> None
+                try Some (context.types.[typeName]) with
+                | _ ->
+                    try Some (Type.GetType typeName) with
+                    | _ -> None
+                    
             
             let callRegex = new Regex(@"([\w\.]+)\.(\w+)", RegexOptions.Compiled)
             let callMatch = callRegex.Match fname

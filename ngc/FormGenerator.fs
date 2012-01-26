@@ -215,7 +215,7 @@ type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Ty
             ilGen.Emit(OpCodes.Ldnull)
             let args_seq = gf.MakeSequence context arguments
             args_seq.Generate ilGen            
-            ilGen.EmitCall(OpCodes.Call, Option.get clrMethod, [| |])
+            ilGen.Emit(OpCodes.Call, Option.get clrMethod)
 
 type NewObjGenerator(context : Context, typeBuilder : TypeBuilder, typeName : string, arguments : SExp list, gf : IGeneratorFactory) =
     interface IGenerator with

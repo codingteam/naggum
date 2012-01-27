@@ -23,6 +23,7 @@ open System
 open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
+open Naggum.Runtime
 open Naggum.Compiler.Reader
 open Naggum.Compiler.Context
 open Naggum.Compiler.IGenerator
@@ -167,6 +168,33 @@ type DefunGenerator(context:Context,typeBuilder:TypeBuilder,fname:string,paramet
             let body_ret_type = bodyGen.Generate methodILGen
             methodILGen.Emit(OpCodes.Ret)
             [typeof<Void>]
+
+type QuoteGenerator(context:Context,typeBuilder:TypeBuilder,quotedExp:SExp,gf:IGeneratorFactory) =
+    let generate_object (ilGen:ILGenerator) (o:obj) =
+        let generator = gf.MakeGenerator context (Atom (Object o))
+        generator.Generate ilGen
+    let generate_symbol (ilGen:ILGenerator) (name:string) =
+        let cons = (typeof<Naggum.Runtime.Symbol>).GetConstructor [|typeof<string>|]
+        ilGen.Emit(OpCodes.Ldstr,name)
+        ilGen.Emit(OpCodes.Newobj,cons)
+        [typeof<Naggum.Runtime.Symbol>]
+    let rec generate_list (ilGen:ILGenerator) (elements:SExp list) =
+        let cons = (typeof<Naggum.Runtime.Cons>).GetConstructor(Array.create 2 typeof<obj>)
+        ilGen.Emit(OpCodes.Ldnull) //list terminator
+        List.iter (fun (e) ->
+                        match e with
+                        |List l -> ignore (generate_list ilGen l)
+                        |Atom (Object o) -> ignore (generate_object ilGen o)
+                        |Atom (Symbol s) -> ignore (generate_symbol ilGen s)
+                        ilGen.Emit(OpCodes.Newobj,cons))
+                  (List.rev elements)
+        [typeof<Naggum.Runtime.Cons>]
+    interface IGenerator with
+        member this.Generate ilGen =
+            match quotedExp with
+            |List l -> generate_list ilGen l
+            |Atom (Object o) -> generate_object ilGen o
+            |Atom (Symbol s) -> generate_symbol ilGen s
 
 type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Type, methodName : string, arguments : SExp list,
                       gf : IGeneratorFactory) =

@@ -19,6 +19,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. *)
 module Naggum.Compiler.IGenerator
 
+open System
 open System.Reflection
 open System.Reflection.Emit
 
@@ -28,7 +29,7 @@ open Naggum.Compiler.Context
 
 type IGenerator =
     interface
-        abstract Generate : ILGenerator -> unit
+        abstract Generate : ILGenerator -> Type list
     end
 
 type IGeneratorFactory =

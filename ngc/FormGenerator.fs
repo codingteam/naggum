@@ -45,23 +45,27 @@ type SymbolGenerator(context:Context,name:string) =
                 try
                     let ctxval = context.locals.[name]
                     match ctxval with
-                    |Local local ->
+                    |Local (local, t) ->
                         ilGen.Emit(OpCodes.Ldloc,local)
+                        [t]
                     |Arg index ->
                         ilGen.Emit(OpCodes.Ldarg,(int16 index))
+                        [typeof<obj>]
                 with
                 | :? KeyNotFoundException -> failwithf "Symbol %A not bound." name
 
 type SequenceGenerator(context:Context,typeBuilder:TypeBuilder,seq:SExp list, gf:IGeneratorFactory) =
     member private this.gen_seq (ilGen:ILGenerator,seq:SExp list) =
         match seq with
-            | [] -> ilGen.Emit(OpCodes.Ldnull)
+            | [] -> 
+                ilGen.Emit(OpCodes.Ldnull)
+                [typeof<Void>]
             | [last] ->
                 let gen = gf.MakeGenerator context last
                 gen.Generate ilGen
             | sexp :: rest ->
                 let gen = gf.MakeGenerator context sexp
-                gen.Generate ilGen
+                ignore (gen.Generate ilGen)
                 this.gen_seq (ilGen, rest)
     interface IGenerator with
         member this.Generate ilGen = this.gen_seq (ilGen,seq)
@@ -69,13 +73,15 @@ type SequenceGenerator(context:Context,typeBuilder:TypeBuilder,seq:SExp list, gf
 type BodyGenerator(context:Context,typeBuilder:TypeBuilder,body:SExp list, gf:IGeneratorFactory) =
     member private this.gen_body (ilGen:ILGenerator,body:SExp list) =
         match body with
-            | [] -> ilGen.Emit(OpCodes.Ldnull)
+            | [] ->
+                ilGen.Emit(OpCodes.Ldnull)
+                [typeof<Void>]
             | [last] ->
                 let gen = gf.MakeGenerator context last
                 gen.Generate ilGen
             | sexp :: rest ->
                 let gen = gf.MakeGenerator context sexp
-                gen.Generate ilGen
+                ignore (gen.Generate ilGen)
                 ilGen.Emit(OpCodes.Pop)
                 this.gen_body (ilGen,rest)
     interface IGenerator with
@@ -92,15 +98,16 @@ type LetGenerator(context:Context,typeBuilder:TypeBuilder,bindings:SExp,body:SEx
                     match binding with
                     | List [(Atom (Symbol name)); form] ->
                         let local = ilGen.DeclareLocal(typeof<obj>)
-                        scope_subctx.locals.[name] <- Local local
                         let generator = gf.MakeGenerator scope_subctx form
-                        generator.Generate ilGen
+                        let local_type = List.head (generator.Generate ilGen)
+                        scope_subctx.locals.[name] <- Local (local, local_type)
                         ilGen.Emit (OpCodes.Stloc,local)
                     | other -> failwithf "In let bindings: Expected: (name (form))\nGot: %A\n" other
             | other -> failwithf "In let form: expected: list of bindings\nGot: %A" other
             let bodyGen = (new BodyGenerator (scope_subctx,typeBuilder,body,gf) :> IGenerator)
-            bodyGen.Generate ilGen
+            let return_type = bodyGen.Generate ilGen
             ilGen.EndScope()
+            return_type
 
 type ReducedIfGenerator(context:Context,typeBuilder:TypeBuilder,condition:SExp,if_true:SExp,gf:IGeneratorFactory) =
     interface IGenerator with
@@ -109,13 +116,14 @@ type ReducedIfGenerator(context:Context,typeBuilder:TypeBuilder,condition:SExp,i
             let if_true_gen = gf.MakeGenerator context if_true
             let if_true_lbl = ilGen.DefineLabel()
             let end_form = ilGen.DefineLabel()
-            cond_gen.Generate ilGen
+            ignore (cond_gen.Generate ilGen)
             ilGen.Emit (OpCodes.Brtrue, if_true_lbl)
             ilGen.Emit OpCodes.Ldnull
             ilGen.Emit (OpCodes.Br,end_form)
             ilGen.MarkLabel if_true_lbl
-            if_true_gen.Generate ilGen
+            let return_type = if_true_gen.Generate ilGen
             ilGen.MarkLabel end_form
+            return_type
 
 type FullIfGenerator(context:Context,typeBuilder:TypeBuilder,condition:SExp,if_true:SExp,if_false:SExp,gf:IGeneratorFactory) =
     interface IGenerator with
@@ -125,21 +133,23 @@ type FullIfGenerator(context:Context,typeBuilder:TypeBuilder,condition:SExp,if_t
             let if_false_gen = gf.MakeGenerator context if_false
             let if_true_lbl = ilGen.DefineLabel()
             let end_form = ilGen.DefineLabel()
-            cond_gen.Generate ilGen
+            ignore (cond_gen.Generate ilGen)
             ilGen.Emit (OpCodes.Brtrue, if_true_lbl)
-            if_false_gen.Generate ilGen
+            let false_ret_type = if_false_gen.Generate ilGen
             ilGen.Emit (OpCodes.Br,end_form)
             ilGen.MarkLabel if_true_lbl
-            if_true_gen.Generate ilGen
+            let true_ret_type = if_true_gen.Generate ilGen
             ilGen.MarkLabel end_form
+            List.concat (Seq.ofList [true_ret_type; false_ret_type]) //TODO This should return closest common ancestor of these types
 
 type FunCallGenerator(context:Context,typeBuilder:TypeBuilder,fname:string,arguments:SExp list,gf:IGeneratorFactory) =
     interface IGenerator with
         member this.Generate ilGen =
             let func = context.functions.[fname]
             let args_seq = gf.MakeSequence context arguments
-            args_seq.Generate ilGen
+            let arg_types = args_seq.Generate ilGen
             ilGen.Emit(OpCodes.Call,func)
+            [func.ReturnType]
 
 type DefunGenerator(context:Context,typeBuilder:TypeBuilder,fname:string,parameters:SExp list,body:SExp list,gf:IGeneratorFactory) =
     interface IGenerator with
@@ -154,8 +164,9 @@ type DefunGenerator(context:Context,typeBuilder:TypeBuilder,fname:string,paramet
                 | Atom(Symbol parm_name) -> fun_ctx.locals.[parm_name] <- Arg (List.findIndex (fun (p) -> p = parm) parameters)
                 | other -> failwithf "In function %A parameter definition:\nExpected: Atom(Symbol)\nGot: %A" fname parm
             let bodyGen = gf.MakeBody fun_ctx body
-            bodyGen.Generate methodILGen
+            let body_ret_type = bodyGen.Generate methodILGen
             methodILGen.Emit(OpCodes.Ret)
+            [typeof<Void>]
 
 type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Type, methodName : string, arguments : SExp list,
                       gf : IGeneratorFactory) =
@@ -213,10 +224,11 @@ type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Ty
                                                     | any               -> failwithf "Cannot use %A in CLR call." any)
             let clrMethod = nearestOverload clrType methodName argTypes
             let args_seq = gf.MakeSequence context arguments
-            args_seq.Generate ilGen            
+            let arg_types = args_seq.Generate ilGen            
             ilGen.Emit(OpCodes.Call, Option.get clrMethod)
             if (Option.get clrMethod).ReturnType = typeof<System.Void> then
                 ilGen.Emit(OpCodes.Ldnull)
+            [(Option.get clrMethod).ReturnType]
 
 type NewObjGenerator(context : Context, typeBuilder : TypeBuilder, typeName : string, arguments : SExp list, gf : IGeneratorFactory) =
     interface IGenerator with
@@ -227,5 +239,6 @@ type NewObjGenerator(context : Context, typeBuilder : TypeBuilder, typeName : st
                                                     | any               -> failwithf "Cannot use %A in CLR call." any)
             let args_gen = gf.MakeSequence context arguments
             let objType = context.types.[typeName]
-            args_gen.Generate ilGen
+            let arg_types = args_gen.Generate ilGen
             ilGen.Emit(OpCodes.Newobj,objType.GetConstructor(Array.ofList argTypes))
+            [objType]

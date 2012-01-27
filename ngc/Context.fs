@@ -28,7 +28,7 @@ open System.Reflection.Emit
 open Naggum.Compiler.Reader
 
 type ContextValue =
-    |Local of LocalBuilder
+    |Local of LocalBuilder * Type
     |Arg of int
 
 type Context =

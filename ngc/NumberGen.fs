@@ -31,27 +31,35 @@ type NumberGen() =
 type Int32Gen(number: Int32) =
     class
         inherit NumberGen()
-        interface IGenerator
-            with member this.Generate ilGen = ilGen.Emit(OpCodes.Ldc_I4,number)
+        interface IGenerator with
+            member this.Generate ilGen =
+                ilGen.Emit(OpCodes.Ldc_I4,number)
+                [typeof<Int32>]
     end
 
 type Int64Gen(number: Int64) =
     class
         inherit NumberGen()
-        interface IGenerator
-            with member this.Generate ilGen = ilGen.Emit(OpCodes.Ldc_I8,number)
+        interface IGenerator with
+            member this.Generate ilGen =
+                ilGen.Emit(OpCodes.Ldc_I8,number)
+                [typeof<Int64>]
     end
 
 type SingleGen(number: Single) =
     class
         inherit NumberGen()
-        interface IGenerator
-            with member this.Generate ilGen = ilGen.Emit(OpCodes.Ldc_R4,number)
+        interface IGenerator with
+            member this.Generate ilGen =
+                ilGen.Emit(OpCodes.Ldc_R4,number)
+                [typeof<Single>]
     end
 
 type DoubleGen(number: Double) =
     class
         inherit NumberGen()
-        interface IGenerator
-            with member this.Generate ilGen = ilGen.Emit(OpCodes.Ldc_R8,number)
+        interface IGenerator with
+            member this.Generate ilGen =
+                ilGen.Emit(OpCodes.Ldc_R8,number)
+                [typeof<Single>]
     end

@@ -74,10 +74,10 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
                 for binding in list do
                     match binding with
                     | List [(Atom (Symbol name)); form] ->
-                        let local = ilGen.DeclareLocal(typeof<SExp>)
+                        let local = ilGen.DeclareLocal(typeof<obj>)
                         generate context typeBuilder ilGen form
                         ilGen.Emit (OpCodes.Stloc,local)
-                        scope_subctx.locals.[name] <- Local local
+                        scope_subctx.locals.[name] <- Local (local, typeof<obj>)
                     | other -> failwithf "In let bindings: Expected: (name (form))\nGot: %A\n" other
             | other -> failwithf "In let form: expected: list of bindings\nGot: %A" other
             generateBody scope_subctx typeBuilder ilGen body
@@ -88,7 +88,7 @@ let rec private generate (context : Context) (typeBuilder : TypeBuilder) (ilGen 
     | Atom a -> 
         let genf = new GeneratorFactory(typeBuilder) :> IGeneratorFactory
         let gen = genf.MakeGenerator context (Atom a)
-        gen.Generate ilGen
+        ignore (gen.Generate ilGen)
     | other     -> failwithf "%A form not supported yet." other
 and private generateBody context (typeBuilder : TypeBuilder) (ilGen : ILGenerator) (body : SExp list) =
     match body with
@@ -202,7 +202,7 @@ let compile (source : StreamReader) (assemblyName : string) (fileName : string) 
     while not source.EndOfStream do
         let sexp = Reader.parse source
         let gen = gf.MakeGenerator context sexp
-        gen.Generate ilGenerator
+        ignore(gen.Generate ilGenerator)
         //generate context typeBuilder ilGenerator sexp
 
     epilogue context typeBuilder ilGenerator

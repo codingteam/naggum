@@ -16,7 +16,7 @@ Naggum's `let` is a loner: every one is inherently iterative (like `let*`) and r
 2. `(defun name (parms*) body*)`
 `defun` defines a function (internally it will be a public static method). Naggum is a Lisp-2, henceforth a function and a variable can share their names.
 
-3. `(if condition if-true [if-false])
+3. `(if condition if-true [if-false])`
 `if` evaluates given `condition`. If it is true (as in "not null, not zero, not false") it evaluates `if-true` form and returns it's result. If `condition` evaluates to false, null or zero then `if-false` form (if given) is evaluated and it's result (or null, if no `if-false` form is given) is returned from `if`.
 
 4. `(fun-name args*)`

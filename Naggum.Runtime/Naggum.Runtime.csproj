@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Cons.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Reader.cs" />
     <Compile Include="Symbol.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

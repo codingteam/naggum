@@ -32,9 +32,11 @@ Performs virtual call of method named `method-name` on object referenced by `obj
 
 7. `(eval form [environment])`
 
-8. `(error [error-type] args*)`
+8. `(error error-type args*)`
+Throws an exception of `error-type`, constructed with `args`.
 
-9. `(try form (catch-forms*))`
+9. `(try form (catch-forms*))` where `catch-forms` follow a pattern of `(error-type handle-form)`
+Tries to evaluate `form`. If any error is encountered, evaluates `handle-form` with the most appropriate `error-type`.
 
 10. `(defmacro name (args*))`
 

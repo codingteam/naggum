@@ -77,6 +77,9 @@ Available values for `access-type` are `public`(available to everybody), `intern
 Naggum is designed to use CLR standard libraries, but some types and routines are provided to facilitate lisp-style programming.
 
 ### Cons
+
 ### Symbol
+
 ### Reader extensions
+
 ### Writer extensions

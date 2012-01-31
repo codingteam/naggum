@@ -30,21 +30,24 @@ Applies function named `fun-name` to given arguments.
 6. `(call method-name object-var args*)`
 Performs virtual call of method named `method-name` on object referenced by `object-var` with given arguments.
 
-7. `(eval form [environment])`
+7. `(lambda (parms*) body*)` 
+Constructs anonymous function with `parms` as parameters and `body` as body and returns it as a result.
 
-8. `(error error-type args*)`
+8. `(eval form [environment])`
+
+9. `(error error-type args*)`
 Throws an exception of `error-type`, constructed with `args`.
 
-9. `(try form (catch-forms*))` where `catch-forms` follow a pattern of `(error-type handle-form)`
+10. `(try form (catch-forms*))` where `catch-forms` follow a pattern of `(error-type handle-form)`
 Tries to evaluate `form`. If any error is encountered, evaluates `handle-form` with the most appropriate `error-type`.
 
-10. `(defmacro name (args*))`
+11. `(defmacro name (args*))`
 
-11. `(require namespaces*)`
+12. `(require namespaces*)`
 
-12. `(cond (cond-clauses*))`
+13. `(cond (cond-clauses*))`
 
-13. `(set var-name value)`
+14. `(set var-name value)`
 
 ### Quoting
 1. `(quote form)`

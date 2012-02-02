@@ -79,7 +79,10 @@ type BodyGenerator(context:Context,typeBuilder:TypeBuilder,body:SExp list, gf:IG
                 [typeof<Void>]
             | [last] ->
                 let gen = gf.MakeGenerator context last
-                gen.Generate ilGen
+                let val_type = gen.Generate ilGen
+                if (val_type = [typeof<System.Void>]) then
+                    ilGen.Emit(OpCodes.Ldnull)
+                val_type
             | sexp :: rest ->
                 let gen = gf.MakeGenerator context sexp
                 let val_type = gen.Generate ilGen

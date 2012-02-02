@@ -26,6 +26,7 @@ open FormGenerator
 open Context
 open Naggum.MaybeMonad
 open Naggum.Compiler.Reader
+open Naggum.Compiler.MathGenerator
 open System
 open System.Reflection
 open System.Reflection.Emit
@@ -66,6 +67,20 @@ type GeneratorFactory(typeBldr:TypeBuilder) =
             new QuoteGenerator(context,typeBldr,quotedExp,this) :> IGenerator
         | Atom (Symbol "new") :: Atom (Symbol typeName) :: args ->
             new NewObjGenerator(context,typeBldr,typeName,args,this) :> IGenerator
+        | Atom (Symbol "+") :: args ->
+            new ArithmeticGenerator(context,typeBldr,args,OpCodes.Add,this) :> IGenerator
+        | Atom (Symbol "-") :: args ->
+            new ArithmeticGenerator(context,typeBldr,args,OpCodes.Add,this) :> IGenerator
+        | Atom (Symbol "*") :: args ->
+            new ArithmeticGenerator(context,typeBldr,args,OpCodes.Add,this) :> IGenerator
+        | Atom (Symbol "/") :: args ->
+            new ArithmeticGenerator(context,typeBldr,args,OpCodes.Add,this) :> IGenerator
+        | Atom (Symbol "=") :: arg_a :: arg_b :: [] ->
+            new SimpleLogicGenerator(context,typeBldr,arg_a,arg_b,OpCodes.Ceq,this) :> IGenerator
+        | Atom (Symbol "<") :: arg_a :: arg_b :: [] ->
+            new SimpleLogicGenerator(context,typeBldr,arg_a,arg_b,OpCodes.Clt,this) :> IGenerator
+        | Atom (Symbol ">") :: arg_a :: arg_b :: [] ->
+            new SimpleLogicGenerator(context,typeBldr,arg_a,arg_b,OpCodes.Cgt,this) :> IGenerator
         | Atom (Symbol fname) :: args -> //generic funcall pattern
             let tryGetType typeName =
                 try Some (context.types.[typeName]) with

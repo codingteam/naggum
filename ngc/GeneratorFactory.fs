@@ -70,11 +70,11 @@ type GeneratorFactory(typeBldr:TypeBuilder) =
         | Atom (Symbol "+") :: args ->
             new ArithmeticGenerator(context,typeBldr,args,OpCodes.Add,this) :> IGenerator
         | Atom (Symbol "-") :: args ->
-            new ArithmeticGenerator(context,typeBldr,args,OpCodes.Add,this) :> IGenerator
+            new ArithmeticGenerator(context,typeBldr,args,OpCodes.Sub,this) :> IGenerator
         | Atom (Symbol "*") :: args ->
-            new ArithmeticGenerator(context,typeBldr,args,OpCodes.Add,this) :> IGenerator
+            new ArithmeticGenerator(context,typeBldr,args,OpCodes.Mul,this) :> IGenerator
         | Atom (Symbol "/") :: args ->
-            new ArithmeticGenerator(context,typeBldr,args,OpCodes.Add,this) :> IGenerator
+            new ArithmeticGenerator(context,typeBldr,args,OpCodes.Div,this) :> IGenerator
         | Atom (Symbol "=") :: arg_a :: arg_b :: [] ->
             new SimpleLogicGenerator(context,typeBldr,arg_a,arg_b,OpCodes.Ceq,this) :> IGenerator
         | Atom (Symbol "<") :: arg_a :: arg_b :: [] ->

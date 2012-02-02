@@ -82,8 +82,9 @@ type BodyGenerator(context:Context,typeBuilder:TypeBuilder,body:SExp list, gf:IG
                 gen.Generate ilGen
             | sexp :: rest ->
                 let gen = gf.MakeGenerator context sexp
-                ignore (gen.Generate ilGen)
-                ilGen.Emit(OpCodes.Pop)
+                let val_type = gen.Generate ilGen
+                if not (val_type = [typeof<System.Void>]) then
+                    ilGen.Emit(OpCodes.Pop)
                 this.gen_body (ilGen,rest)
     interface IGenerator with
         member this.Generate ilGen = this.gen_body (ilGen,body)

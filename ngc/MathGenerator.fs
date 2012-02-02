@@ -40,12 +40,16 @@ type ArithmeticGenerator(context:Context,typeBuilder:TypeBuilder,args:SExp list,
     interface IGenerator with
         member this.Generate ilGen =
             let mutable max_type = typeof<int32>
-            for arg in args do
+            //loading first arg manually so it won't be succeeded by operation opcode
+            let arg_gen = gf.MakeGenerator context (List.head args)
+            let arg_types = arg_gen.Generate ilGen
+            for arg in List.tail args do
                 let arg_gen = gf.MakeGenerator context arg
                 let arg_types = arg_gen.Generate ilGen
                 if tower.[maxType arg_types] > tower.[max_type] then
                     max_type <- maxType arg_types
                 ilGen.Emit(operation)
+            ilGen.Emit(OpCodes.Box,max_type)
             [max_type]
 
 type SimpleLogicGenerator(context:Context,typeBuilder:TypeBuilder,arg_a:SExp, arg_b:SExp, operation:OpCode, gf:IGeneratorFactory) =

@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test programs", "Test progr
 		tests\cons.naggum = tests\cons.naggum
 		tests\if.naggum = tests\if.naggum
 		tests\let.naggum = tests\let.naggum
+		tests\math.naggum = tests\math.naggum
 		tests\minimal.naggum = tests\minimal.naggum
 	EndProjectSection
 EndProject

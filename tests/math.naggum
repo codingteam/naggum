@@ -1,0 +1,5 @@
+(defun main (args)
+	(System.Console.Write "2+2=") (System.Console.WriteLine (+ 2 2))
+	(System.Console.Write "2-2=") (System.Console.WriteLine (- 2 2))
+	(System.Console.Write "2*3=") (System.Console.WriteLine (* 2 3))
+	(System.Console.Write "2/2=") (System.Console.WriteLine (/ 2 2)))

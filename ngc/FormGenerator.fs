@@ -255,7 +255,7 @@ type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Ty
             let args_seq = gf.MakeSequence context arguments
             let arg_types = args_seq.Generate ilGen            
             ilGen.Emit(OpCodes.Call, Option.get clrMethod)
-            if (Option.get clrMethod).ReturnType = typeof<System.Void> then
+            if not ((Option.get clrMethod).ReturnType = typeof<System.Void>) then
                 ilGen.Emit(OpCodes.Ldnull)
             [(Option.get clrMethod).ReturnType]
 

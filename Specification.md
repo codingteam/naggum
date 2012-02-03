@@ -92,9 +92,13 @@ Available values for `access-type` are `public`(available to everybody), `intern
 Naggum is designed to use CLR standard libraries, but some types and routines are provided to facilitate lisp-style programming.
 
 ### Cons
+Cons-cell is the most basic building block of complex data structures. It contains exactly two objects of any types, referenced as _CAR_ (left part, head) and _CDR_ (right part, tail)
 
 ### Symbol
+Symbol is a type that represents language primitives like variable, function and type names.
 
-### Reader extensions
+### Naggum Reader
+Reader reads Lisp objects from any input stream, returning them as lists and atoms.
 
-### Writer extensions
+### Naggum Writer
+Writer writes Lisp objects to any output stream, performing output formatting if needed.

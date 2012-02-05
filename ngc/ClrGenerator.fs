@@ -45,7 +45,7 @@ type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Ty
             if availableTypes.Length <> methodTypes.Length then
                 None
             else
-                Seq.zip methodTypes availableTypes
+                Seq.zip availableTypes methodTypes
                 |> Seq.map distanceBetweenTypes
                 |> Seq.fold (fun state option ->
                                 maybe {
@@ -76,13 +76,9 @@ type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Ty
     
     interface IGenerator with
         member this.Generate ilGen =
-            let argTypes = arguments
-                           |> List.map (fun sexp -> match sexp with
-                                                    | Atom (Object arg) -> arg.GetType()
-                                                    | Atom (Symbol _)   -> typeof<obj>
-                                                    | List _            -> typeof<obj>
-                                                    | any               -> failwithf "Cannot use %A in CLR call." any)
-            let clrMethod = nearestOverload clrType methodName argTypes
+            let args_seq = gf.MakeSequence context arguments
+            let arg_types = args_seq.ReturnTypes()
+            let clrMethod = nearestOverload clrType methodName arg_types
             let args_seq = gf.MakeSequence context arguments
             let arg_types = args_seq.ReturnTypes()
             args_seq.Generate ilGen            

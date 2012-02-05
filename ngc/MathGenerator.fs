@@ -51,7 +51,6 @@ type ArithmeticGenerator(context:Context,typeBuilder:TypeBuilder,args:SExp list,
                 if tower.[maxType arg_types] > tower.[max_type] then
                     max_type <- maxType arg_types
                 ilGen.Emit(operation)
-            ilGen.Emit(OpCodes.Box,max_type)
         member this.ReturnTypes () =
             [List.map (fun (sexp) -> (gf.MakeGenerator context sexp).ReturnTypes() |> List.head) args |> maxType]
 

@@ -23,6 +23,7 @@ open IGenerator
 open NumberGen
 open StringGen
 open FormGenerator
+open ClrGenerator
 open Context
 open Naggum.MaybeMonad
 open Naggum.Compiler.Reader

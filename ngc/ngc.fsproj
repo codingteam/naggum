@@ -45,6 +45,7 @@
     <Compile Include="MaybeMonad.fs" />
     <Compile Include="FormGenerator.fs" />
     <Compile Include="MathGenerator.fs" />
+    <Compile Include="ClrGenerator.fs" />
     <Compile Include="GeneratorFactory.fs" />
     <Compile Include="Generator.fs" />
     <Compile Include="Program.fs" />

@@ -29,7 +29,8 @@ open Naggum.Compiler.Context
 //TODO: Add a method that returns generated values' types without actually emitting the code.
 type IGenerator =
     interface
-        abstract Generate : ILGenerator -> Type list
+        abstract ReturnTypes : unit -> Type list
+        abstract Generate : ILGenerator -> unit
     end
 
 type IGeneratorFactory =

@@ -25,8 +25,9 @@ open System.Reflection
 open System.Reflection.Emit
 
 type NumberGen() =
-    interface IGenerator
-        with member this.Generate _ = failwith "Failure: Tried to generate unreified number constant.\n"
+    interface IGenerator with
+        member this.Generate _ = failwith "Failure: Tried to generate unreified number constant.\n"
+        member this.ReturnTypes () = failwithf "Failure: Tried to infer type of unreified numeric constant.\n"
 
 type Int32Gen(number: Int32) =
     class
@@ -34,6 +35,7 @@ type Int32Gen(number: Int32) =
         interface IGenerator with
             member this.Generate ilGen =
                 ilGen.Emit(OpCodes.Ldc_I4,number)
+            member this.ReturnTypes () =
                 [typeof<Int32>]
     end
 
@@ -43,6 +45,7 @@ type Int64Gen(number: Int64) =
         interface IGenerator with
             member this.Generate ilGen =
                 ilGen.Emit(OpCodes.Ldc_I8,number)
+            member this.ReturnTypes () =
                 [typeof<Int64>]
     end
 
@@ -52,6 +55,7 @@ type SingleGen(number: Single) =
         interface IGenerator with
             member this.Generate ilGen =
                 ilGen.Emit(OpCodes.Ldc_R4,number)
+            member this.ReturnTypes () =
                 [typeof<Single>]
     end
 
@@ -61,5 +65,6 @@ type DoubleGen(number: Double) =
         interface IGenerator with
             member this.Generate ilGen =
                 ilGen.Emit(OpCodes.Ldc_R8,number)
+            member this.ReturnTypes () =
                 [typeof<Single>]
     end

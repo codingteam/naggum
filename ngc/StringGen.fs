@@ -28,4 +28,5 @@ type StringGen(str : string) =
     interface IGenerator with
         member this.Generate ilGen =
             ilGen.Emit(OpCodes.Ldstr,str)
+        member this.ReturnTypes () =
             [typeof<string>]

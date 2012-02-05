@@ -39,17 +39,18 @@ let maxType types =
 type ArithmeticGenerator(context:Context,typeBuilder:TypeBuilder,args:SExp list, operation:OpCode, gf:IGeneratorFactory) =
     interface IGenerator with
         member this.Generate ilGen =
-            let mutable max_type = typeof<int32>
+            //making this just for the sake of return types
+            let max_type = (gf.MakeSequence context args).ReturnTypes() |> maxType
             //loading first arg manually so it won't be succeeded by operation opcode
             let arg_gen = gf.MakeGenerator context (List.head args)
-            let arg_types = arg_gen.ReturnTypes()
+            let arg_type = arg_gen.ReturnTypes() |> List.head
             arg_gen.Generate ilGen
+            if not (arg_type = max_type) then
+                ilGen.Emit(OpCodes.Newobj, max_type.GetConstructor [|arg_type|])
             for arg in List.tail args do
                 let arg_gen = gf.MakeGenerator context arg
-                let arg_types = arg_gen.ReturnTypes()
+                let arg_type = arg_gen.ReturnTypes() |> List.head
                 arg_gen.Generate ilGen
-                if tower.[maxType arg_types] > tower.[max_type] then
-                    max_type <- maxType arg_types
                 ilGen.Emit(operation)
         member this.ReturnTypes () =
             [List.map (fun (sexp) -> (gf.MakeGenerator context sexp).ReturnTypes() |> List.head) args |> maxType]

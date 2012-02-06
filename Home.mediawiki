@@ -1,1 +1,2 @@
-[[Specification]]
+* [[Specification]]
+* [[Command Line Options]]

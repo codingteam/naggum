@@ -92,15 +92,20 @@ type BodyGenerator(context:Context,typeBuilder:TypeBuilder,body:SExp list, gf:IG
                 let gen = gf.MakeGenerator context sexp
                 let val_type = gen.ReturnTypes()
                 gen.Generate ilGen
-                if not (val_type = [typeof<System.Void>]) then
+                if not (List.head val_type = typeof<System.Void>) then
                     ilGen.Emit(OpCodes.Pop)
                 this.gen_body (ilGen,rest)
     interface IGenerator with
-        member this.Generate ilGen = this.gen_body (ilGen,body)
+        member this.Generate ilGen = 
+            this.gen_body (ilGen,body)
         member this.ReturnTypes () =
             match body with
             |[] -> [typeof<System.Void>]
-            |somelist -> (gf.MakeGenerator context (List.rev body |> List.head)).ReturnTypes()
+            |somelist -> 
+                let tail_type = (gf.MakeGenerator context (List.rev body |> List.head)).ReturnTypes()
+                if tail_type = [typeof<System.Void>] then
+                    [typeof<obj>]
+                else tail_type
 
 type LetGenerator(context:Context,typeBuilder:TypeBuilder,bindings:SExp,body:SExp list,gf:IGeneratorFactory) =
     interface IGenerator with
@@ -112,11 +117,11 @@ type LetGenerator(context:Context,typeBuilder:TypeBuilder,bindings:SExp,body:SEx
                 for binding in list do
                     match binding with
                     | List [(Atom (Symbol name)); form] ->
-                        let local = ilGen.DeclareLocal(typeof<obj>)
                         let generator = gf.MakeGenerator scope_subctx form
                         let local_type = List.head (generator.ReturnTypes())
-                        generator.Generate ilGen
+                        let local = ilGen.DeclareLocal(local_type)
                         scope_subctx.locals.[name] <- Local (local, local_type)
+                        generator.Generate ilGen
                         ilGen.Emit (OpCodes.Stloc,local)
                     | other -> failwithf "In let bindings: Expected: (name (form))\nGot: %A\n" other
             | other -> failwithf "In let form: expected: list of bindings\nGot: %A" other
@@ -124,7 +129,17 @@ type LetGenerator(context:Context,typeBuilder:TypeBuilder,bindings:SExp,body:SEx
             bodyGen.Generate ilGen
             ilGen.EndScope()
         member this.ReturnTypes () =
-            (gf.MakeBody context body).ReturnTypes()
+            let type_subctx = new Context(context)
+            match bindings with
+            | List list ->
+                for binding in list do
+                    match binding with
+                    | List [(Atom (Symbol name)); form] ->
+                        let generator = gf.MakeGenerator type_subctx form
+                        type_subctx.locals.[name] <- Local (null,generator.ReturnTypes() |> List.head)
+                    | other -> failwithf "In let bindings: Expected: (name (form))\nGot: %A\n" other
+            | other -> failwithf "In let form: expected: list of bindings\nGot: %A" other
+            (gf.MakeBody type_subctx body).ReturnTypes()
 
 type ReducedIfGenerator(context:Context,typeBuilder:TypeBuilder,condition:SExp,if_true:SExp,gf:IGeneratorFactory) =
     interface IGenerator with
@@ -226,11 +241,8 @@ type QuoteGenerator(context:Context,typeBuilder:TypeBuilder,quotedExp:SExp,gf:IG
 type NewObjGenerator(context : Context, typeBuilder : TypeBuilder, typeName : string, arguments : SExp list, gf : IGeneratorFactory) =
     interface IGenerator with
         member this.Generate ilGen =
-            let argTypes = arguments
-                           |> List.map (fun sexp -> match sexp with
-                                                    | Atom (Object arg) -> arg.GetType()
-                                                    | any               -> failwithf "Cannot use %A in CLR call." any)
             let args_gen = gf.MakeSequence context arguments
+            let argTypes = args_gen.ReturnTypes()
             let objType = context.types.[typeName]
             let arg_types = args_gen.Generate ilGen
             ilGen.Emit(OpCodes.Newobj,objType.GetConstructor(Array.ofList argTypes))

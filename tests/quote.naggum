@@ -1,3 +1,0 @@
-(defun main (args)
-	(quote TEST-SYMBOL)
-	(quote (a b c 1 2 3)))

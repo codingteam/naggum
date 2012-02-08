@@ -79,18 +79,10 @@ type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Ty
             let args_seq = gf.MakeSequence context arguments
             let arg_types = args_seq.ReturnTypes()
             let clrMethod = nearestOverload clrType methodName arg_types
-            let args_seq = gf.MakeSequence context arguments
-            let arg_types = args_seq.ReturnTypes()
             args_seq.Generate ilGen            
             ilGen.Emit(OpCodes.Call, Option.get clrMethod)
-            if not ((Option.get clrMethod).ReturnType = typeof<System.Void>) then
-                ilGen.Emit(OpCodes.Ldnull)
         member this.ReturnTypes() =
-            let argTypes = arguments
-                           |> List.map (fun sexp -> match sexp with
-                                                    | Atom (Object arg) -> arg.GetType()
-                                                    | Atom (Symbol _)   -> typeof<obj>
-                                                    | List _            -> typeof<obj>
-                                                    | any               -> failwithf "Cannot use %A in CLR call." any)
-            let clrMethod = nearestOverload clrType methodName argTypes
+            let args_seq = gf.MakeSequence context arguments
+            let arg_types = args_seq.ReturnTypes()
+            let clrMethod = nearestOverload clrType methodName arg_types
             [(Option.get clrMethod).ReturnType]

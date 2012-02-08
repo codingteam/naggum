@@ -1,4 +1,0 @@
-(defun main (args)
-	(let ((c (new Naggum.Runtime.Cons "car" "cdr")))
-		(System.Console.Write "Car: ") (System.Console.WriteLine (Naggum.Runtime.Cons.Car c))
-		(System.Console.Write "Cdr: ") (System.Console.WriteLine (Naggum.Runtime.Cons.Cdr c))))

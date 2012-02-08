@@ -1,0 +1,35 @@
+(defun main (args)
+  (System.Console.WriteLine "Naggum test suite")
+
+  (System.Console.WriteLine "Conditionals")
+  (if 1 (System.Console.WriteLine "Reduced if: OK"))
+  (if 1
+      (System.Console.WriteLine "Full if (true branch): OK")
+      (System.Console.WriteLine "Full if (true branch): FAILURE"))
+  (if 0
+      (System.Console.WriteLine "Full if (false branch): FAILURE")
+      (System.Console.WriteLine "Full if (false branch): OK"))
+  
+  (System.Console.Write "Let: ")
+  (let ((ok "OK"))
+    (System.Console.WriteLine ok))
+  
+  (System.Console.WriteLine "Quoting:")
+  (System.Console.Write "Symbol: ") (System.Console.WriteLine (quote OK))
+  (System.Console.Write "List: ") (System.Console.WriteLine (quote (OK)))
+
+  (System.Console.Write "Object construction: ")
+  (let ((ok-sym (new Naggum.Runtime.Symbol "OK")))
+    (System.Console.WriteLine ok-sym))
+  
+  (System.Console.WriteLine "Cons:")
+  (let ((test-car (new Naggum.Runtime.Cons "OK" "FAILURE"))
+        (test-cdr (new Naggum.Runtime.Cons "FAILURE" "OK")))
+    (System.Console.Write "CAR: ") (System.Console.WriteLine (Naggum.Runtime.Cons.Car test-car))
+    (System.Console.Write "CDR: ") (System.Console.WriteLine (Naggum.Runtime.Cons.Cdr test-cdr)))
+  
+  (System.Console.WriteLine "Math:")
+  (System.Console.Write "2+2=") (System.Console.WriteLine (+ 2 2))
+  (System.Console.Write "2-2=") (System.Console.WriteLine (- 2 2))
+  (System.Console.Write "2*3=") (System.Console.WriteLine (* 2 3))
+  (System.Console.Write "2/2=") (System.Console.WriteLine (/ 2 2)))

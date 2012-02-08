@@ -1,2 +1,0 @@
-(defun main (args)
-       (if 1 2 3))

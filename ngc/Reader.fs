@@ -37,16 +37,44 @@ type SExp =
 
 let ws parser = parser .>> spaces
 let list,listRef = createParserForwardedToRef()
-let float = pfloat |>> (fun (flt) -> flt :> obj)
-let int = pint32 |>> (fun (int) -> int :> obj)
-let number = int <|> float |>> Object
+
+let numberOptions =
+    NumberLiteralOptions.AllowMinusSign
+    ||| NumberLiteralOptions.AllowExponent
+    ||| NumberLiteralOptions.AllowHexadecimal
+    ||| NumberLiteralOptions.AllowFraction
+    ||| NumberLiteralOptions.AllowSuffix
+let pnumber : Parser<Value,unit> =
+    let pliteral = numberLiteral numberOptions "number"
+    fun stream ->
+        let reply = pliteral stream
+        if reply.Status = Ok then
+            let result : NumberLiteral = reply.Result
+            if result.IsInteger then
+                if result.SuffixLength = 1 && result.SuffixChar1 = 'L' then
+                    Reply((int64 result.String) :> obj |> Object)
+                else
+                    if not (result.SuffixLength = 1) then
+                        Reply((int32 result.String) :> obj |> Object)
+                    else
+                        Reply (ReplyStatus.Error, messageError <| sprintf "Unknown suffix: %A" result.SuffixChar1)
+            else
+                if result.SuffixLength = 1 && result.SuffixChar1 = 'f' then
+                    Reply((float result.String) :> obj |> Object)
+                else
+                    if not (result.SuffixLength = 1) then
+                        Reply((single result.String) :> obj |> Object)
+                    else
+                        Reply (ReplyStatus.Error, messageError <| sprintf "Unknown suffix: %A" result.SuffixChar1)
+        else
+            Reply(reply.Status,reply.Error)
 let string =
     let normalChar = satisfy (fun c -> c <> '\"')
     between (pstring "\"")(pstring "\"") (manyChars normalChar) |>> (fun (str) -> str :> obj) |>> Object
 let symChars = (anyOf "+-*/=<>!?.") //chars that are valid in the symbol name
 let symbol = (many1Chars (letter <|> digit <|> symChars)) |>> Symbol
 
-let atom =  (number <|> string <|> symbol) |>> Atom
+let atom =  (pnumber <|> string <|> symbol) |>> Atom
 
 let listElement = choice [atom;list]
 let sexp = ws (pstring "(") >>. many (ws listElement) .>> ws (pstring ")") |>> List

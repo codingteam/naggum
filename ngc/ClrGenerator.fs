@@ -28,9 +28,7 @@ open Naggum.Compiler.Context
 open Naggum.Compiler.IGenerator
 open Naggum.MaybeMonad
 
-type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Type, methodName : string, arguments : SExp list,
-                      gf : IGeneratorFactory) =
-    let nearestOverload (clrType : Type) methodName types =
+let nearestOverload (clrType : Type) methodName types =
         let rec distanceBetweenTypes (derivedType : Type, baseType) =
             match derivedType with
             | null                     -> None
@@ -73,7 +71,9 @@ type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Ty
                 None
             else
                 Some (List.head methods)
-    
+
+type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Type, methodName : string, arguments : SExp list,
+                      gf : IGeneratorFactory) =   
     interface IGenerator with
         member this.Generate ilGen =
             let args_seq = gf.MakeSequence context arguments

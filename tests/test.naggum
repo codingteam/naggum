@@ -32,4 +32,9 @@
   (System.Console.Write "2+2=") (System.Console.WriteLine (+ 2 2))
   (System.Console.Write "2-2=") (System.Console.WriteLine (- 2 2))
   (System.Console.Write "2*3=") (System.Console.WriteLine (* 2 3))
-  (System.Console.Write "2/2=") (System.Console.WriteLine (/ 2 2)))
+  (System.Console.Write "2/2=") (System.Console.WriteLine (/ 2 2))
+
+  (System.Console.WriteLine "Instance calls:")
+  (let ((test-obj (new System.Random)))
+    (System.Console.Write "Random number:")
+	(System.Console.WriteLine (call Next test-obj))))

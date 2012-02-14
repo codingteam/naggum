@@ -86,3 +86,22 @@ type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Ty
             let arg_types = args_seq.ReturnTypes()
             let clrMethod = nearestOverload clrType methodName arg_types
             [(Option.get clrMethod).ReturnType]
+
+type InstanceCallGenerator(context : Context, typeBuilder : TypeBuilder, instance : SExp, methodName : string, arguments : SExp list, gf : IGeneratorFactory) =
+    interface IGenerator with
+        member this.Generate ilGen =
+            let inst_gen = gf.MakeGenerator context instance
+            let args_gen = gf.MakeSequence context arguments
+            let methodInfo = nearestOverload (inst_gen.ReturnTypes() |> List.head) methodName (args_gen.ReturnTypes())
+            if Option.isSome methodInfo then
+                inst_gen.Generate ilGen
+                args_gen.Generate ilGen
+                ilGen.Emit(OpCodes.Callvirt,Option.get methodInfo)
+            else failwithf "No overload found for method %A with types %A" methodName (args_gen.ReturnTypes())
+        member this.ReturnTypes () =
+            let inst_gen = gf.MakeGenerator context instance
+            let args_gen = gf.MakeSequence context arguments
+            let methodInfo = nearestOverload (inst_gen.ReturnTypes() |> List.head) methodName (args_gen.ReturnTypes())
+            if Option.isSome methodInfo then
+                [(Option.get methodInfo).ReturnType]
+            else failwithf "No overload found for method %A with types %A" methodName (args_gen.ReturnTypes())

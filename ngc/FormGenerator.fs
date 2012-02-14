@@ -64,7 +64,7 @@ type SequenceGenerator(context:Context,typeBuilder:TypeBuilder,seq:SExp list, gf
     member private this.gen_seq (ilGen:ILGenerator,seq:SExp list) =
         match seq with
             | [] -> 
-                ilGen.Emit(OpCodes.Ldnull)
+                ()
             | [last] ->
                 let gen = gf.MakeGenerator context last
                 gen.Generate ilGen
@@ -247,8 +247,15 @@ type NewObjGenerator(context : Context, typeBuilder : TypeBuilder, typeName : st
         member this.Generate ilGen =
             let args_gen = gf.MakeSequence context arguments
             let argTypes = args_gen.ReturnTypes()
-            let objType = context.types.[typeName]
+            let objType = 
+                 if typeName.StartsWith "System" then
+                    Type.GetType typeName
+                 else
+                    context.types.[typeName]
             let arg_types = args_gen.Generate ilGen
             ilGen.Emit(OpCodes.Newobj,objType.GetConstructor(Array.ofList argTypes))
         member this.ReturnTypes () =
-            [context.types.[typeName]]
+            if typeName.StartsWith "System" then
+                [Type.GetType typeName]
+            else
+                [context.types.[typeName]]

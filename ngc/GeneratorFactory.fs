@@ -82,6 +82,8 @@ type GeneratorFactory(typeBldr:TypeBuilder) =
             new SimpleLogicGenerator(context,typeBldr,arg_a,arg_b,OpCodes.Clt,this) :> IGenerator
         | Atom (Symbol ">") :: arg_a :: arg_b :: [] ->
             new SimpleLogicGenerator(context,typeBldr,arg_a,arg_b,OpCodes.Cgt,this) :> IGenerator
+        |Atom (Symbol "call") :: Atom (Symbol fname) :: instance :: args ->
+            new InstanceCallGenerator(context, typeBldr, instance, fname, args, this) :> IGenerator
         | Atom (Symbol fname) :: args -> //generic funcall pattern
             let tryGetType typeName =
                 try Some (context.types.[typeName]) with
@@ -104,7 +106,7 @@ type GeneratorFactory(typeBldr:TypeBuilder) =
                 let methodName = callMatch.Groups.[2].Value
                 new ClrCallGenerator(context, typeBldr, clrType, methodName, args, this) :> IGenerator
             else
-                new FunCallGenerator(context,typeBldr,fname,args,this) :> IGenerator            
+                new FunCallGenerator(context,typeBldr,fname,args,this) :> IGenerator
         | _ -> failwithf "Form %A is not supported yet" list
 
     member private this.makeSequenceGenerator(context: Context,seq:SExp list) =

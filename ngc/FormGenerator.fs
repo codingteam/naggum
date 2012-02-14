@@ -217,15 +217,19 @@ type QuoteGenerator(context:Context,typeBuilder:TypeBuilder,quotedExp:SExp,gf:IG
         ilGen.Emit(OpCodes.Ldstr,name)
         ilGen.Emit(OpCodes.Newobj,cons)
     let rec generate_list (ilGen:ILGenerator) (elements:SExp list) =
+        let generate_list_element e =
+            match e with
+            | List l -> generate_list ilGen l
+            | Atom (Object o) -> generate_object ilGen o
+            | Atom (Symbol s) -> generate_symbol ilGen s
+            | other -> failwithf "Error: Unexpected form in quoted expression: %A" other
         let cons = (typeof<Naggum.Runtime.Cons>).GetConstructor(Array.create 2 typeof<obj>)
+        List.rev elements |> List.head |> generate_list_element //last element
         ilGen.Emit(OpCodes.Ldnull) //list terminator
-        List.iter (fun (e) ->
-                        match e with
-                        |List l -> ignore (generate_list ilGen l)
-                        |Atom (Object o) -> ignore (generate_object ilGen o)
-                        |Atom (Symbol s) -> ignore (generate_symbol ilGen s)
-                        ilGen.Emit(OpCodes.Newobj,cons))
-                  (List.rev elements)
+        ilGen.Emit(OpCodes.Newobj,cons)
+        List.rev elements |> List.tail |> List.iter (fun (e) ->
+                                                        generate_list_element e
+                                                        ilGen.Emit(OpCodes.Newobj,cons))
     interface IGenerator with
         member this.Generate ilGen =
             match quotedExp with

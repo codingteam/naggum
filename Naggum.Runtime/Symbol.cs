@@ -21,5 +21,13 @@ namespace Naggum.Runtime
         {
             return Name.Equals(other.Name);
         }
+
+        /// <summary>
+        /// </summary>
+        /// <returns>Returns symbol's name as string.</returns>
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

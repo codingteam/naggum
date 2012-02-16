@@ -40,7 +40,7 @@ let private epilogue context typeBuilder (ilGen : ILGenerator) =
     ilGen.Emit OpCodes.Ret
     ilGen.EndScope()
 
-let compile (source : StreamReader) (assemblyName : string) (fileName : string) (asmRefs:string list): unit =
+let compile (source : Stream) (assemblyName : string) (fileName : string) (asmRefs:string list): unit =
     let assemblyName = new AssemblyName(assemblyName)
     let assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Save)
     let moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyBuilder.GetName().Name, fileName)
@@ -61,13 +61,12 @@ let compile (source : StreamReader) (assemblyName : string) (fileName : string) 
     List.iter context.loadAssembly (List.map Assembly.LoadFrom asmRefs)
 
     prologue ilGenerator
-    while not source.EndOfStream do
-        try
-            let sexp = Reader.parse source
-            let gen = gf.MakeGenerator context sexp
-            gen.Generate ilGenerator
-        with
-        | ex -> printfn "File: %A\nForm: %A\nError: %A" fileName sexp ex.Source
+    try
+        Reader.parse fileName source |> List.iter (fun sexp ->
+                                                   let gen = gf.MakeGenerator context sexp
+                                                   gen.Generate ilGenerator) 
+    with
+    | ex -> printfn "File: %A\nForm: %A\nError: %A" fileName sexp ex.Source
 
     epilogue context typeBuilder ilGenerator
 

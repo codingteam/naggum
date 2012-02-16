@@ -33,6 +33,7 @@ for arg in (List.tail args) do
     else
         sources <- arg :: sources
 for fileName in sources do
-    let source = new StreamReader(File.Open (fileName,FileMode.Open))
+    let source = File.Open (fileName,FileMode.Open) :> Stream
     let assemblyName = Path.GetFileNameWithoutExtension fileName
     Generator.compile source assemblyName (assemblyName + ".exe") asmRefs
+    source.Close()

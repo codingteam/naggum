@@ -1,4 +1,5 @@
 (defun test-funcall (test-arg)
+  (System.Console.Write "Functions: ")
   (System.Console.WriteLine test-arg))
 
 (defun test-conditionals ()
@@ -41,7 +42,7 @@
   (System.Console.Write "2*3=") (System.Console.WriteLine (* 2 3))
   (System.Console.Write "2/2=") (System.Console.WriteLine (/ 2 2))
 
-  (System.Console.WriteLine "Floats")
+  (System.Console.WriteLine "Floats:")
   (System.Console.Write "2.0 + 0.5=") (System.Console.WriteLine (+ 2.0 0.5))
   (System.Console.Write "3.0 - 1.5=") (System.Console.WriteLine (- 3.0 1.5))
   (System.Console.Write "2.0 * 0.7=") (System.Console.WriteLine (* 2.0 0.7))
@@ -55,13 +56,12 @@
 
 (System.Console.WriteLine "Naggum test suite")
 
-(System.Console.Write "Functions: ")
 (test-funcall "OK")
-
 (test-conditionals)
 (test-let)
 (test-quote)
 (test-new)
 (test-cons)
-(test-math)
+(test-quote)
 (test-instance-call)
+(test-math)

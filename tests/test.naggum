@@ -1,40 +1,67 @@
-(defun main (args)
-  (System.Console.WriteLine "Naggum test suite")
+(defun test-funcall (test-arg)
+  (System.Console.WriteLine test-arg))
 
-  (System.Console.WriteLine "Conditionals")
+(defun test-conditionals ()
+  (System.Console.WriteLine "Conditionals:")
   (if 1 (System.Console.WriteLine "Reduced if: OK"))
   (if 1
       (System.Console.WriteLine "Full if (true branch): OK")
-      (System.Console.WriteLine "Full if (true branch): FAILURE"))
+    (System.Console.WriteLine "Full if (true branch): FAILURE"))
   (if 0
       (System.Console.WriteLine "Full if (false branch): FAILURE")
-      (System.Console.WriteLine "Full if (false branch): OK"))
-  
+    (System.Console.WriteLine "Full if (false branch): OK")))
+
+(defun test-let ()
   (System.Console.Write "Let: ")
   (let ((ok "OK"))
-    (System.Console.WriteLine ok))
-  
+    (System.Console.WriteLine ok)))
+
+(defun test-quote ()
   (System.Console.WriteLine "Quoting:")
   (System.Console.Write "Symbol: ") (System.Console.WriteLine (quote OK))
-  (System.Console.Write "List: ") (System.Console.WriteLine (quote (OK)))
+  (System.Console.Write "List: ") (System.Console.WriteLine (quote (OK))))
 
+(defun test-new ()
   (System.Console.Write "Object construction: ")
   (let ((ok-sym (new Naggum.Runtime.Symbol "OK")))
-    (System.Console.WriteLine ok-sym))
-  
+    (System.Console.WriteLine ok-sym)))
+
+(defun test-cons ()
   (System.Console.WriteLine "Cons:")
   (let ((test-car (new Naggum.Runtime.Cons "OK" "FAILURE"))
         (test-cdr (new Naggum.Runtime.Cons "FAILURE" "OK")))
     (System.Console.Write "CAR: ") (System.Console.WriteLine (Naggum.Runtime.Cons.Car test-car))
-    (System.Console.Write "CDR: ") (System.Console.WriteLine (Naggum.Runtime.Cons.Cdr test-cdr)))
-  
+    (System.Console.Write "CDR: ") (System.Console.WriteLine (Naggum.Runtime.Cons.Cdr test-cdr))))
+
+(defun test-math ()
   (System.Console.WriteLine "Math:")
+  (System.Console.WriteLine "Integers:")
   (System.Console.Write "2+2=") (System.Console.WriteLine (+ 2 2))
   (System.Console.Write "2-2=") (System.Console.WriteLine (- 2 2))
   (System.Console.Write "2*3=") (System.Console.WriteLine (* 2 3))
   (System.Console.Write "2/2=") (System.Console.WriteLine (/ 2 2))
 
+  (System.Console.WriteLine "Floats")
+  (System.Console.Write "2.0 + 0.5=") (System.Console.WriteLine (+ 2.0 0.5))
+  (System.Console.Write "3.0 - 1.5=") (System.Console.WriteLine (- 3.0 1.5))
+  (System.Console.Write "2.0 * 0.7=") (System.Console.WriteLine (* 2.0 0.7))
+  (System.Console.Write "3.0 / 2.0=") (System.Console.WriteLine (/ 3.0 2.0)))
+
+(defun test-instance-call ()
   (System.Console.WriteLine "Instance calls:")
   (let ((test-obj (new System.Random)))
     (System.Console.Write "Random number:")
 	(System.Console.WriteLine (call Next test-obj))))
+
+(System.Console.WriteLine "Naggum test suite")
+
+(System.Console.Write "Functions: ")
+(test-funcall "OK")
+
+(test-conditionals)
+(test-let)
+(test-quote)
+(test-new)
+(test-cons)
+(test-math)
+(test-instance-call)

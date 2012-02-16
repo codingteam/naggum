@@ -19,9 +19,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
+using System.Collections;
 
 namespace Naggum.Runtime
 {
@@ -117,7 +116,8 @@ namespace Naggum.Runtime
         public static Cons List(params object[] elements)
         {
             Cons list = null;
-            foreach (var element in (elements.Reverse()))
+            Array.Reverse(elements);
+            foreach (var element in elements)
             {
                 var tmp = new Cons(element, list);
                 list = tmp;

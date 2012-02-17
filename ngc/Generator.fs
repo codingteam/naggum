@@ -62,9 +62,9 @@ let compile (source : Stream) (assemblyName : string) (fileName : string) (asmRe
 
     prologue ilGenerator
     try
-        Reader.parse fileName source |> List.iter (fun sexp ->
-                                                   let gen = gf.MakeGenerator context sexp
-                                                   gen.Generate ilGenerator) 
+        let body = Reader.parse fileName source
+        let gen = gf.MakeBody context body
+        gen.Generate ilGenerator
     with
     | ex -> printfn "File: %A\nForm: %A\nError: %A" fileName sexp ex.Source
 

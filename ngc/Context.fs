@@ -29,22 +29,22 @@ open Naggum.Compiler.Reader
 
 type ContextValue =
     |Local of LocalBuilder * Type
-    |Arg of int
+    |Arg of int * Type
 
 type Context =
     val types : Dictionary<string,Type>
-    val functions : Dictionary<string, MethodInfo>
+    val functions : Dictionary<string, (Type list -> MethodInfo)>
     val locals : Dictionary<string,ContextValue>
     new (t,f,l) =
         {types = t; functions = f; locals = l}
     new (ctx : Context) =
         let t = new Dictionary<string, Type>(ctx.types)
-        let f = new Dictionary<string, MethodInfo>(ctx.functions)
+        let f = new Dictionary<string, (Type list -> MethodInfo)>(ctx.functions)
         let l = new Dictionary<string,ContextValue>(ctx.locals)
         new Context (t,f,l)
     new() =
         let t = new Dictionary<string, Type>()
-        let f = new Dictionary<string, MethodInfo>()
+        let f = new Dictionary<string, (Type list -> MethodInfo)>()
         let l = new Dictionary<string,ContextValue>()
         new Context (t,f,l)
 

@@ -48,16 +48,16 @@ type SymbolGenerator(context:Context,name:string) =
             try
                 let ctxval = context.locals.[name]
                 match ctxval with
-                |Local (local, t) ->
+                |Local (local, _) ->
                     ilGen.Emit(OpCodes.Ldloc,local)
-                |Arg index ->
+                |Arg (index,_) ->
                     ilGen.Emit(OpCodes.Ldarg,(int16 index))
             with
             | :? KeyNotFoundException -> failwithf "Symbol %A not bound." name
         member this.ReturnTypes () =
             match context.locals.[name] with
             |Local (_,t) -> [t]
-            |Arg _ -> [typeof<obj>]
+            |Arg (_,t) -> [t]
             
 
 type SequenceGenerator(context:Context,typeBuilder:TypeBuilder,seq:SExp list, gf:IGeneratorFactory) =
@@ -179,32 +179,33 @@ type FullIfGenerator(context:Context,typeBuilder:TypeBuilder,condition:SExp,if_t
             List.concat (Seq.ofList [true_ret_type; false_ret_type]) //TODO This should return closest common ancestor of these types
 
 type FunCallGenerator(context:Context,typeBuilder:TypeBuilder,fname:string,arguments:SExp list,gf:IGeneratorFactory) =
+    let args_seq = gf.MakeSequence context arguments
+    let func = context.functions.[fname] <| args_seq.ReturnTypes()
     interface IGenerator with
         member this.Generate ilGen =
-            let func = context.functions.[fname]
-            let args_seq = gf.MakeSequence context arguments
-            let arg_types = args_seq.ReturnTypes()
             args_seq.Generate ilGen
             ilGen.Emit(OpCodes.Call,func)
         member this.ReturnTypes () =
-            let func = context.functions.[fname]
             [func.ReturnType]
 
 type DefunGenerator(context:Context,typeBuilder:TypeBuilder,fname:string,parameters:SExp list,body:SExp list,gf:IGeneratorFactory) =
+    do context.functions.[fname] <- (fun arg_types ->
+                                            let methodGen = typeBuilder.DefineMethod(fname, MethodAttributes.Public ||| MethodAttributes.Static, typeof<obj>, (Array.ofList arg_types))
+                                            let methodILGen = (methodGen.GetILGenerator())
+                                            let fun_ctx = new Context(context)
+                                            for parm in parameters do
+                                                match parm with
+                                                | Atom(Symbol parm_name) ->
+                                                    let parm_idx = (List.findIndex (fun (p) -> p = parm) parameters)
+                                                    fun_ctx.locals.[parm_name] <- Arg (parm_idx,arg_types.[parm_idx])
+                                                | other -> failwithf "In function %A parameter definition:\nExpected: Atom(Symbol)\nGot: %A" fname parm
+                                            let bodyGen = gf.MakeBody fun_ctx body
+                                            bodyGen.Generate methodILGen
+                                            methodILGen.Emit(OpCodes.Ret)
+                                            methodGen :> MethodInfo)
     interface IGenerator with
         member this.Generate ilGen =
-            let argsDef = Array.create (List.length parameters) typeof<obj>
-            let methodGen = typeBuilder.DefineMethod(fname, MethodAttributes.Public ||| MethodAttributes.Static, typeof<obj>, argsDef)
-            let methodILGen = (methodGen.GetILGenerator())
-            context.functions.[fname] <- methodGen
-            let fun_ctx = new Context(context)
-            for parm in parameters do
-                match parm with
-                | Atom(Symbol parm_name) -> fun_ctx.locals.[parm_name] <- Arg (List.findIndex (fun (p) -> p = parm) parameters)
-                | other -> failwithf "In function %A parameter definition:\nExpected: Atom(Symbol)\nGot: %A" fname parm
-            let bodyGen = gf.MakeBody fun_ctx body
-            bodyGen.Generate methodILGen
-            methodILGen.Emit(OpCodes.Ret)
+            ()
         member  this.ReturnTypes() = 
             [typeof<Void>]
 

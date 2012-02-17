@@ -74,18 +74,18 @@ let nearestOverload (clrType : Type) methodName types =
 
 type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Type, methodName : string, arguments : SExp list,
                       gf : IGeneratorFactory) =   
+    let args_seq = gf.MakeSequence context arguments
+    let arg_types = args_seq.ReturnTypes()
+    let clrMethod = nearestOverload clrType methodName arg_types
     interface IGenerator with
         member this.Generate ilGen =
-            let args_seq = gf.MakeSequence context arguments
-            let arg_types = args_seq.ReturnTypes()
-            let clrMethod = nearestOverload clrType methodName arg_types
+
             args_seq.Generate ilGen            
             ilGen.Emit(OpCodes.Call, Option.get clrMethod)
+            if (Option.get clrMethod).ReturnType = typeof<Void> then
+                ilGen.Emit(OpCodes.Ldnull);
         member this.ReturnTypes() =
-            let args_seq = gf.MakeSequence context arguments
-            let arg_types = args_seq.ReturnTypes()
-            let clrMethod = nearestOverload clrType methodName arg_types
-            [(Option.get clrMethod).ReturnType]
+            if (Option.get clrMethod).ReturnType = typeof<Void> then [typeof<obj>] else [(Option.get clrMethod).ReturnType]
 
 type InstanceCallGenerator(context : Context, typeBuilder : TypeBuilder, instance : SExp, methodName : string, arguments : SExp list, gf : IGeneratorFactory) =
     interface IGenerator with

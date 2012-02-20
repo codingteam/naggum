@@ -86,7 +86,7 @@ type BodyGenerator(context:Context,typeBuilder:TypeBuilder,body:SExp list, gf:IG
                 let gen = gf.MakeGenerator context last
                 let val_type = gen.ReturnTypes()
                 gen.Generate ilGen
-                if (val_type = [typeof<System.Void>]) then
+                if ((List.head val_type) = typeof<System.Void>) then
                     ilGen.Emit(OpCodes.Ldnull)
             | sexp :: rest ->
                 let gen = gf.MakeGenerator context sexp

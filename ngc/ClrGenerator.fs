@@ -82,10 +82,8 @@ type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Ty
 
             args_seq.Generate ilGen            
             ilGen.Emit(OpCodes.Call, Option.get clrMethod)
-            if (Option.get clrMethod).ReturnType = typeof<Void> then
-                ilGen.Emit(OpCodes.Ldnull);
         member this.ReturnTypes() =
-            if (Option.get clrMethod).ReturnType = typeof<Void> then [typeof<obj>] else [(Option.get clrMethod).ReturnType]
+            [(Option.get clrMethod).ReturnType]
 
 type InstanceCallGenerator(context : Context, typeBuilder : TypeBuilder, instance : SExp, methodName : string, arguments : SExp list, gf : IGeneratorFactory) =
     interface IGenerator with

@@ -26,7 +26,7 @@ using System.Text;
 
 namespace Naggum.Runtime
 {
-    class Reader
+    public class Reader
     {
         /// <summary>
         /// Checks if the character is constituent, i.e. not whitespace or list separator.
@@ -45,11 +45,10 @@ namespace Naggum.Runtime
         /// </summary>
         /// <param name="stream">stream to read from</param>
         /// <returns></returns>
-        private static Object ReadSymbol(Stream stream)
+        private static Object ReadSymbol(StreamReader reader)
         {
             bool in_symbol = true;
             StringBuilder symbol_name = new StringBuilder();
-            StreamReader reader = new StreamReader(stream);
             while (in_symbol)
             {
                 var ch = reader.Peek();
@@ -74,9 +73,8 @@ namespace Naggum.Runtime
         /// </summary>
         /// <param name="stream">stream to read from</param>
         /// <returns></returns>
-        private static Object ReadList(Stream stream)
+        private static Object ReadList(StreamReader reader)
         {
-            StreamReader reader = new StreamReader(stream);
             bool in_list = true;
             Cons list = null;
             while (in_list)
@@ -85,14 +83,77 @@ namespace Naggum.Runtime
                 if (ch < 0) throw new IOException("Unexpected end of stream.");
                 if ((char)ch != ')')
                 {
-                    list = new Cons(Read(stream), list);
+                    list = new Cons(ReadObject(reader), list);
                 }
                 else
                 {
+                    reader.Read(); //consume closing paren
                     in_list = false;
                 }
             }
             return list;
+        }
+
+        /// <summary>
+        /// Reads a string from input stream
+        /// </summary>
+        /// <param name="stream">input stream</param>
+        /// <returns>a string that was read</returns>
+        private static string ReadString(StreamReader reader)
+        {
+            bool in_string = true;
+            bool single_escape = false;
+            StringBuilder sbld = new StringBuilder();
+
+            while (in_string)
+            {
+                var ch = reader.Read();
+                if (single_escape)
+                {
+                    single_escape = false;
+                    switch (ch)
+                    {
+                        case 'n': sbld.Append('\n'); break;
+                        case 'r': sbld.Append('\r'); break;
+                        case '\"': sbld.Append('"'); break;
+                        case 't': sbld.Append('\t'); break;
+                        case '\\': sbld.Append('\\'); break;
+                        default: throw new Exception("Unknown escape sequence: \\" + ch);
+                    }
+                }
+                else
+                {
+                    switch (ch)
+                    {
+                        case '\"': in_string = false; break;
+                        case '\\': single_escape = true; break;
+                        default: sbld.Append((char)ch); break;
+                    }
+                }
+
+            }
+            return sbld.ToString();
+        }
+
+        private static Object ReadObject(StreamReader reader)
+        {
+            while (Char.IsWhiteSpace((char)reader.Peek())) reader.Read(); //consume all leading whitespace
+            var ch = reader.Peek();
+            if (ch < 0) return null;
+            if (ch == '(') //beginning of a list
+            {
+                reader.Read(); //consume opening list delimiter.
+                return ReadList(reader);
+            }
+            if (ch == '\"') //beginning of a string
+            {
+                reader.Read(); //consume opening quote
+                return ReadString(reader);
+            }
+            if (isConstituent((char)ch))
+                return ReadSymbol(reader);
+
+            throw new IOException("Unexpected char: " + (char)ch);
         }
 
         /// <summary>
@@ -103,18 +164,8 @@ namespace Naggum.Runtime
         public static Object Read(Stream stream)
         {
             StreamReader reader = new StreamReader(stream);
-            while (Char.IsWhiteSpace((char)reader.Peek())) reader.Read(); //consume all leading whitespace
-            var ch = reader.Peek();
-            if (ch < 0) return null;
-            if (ch == '(') //beginning of a list
-            {
-                reader.Read(); //consume opening list delimiter.
-                return ReadList(stream);
-            }
-            if (isConstituent((char)ch))
-                return ReadSymbol(stream);
-
-            throw new IOException("Unexpected char: " + (char)ch);
+            var obj = ReadObject(reader);
+            return obj;
         }
     }
 }

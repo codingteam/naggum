@@ -124,3 +124,5 @@ type GeneratorFactory(typeBldr:TypeBuilder) =
         member this.MakeSequence context seq = this.makeSequenceGenerator (context,seq) :> IGenerator
 
         member this.MakeBody context body = this.makeBodyGenerator (context,body) :> IGenerator
+
+        member this.MakeGeneratorFactory newTypeBuilder = (new GeneratorFactory (newTypeBuilder)) :> IGeneratorFactory

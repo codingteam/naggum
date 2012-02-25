@@ -26,6 +26,7 @@ open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
 
+open Naggum.Compiler.Globals
 open Naggum.Compiler.IGenerator
 open Naggum.Compiler.GeneratorFactory
 open Naggum.Compiler.Reader
@@ -43,8 +44,8 @@ let private epilogue context typeBuilder (ilGen : ILGenerator) =
 let compile (source : Stream) (assemblyName : string) (fileName : string) (asmRefs:string list): unit =
     let assemblyName = new AssemblyName(assemblyName)
     let assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Save)
-    let moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyBuilder.GetName().Name, fileName)
-    let typeBuilder = moduleBuilder.DefineType("Program", TypeAttributes.Public ||| TypeAttributes.Class ||| TypeAttributes.BeforeFieldInit)
+    Globals.ModuleBuilder <- assemblyBuilder.DefineDynamicModule(assemblyBuilder.GetName().Name, fileName)
+    let typeBuilder = Globals.ModuleBuilder.DefineType("Program", TypeAttributes.Public ||| TypeAttributes.Class ||| TypeAttributes.BeforeFieldInit)
     let methodBuilder = typeBuilder.DefineMethod("Main", MethodAttributes.Public ||| MethodAttributes.Static, typeof<int>, [| |])
     
     let gf = new GeneratorFactory(typeBuilder) :> IGeneratorFactory

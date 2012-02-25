@@ -24,6 +24,7 @@ open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
 open Naggum.Runtime
+open Naggum.Compiler.Globals
 open Naggum.Compiler.Reader
 open Naggum.Compiler.Context
 open Naggum.Compiler.IGenerator
@@ -260,3 +261,42 @@ type NewObjGenerator(context : Context, typeBuilder : TypeBuilder, typeName : st
                 [Type.GetType typeName]
             else
                 [context.types.[typeName]]
+
+type TypeGenerator(context : Context, typeBuilder : TypeBuilder, typeName : string, parentTypeName: string, members : SExp list, gf : IGeneratorFactory) =
+    let newTypeBuilder = 
+        if parentTypeName = "" then
+            Globals.ModuleBuilder.DefineType(typeName, TypeAttributes.Class ||| TypeAttributes.Public, typeof<obj>)
+        else
+            Globals.ModuleBuilder.DefineType(typeName, TypeAttributes.Class ||| TypeAttributes.Public, context.types.[parentTypeName])
+    let newGeneratorFactory = gf.MakeGeneratorFactory newTypeBuilder
+    let mutable fields : string list = []
+
+    let generate_field field_name =
+        let fieldBuilder = newTypeBuilder.DefineField(field_name,typeof<obj>,FieldAttributes.Public)
+        fields <- List.append fields [field_name]
+    let generate_method method_name method_parms method_body =
+        let method_gen = newTypeBuilder.DefineMethod(method_name,MethodAttributes.Public,
+                            typeof<obj>,
+                            Array.create (List.length method_parms) typeof<obj>)
+        let method_ctx = new Context(context)
+        for parm in method_parms do
+            match parm with
+            | Atom(Symbol parm_name) ->
+                let parm_idx = (List.findIndex (fun (p) -> p = parm) method_parms)
+                method_ctx.locals.[parm_name] <- Arg (parm_idx,typeof<obj>)
+            | other -> failwithf "In method %A%A parameter definition:\nExpected: Atom(Symbol)\nGot: %A" typeName method_name parm
+        let body_gen = newGeneratorFactory.MakeBody method_ctx method_body
+        body_gen.Generate (method_gen.GetILGenerator())
+        (method_gen.GetILGenerator()).Emit(OpCodes.Ret)
+
+    interface IGenerator with
+        member this.Generate ilGen = 
+            for m in members do
+                match m with
+                | List (Atom (Symbol "field") :: Atom (Symbol name) :: []) -> generate_field name
+                | List (Atom (Symbol "field") :: Atom (Symbol access) :: Atom (Symbol name) :: []) -> generate_field name
+                | List (Atom (Symbol "method") :: Atom (Symbol name) :: List parms :: body) -> generate_method name parms body
+                | List (Atom (Symbol "method") :: Atom (Symbol name) :: Atom (Symbol access) :: List parms :: body) -> generate_method name parms body
+                | other -> failwithf "In definition of type %A: \nUnknown member definition: %A" typeName other
+        member this.ReturnTypes () =
+            [typeof<System.Void>]

@@ -38,4 +38,5 @@ type IGeneratorFactory =
         abstract MakeGenerator : Context -> SExp -> IGenerator
         abstract MakeSequence : Context -> SExp list -> IGenerator
         abstract MakeBody : Context -> SExp list -> IGenerator
+        abstract MakeGeneratorFactory : TypeBuilder -> IGeneratorFactory
     end

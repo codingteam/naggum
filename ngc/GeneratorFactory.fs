@@ -26,7 +26,7 @@ open FormGenerator
 open ClrGenerator
 open Context
 open Naggum.Runtime
-open Naggum.MaybeMonad
+open Naggum.Util.MaybeMonad
 open Naggum.Compiler.Reader
 open Naggum.Compiler.MathGenerator
 open System

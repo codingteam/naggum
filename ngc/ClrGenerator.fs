@@ -26,7 +26,7 @@ open Naggum.Runtime
 open Naggum.Compiler.Reader
 open Naggum.Compiler.Context
 open Naggum.Compiler.IGenerator
-open Naggum.MaybeMonad
+open Naggum.Util.MaybeMonad
 
 let nearestOverload (clrType : Type) methodName types =
         let rec distanceBetweenTypes (derivedType : Type, baseType) =

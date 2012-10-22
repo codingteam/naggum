@@ -30,6 +30,7 @@ open Naggum.Compiler.Reader
 
 type ContextValue =
     |Local of LocalBuilder * Type
+    |Field of FieldBuilder * Type
     |Arg of int * Type
 
 type Context =

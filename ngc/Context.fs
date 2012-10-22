@@ -25,6 +25,7 @@ open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
 
+open Naggum.Runtime
 open Naggum.Compiler.Reader
 
 type ContextValue =
@@ -32,25 +33,25 @@ type ContextValue =
     |Arg of int * Type
 
 type Context =
-    val types : Dictionary<string,Type>
-    val functions : Dictionary<string, (Type list -> MethodInfo)>
-    val locals : Dictionary<string,ContextValue>
+    val types : Dictionary<Symbol,Type>
+    val functions : Dictionary<Symbol, (Type list -> MethodInfo)>
+    val locals : Dictionary<Symbol,ContextValue>
     new (t,f,l) =
         {types = t; functions = f; locals = l}
     new (ctx : Context) =
-        let t = new Dictionary<string, Type>(ctx.types)
-        let f = new Dictionary<string, (Type list -> MethodInfo)>(ctx.functions)
-        let l = new Dictionary<string,ContextValue>(ctx.locals)
+        let t = new Dictionary<Symbol, Type>(ctx.types)
+        let f = new Dictionary<Symbol, (Type list -> MethodInfo)>(ctx.functions)
+        let l = new Dictionary<Symbol,ContextValue>(ctx.locals)
         new Context (t,f,l)
     new() =
-        let t = new Dictionary<string, Type>()
-        let f = new Dictionary<string, (Type list -> MethodInfo)>()
-        let l = new Dictionary<string,ContextValue>()
+        let t = new Dictionary<Symbol, Type>()
+        let f = new Dictionary<Symbol, (Type list -> MethodInfo)>()
+        let l = new Dictionary<Symbol,ContextValue>()
         new Context (t,f,l)
 
     member public this.loadAssembly(asm:Assembly) =
         let types = List.ofArray (asm.GetTypes())
-        List.iter (fun (t:Type) -> this.types.Add(t.FullName,t)) types
+        List.iter (fun (t:Type) -> this.types.Add(new Symbol(t.FullName),t)) types
 
 let create () =
     let context = new Context()

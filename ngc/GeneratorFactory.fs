@@ -25,6 +25,7 @@ open StringGen
 open FormGenerator
 open ClrGenerator
 open Context
+open Naggum.Runtime
 open Naggum.MaybeMonad
 open Naggum.Compiler.Reader
 open Naggum.Compiler.MathGenerator
@@ -86,7 +87,7 @@ type GeneratorFactory(typeBldr:TypeBuilder) =
             new InstanceCallGenerator(context, typeBldr, instance, fname, args, this) :> IGenerator
         | Atom (Symbol fname) :: args -> //generic funcall pattern
             let tryGetType typeName =
-                try Some (context.types.[typeName]) with
+                try Some (context.types.[new Symbol(typeName)]) with
                 | _ ->
                     try Some (Type.GetType typeName) with
                     | _ -> None

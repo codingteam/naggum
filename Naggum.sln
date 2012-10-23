@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test programs", "Test progr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Naggum.Runtime", "Naggum.Runtime\Naggum.Runtime.csproj", "{402B5E79-E063-4833-AE4B-2986AEEC1D75}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Naggum.Test", "Naggum.Test\Naggum.Test.fsproj", "{38230CBD-DE3E-4470-925F-DE966E8691AA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,6 +26,10 @@ Global
 		{402B5E79-E063-4833-AE4B-2986AEEC1D75}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{402B5E79-E063-4833-AE4B-2986AEEC1D75}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{402B5E79-E063-4833-AE4B-2986AEEC1D75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38230CBD-DE3E-4470-925F-DE966E8691AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38230CBD-DE3E-4470-925F-DE966E8691AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38230CBD-DE3E-4470-925F-DE966E8691AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38230CBD-DE3E-4470-925F-DE966E8691AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

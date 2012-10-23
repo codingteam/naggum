@@ -52,7 +52,7 @@
   (System.Console.WriteLine "Instance calls:")
   (let ((test-obj (new System.Random)))
     (System.Console.Write "Random number:")
-	(System.Console.WriteLine (call Next test-obj))))
+    (System.Console.WriteLine (call Next test-obj))))
 
 (System.Console.WriteLine "Naggum test suite")
 

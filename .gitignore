@@ -2,3 +2,5 @@ bin/
 obj/
 *.suo
 /_ReSharper.Naggum/
+/*.user
+/packages/

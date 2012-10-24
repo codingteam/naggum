@@ -16,8 +16,24 @@ namespace Naggum.Runtime
 
         bool IEquatable<Symbol>.Equals(Symbol other)
         {
-            return Name.Equals(other.Name);
+			return AreEqual(this, other);
         }
+
+		public override bool Equals(object obj)
+		{
+			var symbol = obj as Symbol;
+			if (symbol != null)
+			{
+				return AreEqual(this, symbol);
+			}
+
+			return false;
+		}
+
+		public override int GetHashCode()
+		{
+			return Name.GetHashCode();
+		}
 
         /// <summary>
         /// </summary>
@@ -26,5 +42,10 @@ namespace Naggum.Runtime
         {
             return Name;
         }
+
+		private static bool AreEqual(Symbol one, Symbol other)
+		{
+			return one.Name.Equals(other.Name);
+		}
     }
 }

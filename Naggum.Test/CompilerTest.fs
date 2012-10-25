@@ -26,12 +26,31 @@ open System.IO
 
 [<TestFixture>]
 type CompilerTest() =
-    let sourceFilename = @"..\..\..\tests\test.naggum"
+    static let testExtension = "naggum"
+    static let resultExtension = "result"
+    static let executableExtension = "exe"
+    
+    static let directory = @"..\..\..\tests"
+    static let filenames = [@"test"]
+
+    static member private RunTest testName =
+        let basePath = Path.Combine(directory, testName)
+        let testPath = Path.ChangeExtension(basePath, testExtension)
+        let resultPath = Path.ChangeExtension(basePath, resultExtension)
+        let executablePath = Path.ChangeExtension(testName, executableExtension)
+
+        use stream = File.Open(testPath, FileMode.Open)
+        Generator.compile stream testName executablePath []
+
+        let startInfo = new ProcessStartInfo(executablePath, UseShellExecute = false, RedirectStandardOutput = true)
+        let ``process`` = Process.Start startInfo
+        ``process``.WaitForExit()
+        let result = ``process``.StandardOutput.ReadToEnd()
+
+        let reference = File.ReadAllText resultPath
+        Assert.AreEqual(reference, result)
 
     [<Test>]
-    member this.RunTest() =
-        let filename = "test.exe"
-
-        use stream = File.Open(sourceFilename, FileMode.Open)
-        Generator.compile stream "test" filename []
-        ignore <| (Process.Start filename).WaitForExit(30000) // 30 sec should be enough
+    member this.RunTests() =
+        filenames
+        |> List.iter CompilerTest.RunTest    

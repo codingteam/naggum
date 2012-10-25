@@ -1,0 +1,27 @@
+Naggum test suite
+Functions: OK
+Conditionals:
+Reduced if: OK
+Full if (true branch): OK
+Full if (false branch): OK
+Let: OK
+Quoting:
+Symbol: OK
+List: (OK)
+Object construction: OK
+Cons:
+CAR: OK
+CDR: OK
+Instance calls:
+Random number:1010002958
+Math:
+Integers:
+2+2=4
+2-2=0
+2*3=6
+2/2=1
+Floats:
+2.0 + 0.5=2,5
+3.0 - 1.5=1,5
+2.0 * 0.7=1,4
+3.0 / 2.0=1,5

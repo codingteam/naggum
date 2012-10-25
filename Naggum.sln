@@ -6,6 +6,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test programs", "Test programs", "{2972575D-A421-4759-AE89-57560E0224AE}"
 	ProjectSection(SolutionItems) = preProject
 		tests\test.naggum = tests\test.naggum
+		tests\test.result = tests\test.result
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Naggum.Runtime", "Naggum.Runtime\Naggum.Runtime.csproj", "{402B5E79-E063-4833-AE4B-2986AEEC1D75}"

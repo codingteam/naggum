@@ -50,7 +50,7 @@
 
 (defun test-instance-call ()
   (System.Console.WriteLine "Instance calls:")
-  (let ((test-obj (new System.Random)))
+  (let ((test-obj (new System.Random 100500)))
     (System.Console.Write "Random number:")
     (System.Console.WriteLine (call Next test-obj))))
 

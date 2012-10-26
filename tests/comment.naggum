@@ -1,0 +1,4 @@
+; a comment
+(System.Console.WriteLine "ok")
+ ; a second comment
+ ; a third comment

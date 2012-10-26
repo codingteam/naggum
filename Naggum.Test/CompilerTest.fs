@@ -31,7 +31,7 @@ type CompilerTest() =
     static let executableExtension = "exe"
     
     static let directory = @"..\..\..\tests"
-    static let filenames = [@"test"]
+    static let filenames = [@"comment"; @"test"]
 
     static member private RunTest testName =
         let basePath = Path.Combine(directory, testName)

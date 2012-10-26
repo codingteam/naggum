@@ -35,8 +35,9 @@ type SExp =
     | Atom of Value
     | List of SExp list
 
-let ws parser = parser .>> spaces
-let commented parser = ws parser .>> (opt ((skipChar ';') .>> (skipRestOfLine true)))
+let comment = (skipChar ';') .>> (skipRestOfLine true)
+let skipSpaceAndComments = skipMany (spaces1 <|> comment)
+let commented parser = skipSpaceAndComments >>. parser .>> skipSpaceAndComments
 let list,listRef = createParserForwardedToRef()
 
 let numberOptions =
@@ -78,7 +79,7 @@ let symbol = (many1Chars (letter <|> digit <|> symChars)) |>> Symbol
 let atom =  (pnumber <|> string <|> symbol) |>> Atom
 
 let listElement = choice [atom;list]
-let sexp = commented (pstring "(") >>. many (commented listElement) .>> commented (pstring ")") |>> List
+let sexp = commented (pchar '(') >>. many (commented listElement) .>> commented (pchar ')') |>> List
 let parser = many1 (choice [atom;sexp])
 do listRef := sexp
 

@@ -76,6 +76,7 @@ namespace Naggum.Runtime
         private static Object ReadList(StreamReader reader)
         {
             bool in_list = true;
+            Stack<Object> list_stack = new Stack<object>();
             Cons list = null;
             while (in_list)
             {
@@ -83,7 +84,7 @@ namespace Naggum.Runtime
                 if (ch < 0) throw new IOException("Unexpected end of stream.");
                 if ((char)ch != ')')
                 {
-                    list = new Cons(ReadObject(reader), list);
+                    list_stack.Push(ReadObject(reader));
                 }
                 else
                 {
@@ -91,6 +92,7 @@ namespace Naggum.Runtime
                     in_list = false;
                 }
             }
+            while (list_stack.Count > 0) list = new Cons(list_stack.Pop(), list);
             return list;
         }
 

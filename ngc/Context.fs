@@ -54,6 +54,15 @@ type Context =
         let types = List.ofArray (asm.GetTypes())
         List.iter (fun (t:Type) -> this.types.Add(new Symbol(t.FullName),t)) types
 
+    member public this.captureLocal(localName: Symbol, typeBuilder: TypeBuilder) =
+        let local = this.locals.[localName]
+        match local with
+        | Local (_,t) ->
+                let field = typeBuilder.DefineField(localName.Name,t,FieldAttributes.Static ||| FieldAttributes.Private)
+                this.locals.[localName] <- Field (field, t)
+        | Field (fb,_) -> ()
+        | Arg (_,_) -> failwithf "Unable to capture parameter %A" localName.Name
+        
 let create () =
     let context = new Context()
     context

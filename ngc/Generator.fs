@@ -37,9 +37,21 @@ open Context
 let private prologue (ilGen : ILGenerator) =
     ilGen.BeginScope()
 
-let private epilogue context typeBuilder (ilGen : ILGenerator) =
+let private epilogue context (ilGen : ILGenerator) =
     ilGen.Emit OpCodes.Ret
     ilGen.EndScope()
+
+let compileMethod context (generatorFactory : IGeneratorFactory) body (methodBuilder : MethodBuilder) fileName =
+    let ilGenerator = methodBuilder.GetILGenerator()
+    
+    prologue ilGenerator
+    try
+        let gen = generatorFactory.MakeBody context body
+        gen.Generate ilGenerator
+    with
+    | ex -> printfn "File: %A\nForm: %A\nError: %A" fileName sexp ex.Source
+
+    epilogue context ilGenerator
 
 let compile (source : Stream) (assemblyName : string) (fileName : string) (asmRefs:string list): unit =
     let assemblyName = new AssemblyName(assemblyName)
@@ -51,8 +63,6 @@ let compile (source : Stream) (assemblyName : string) (fileName : string) (asmRe
     let gf = new GeneratorFactory(typeBuilder) :> IGeneratorFactory
     assemblyBuilder.SetEntryPoint methodBuilder
     
-    let ilGenerator = methodBuilder.GetILGenerator()
-
     let context = Context.create ()
 
     //loading language runtime
@@ -63,15 +73,8 @@ let compile (source : Stream) (assemblyName : string) (fileName : string) (asmRe
     context.loadAssembly <| Assembly.Load "mscorlib"
     List.iter context.loadAssembly (List.map Assembly.LoadFrom asmRefs)
 
-    prologue ilGenerator
-    try
-        let body = Reader.parse fileName source
-        let gen = gf.MakeBody context body
-        gen.Generate ilGenerator
-    with
-    | ex -> printfn "File: %A\nForm: %A\nError: %A" fileName sexp ex.Source
-
-    epilogue context typeBuilder ilGenerator
+    let body = Reader.parse fileName source
+    compileMethod context gf body methodBuilder fileName
 
     typeBuilder.CreateType()
     |> ignore

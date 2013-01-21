@@ -59,6 +59,8 @@ let compile (source : Stream) (assemblyName : string) (fileName : string) (asmRe
     let rta = Assembly.LoadFrom("Naggum.Runtime.dll")
     context.loadAssembly rta
 
+    // Load .NET runtime and all referenced assemblies:
+    context.loadAssembly <| Assembly.Load "mscorlib"
     List.iter context.loadAssembly (List.map Assembly.LoadFrom asmRefs)
 
     prologue ilGenerator

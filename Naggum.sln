@@ -14,6 +14,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ngi", "ngi\ngi.csproj", "{3
 	ProjectSection(ProjectDependencies) = postProject
 		{402B5E79-E063-4833-AE4B-2986AEEC1D75} = {402B5E79-E063-4833-AE4B-2986AEEC1D75}
 	EndProjectSection
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Naggum.Test", "Naggum.Test\Naggum.Test.fsproj", "{38230CBD-DE3E-4470-925F-DE966E8691AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,6 +56,10 @@ Global
 		{34E781DF-EAD9-4034-ADE4-8DA41A16644A}.Release|Mixed Platforms.Build.0 = Release|x86
 		{34E781DF-EAD9-4034-ADE4-8DA41A16644A}.Release|x86.ActiveCfg = Release|x86
 		{34E781DF-EAD9-4034-ADE4-8DA41A16644A}.Release|x86.Build.0 = Release|x86
+		{38230CBD-DE3E-4470-925F-DE966E8691AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38230CBD-DE3E-4470-925F-DE966E8691AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38230CBD-DE3E-4470-925F-DE966E8691AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38230CBD-DE3E-4470-925F-DE966E8691AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

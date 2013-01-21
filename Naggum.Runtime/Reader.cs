@@ -92,7 +92,7 @@ namespace Naggum.Runtime
                     in_list = false;
                 }
             }
-            list = new Cons(list_stack.Pop(), list);
+            while (list_stack.Count > 0) list = new Cons(list_stack.Pop(), list);
             return list;
         }
 

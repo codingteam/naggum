@@ -11,6 +11,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Naggum.Runtime", "Naggum.Runtime\Naggum.Runtime.csproj", "{402B5E79-E063-4833-AE4B-2986AEEC1D75}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ngi", "ngi\ngi.csproj", "{34E781DF-EAD9-4034-ADE4-8DA41A16644A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{402B5E79-E063-4833-AE4B-2986AEEC1D75} = {402B5E79-E063-4833-AE4B-2986AEEC1D75}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

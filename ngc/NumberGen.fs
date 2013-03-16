@@ -1,4 +1,4 @@
-﻿(*  Copyright (C) 2011-2012 by ForNeVeR, Hagane
+﻿(*  Copyright (C) 2011-2013 by ForNeVeR, Hagane
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,47 +24,27 @@ open System
 open System.Reflection
 open System.Reflection.Emit
 
-type NumberGen() =
+type NumberGen<'TNumber>() =
     interface IGenerator with
         member this.Generate _ = failwith "Failure: Tried to generate unreified number constant.\n"
-        member this.ReturnTypes () = failwithf "Failure: Tried to infer type of unreified numeric constant.\n"
+        member this.ReturnTypes () = [typeof<'TNumber>]        
 
 type Int32Gen(number: Int32) =
-    class
-        inherit NumberGen()
-        interface IGenerator with
-            member this.Generate ilGen =
-                ilGen.Emit(OpCodes.Ldc_I4,number)
-            member this.ReturnTypes () =
-                [typeof<Int32>]
-    end
+    inherit NumberGen<Int32>()
+    interface IGenerator with
+        member this.Generate ilGen = ilGen.Emit(OpCodes.Ldc_I4, number)
 
 type Int64Gen(number: Int64) =
-    class
-        inherit NumberGen()
-        interface IGenerator with
-            member this.Generate ilGen =
-                ilGen.Emit(OpCodes.Ldc_I8,number)
-            member this.ReturnTypes () =
-                [typeof<Int64>]
-    end
+    inherit NumberGen<Int64>()
+    interface IGenerator with
+        member this.Generate ilGen = ilGen.Emit(OpCodes.Ldc_I8, number)
 
 type SingleGen(number: Single) =
-    class
-        inherit NumberGen()
-        interface IGenerator with
-            member this.Generate ilGen =
-                ilGen.Emit(OpCodes.Ldc_R4,number)
-            member this.ReturnTypes () =
-                [typeof<Single>]
-    end
+    inherit NumberGen<Single>()
+    interface IGenerator with
+        member this.Generate ilGen = ilGen.Emit(OpCodes.Ldc_R4, number)
 
 type DoubleGen(number: Double) =
-    class
-        inherit NumberGen()
-        interface IGenerator with
-            member this.Generate ilGen =
-                ilGen.Emit(OpCodes.Ldc_R8,number)
-            member this.ReturnTypes () =
-                [typeof<Single>]
-    end
+    inherit NumberGen<Double>()
+    interface IGenerator with
+        member this.Generate ilGen = ilGen.Emit(OpCodes.Ldc_R8, number)

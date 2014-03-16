@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Naggum", "Naggum\Naggum.csproj", "{DD66B8AB-F03B-4A1B-B000-7E0BB54C6A50}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Naggum.Tests", "Naggum.Tests\Naggum.Tests.csproj", "{9BE5DE5E-B81C-4CAB-904E-F8DB7D13E2B1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{DD66B8AB-F03B-4A1B-B000-7E0BB54C6A50}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD66B8AB-F03B-4A1B-B000-7E0BB54C6A50}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD66B8AB-F03B-4A1B-B000-7E0BB54C6A50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BE5DE5E-B81C-4CAB-904E-F8DB7D13E2B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BE5DE5E-B81C-4CAB-904E-F8DB7D13E2B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BE5DE5E-B81C-4CAB-904E-F8DB7D13E2B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BE5DE5E-B81C-4CAB-904E-F8DB7D13E2B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

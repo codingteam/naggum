@@ -27,7 +27,17 @@ namespace Naggum
 					case ')':
 						yield return CreateLexem(LexemTokenKind.CloseBrace);
 						continue;
+					case '\'':
+						yield return CreateLexem(LexemTokenKind.Quote);
+						continue;
 				}
+
+				if (char.IsWhiteSpace(character))
+				{
+					continue;
+				}
+
+				// TODO: Parse identifiers.
 			}
 
 			yield return CreateLexem(LexemTokenKind.Eof);

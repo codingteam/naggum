@@ -57,6 +57,9 @@
     <Compile Include="Lexems\LexemTokenKind.cs" />
     <Compile Include="Lexems\TokenLexem.cs" />
     <Compile Include="Lexer.cs" />
+    <Compile Include="Lisp\Atom.cs" />
+    <Compile Include="Lisp\Cons.cs" />
+    <Compile Include="Lisp\TypedAtom.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

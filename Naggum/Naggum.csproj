@@ -53,6 +53,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dlr\NaggumLanguageContext.cs" />
+    <Compile Include="Dlr\NaggumScriptCode.cs" />
     <Compile Include="Lexems\Lexem.cs" />
     <Compile Include="Lexems\LexemTokenKind.cs" />
     <Compile Include="Lexems\TokenLexem.cs" />

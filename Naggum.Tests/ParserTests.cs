@@ -9,9 +9,27 @@ namespace Naggum.Tests
 	public class ParserTests
 	{
 		[TestMethod]
-		public void UnitTest()
+		public void EmptyFileTest()
+		{
+			Test(string.Empty);
+		}
+
+		[TestMethod]
+		public void NilTest()
 		{
 			Test("()", Cons.Nil);
+		}
+
+		[TestMethod]
+		public void ChainedListTest()
+		{
+			Test("()()", Cons.Nil, Cons.Nil);
+		}
+
+		[TestMethod]
+		public void NestedListTest()
+		{
+			Test("(())", new Cons(Cons.Nil, Cons.Nil));
 		}
 
 		private static void Test(string source, params Atom[] expected)

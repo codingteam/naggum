@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Naggum.Lexems;
 using Naggum.Lisp;
 
@@ -16,47 +17,50 @@ namespace Naggum
 
 		public IEnumerable<Atom> Parse()
 		{
-			var atoms = new Stack<Atom>();
-			foreach (var lexem in _lexer.Read())
+			using (var state = _lexer.Read().GetEnumerator())
 			{
-				switch (lexem.Kind)
+				foreach (var atom in ReadList(state, LexemFactory.Eof))
 				{
-					case LexemKind.TokenLexem:
-					{
-						var tokenLexem = (TokenLexem)lexem;
-						switch (tokenLexem.TokenKind)
-						{
-							case LexemTokenKind.OpenBrace:
-								atoms.Push(Cons.Nil);
-								break;
-
-							case LexemTokenKind.CloseBrace:
-								if (atoms.Count == 0)
-								{
-									throw new Exception("Unopened brace detected");
-								}
-
-								yield return atoms.Pop();
-								break;
-
-							case LexemTokenKind.Eof:
-								if (atoms.Count != 0)
-								{
-									throw new Exception("Unclosed brace detected");
-								}
-
-								yield break;
-
-							default:
-								throw new NotSupportedException(
-									"Lexem token kind not supported: " + tokenLexem.TokenKind);
-						}
-
-						break;
-					}
-					default:
-						throw new NotSupportedException("Lexem kind not supported: " + lexem.Kind);
+					yield return atom;
 				}
+			}
+		}
+
+		private Atom ReadAtom(IEnumerator<Lexem> state)
+		{
+			var lexem = state.Current;
+			switch (lexem.Kind)
+			{
+				case LexemKind.TokenLexem:
+				{
+					var tokenLexem = (TokenLexem)lexem;
+					switch (tokenLexem.TokenKind)
+					{
+						case LexemTokenKind.OpenBrace:
+							var innerAtoms = ReadList(state, LexemFactory.CloseBrace).ToList();
+							if (!LexemFactory.CloseBrace.Equals(state.Current))
+							{
+								throw new Exception("Unexpected " + state.Current);
+							}
+
+							state.MoveNext();
+							return Cons.FromEnumerable(innerAtoms);
+
+						default:
+							throw new Exception("Unexpected " + tokenLexem);
+					}
+				}
+				default:
+					throw new Exception("Unexpected " + lexem.Kind);
+			}
+		}
+
+		private IEnumerable<Atom> ReadList(IEnumerator<Lexem> state, TokenLexem finalToken)
+		{
+			state.MoveNext();
+			while (!finalToken.Equals(state.Current))
+			{
+				yield return ReadAtom(state);
 			}
 		}
 	}

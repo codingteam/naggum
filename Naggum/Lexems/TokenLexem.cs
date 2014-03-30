@@ -26,5 +26,10 @@
 		{
 			return (int)TokenKind;
 		}
+
+		public override string ToString()
+		{
+			return TokenKind.ToString();
+		}
 	}
 }

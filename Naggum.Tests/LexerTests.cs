@@ -11,7 +11,7 @@ namespace Naggum.Tests
 		[TestMethod]
 		public void EmptyInputTest()
 		{
-			Test(string.Empty, CreateLexem(LexemTokenKind.Eof));
+			Test(string.Empty, LexemFactory.CreateLexem(LexemTokenKind.Eof));
 		}
 
 		[TestMethod]
@@ -19,15 +19,10 @@ namespace Naggum.Tests
 		{
 			Test(
 				"'()",
-				CreateLexem(LexemTokenKind.Quote),
-				CreateLexem(LexemTokenKind.OpenBrace),
-				CreateLexem(LexemTokenKind.CloseBrace),
-				CreateLexem(LexemTokenKind.Eof));
-		}
-
-		private static Lexem CreateLexem(LexemTokenKind tokenKind)
-		{
-			return new TokenLexem(tokenKind);
+				LexemFactory.CreateLexem(LexemTokenKind.Quote),
+				LexemFactory.CreateLexem(LexemTokenKind.OpenBrace),
+				LexemFactory.CreateLexem(LexemTokenKind.CloseBrace),
+				LexemFactory.CreateLexem(LexemTokenKind.Eof));
 		}
 
 		private void Test(string source, params Lexem[] expected)

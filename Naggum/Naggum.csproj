@@ -56,12 +56,15 @@
     <Compile Include="Dlr\NaggumLanguageContext.cs" />
     <Compile Include="Dlr\NaggumScriptCode.cs" />
     <Compile Include="Lexems\Lexem.cs" />
+    <Compile Include="Lexems\LexemFactory.cs" />
+    <Compile Include="Lexems\LexemKind.cs" />
     <Compile Include="Lexems\LexemTokenKind.cs" />
     <Compile Include="Lexems\TokenLexem.cs" />
     <Compile Include="Lexer.cs" />
     <Compile Include="Lisp\Atom.cs" />
     <Compile Include="Lisp\Cons.cs" />
     <Compile Include="Lisp\TypedAtom.cs" />
+    <Compile Include="Parser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

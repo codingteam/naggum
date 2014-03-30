@@ -4,14 +4,14 @@
 	{
 		public LexemTokenKind TokenKind { get; private set; }
 
-		public TokenLexem(LexemTokenKind tokenKind)
+		public TokenLexem(LexemTokenKind tokenKind) : base(LexemKind.TokenLexem)
 		{
 			TokenKind = tokenKind;
 		}
 
 		protected bool Equals(TokenLexem other)
 		{
-			return TokenKind == other.TokenKind;
+			return base.Equals(other) && TokenKind == other.TokenKind;
 		}
 
 		public override bool Equals(object obj)

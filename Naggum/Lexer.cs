@@ -22,13 +22,13 @@ namespace Naggum
 				switch (character)
 				{
 					case '(':
-						yield return CreateLexem(LexemTokenKind.OpenBrace);
+						yield return LexemFactory.CreateLexem(LexemTokenKind.OpenBrace);
 						continue;
 					case ')':
-						yield return CreateLexem(LexemTokenKind.CloseBrace);
+						yield return LexemFactory.CreateLexem(LexemTokenKind.CloseBrace);
 						continue;
 					case '\'':
-						yield return CreateLexem(LexemTokenKind.Quote);
+						yield return LexemFactory.CreateLexem(LexemTokenKind.Quote);
 						continue;
 				}
 
@@ -40,12 +40,7 @@ namespace Naggum
 				// TODO: Parse identifiers.
 			}
 
-			yield return CreateLexem(LexemTokenKind.Eof);
-		}
-
-		private Lexem CreateLexem(LexemTokenKind tokenKind)
-		{
-			return new TokenLexem(tokenKind);
+			yield return LexemFactory.CreateLexem(LexemTokenKind.Eof);
 		}
 	}
 }

@@ -67,13 +67,19 @@
     <Compile Include="GeneratorFactory.fs" />
     <Compile Include="Generator.fs" />
     <Compile Include="Program.fs" />
+    <Content Include="App.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FParsec">
-      <HintPath>..\3rdparty\FParsec.dll</HintPath>
+      <HintPath>..\packages\FParsec.1.0.2\lib\net40-client\FParsec.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="FParsecCS">
-      <HintPath>..\3rdparty\FParsecCS.dll</HintPath>
+      <HintPath>..\packages\FParsec.1.0.2\lib\net40-client\FParsecCS.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
@@ -82,18 +88,11 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Naggum.Runtime\Naggum.Runtime.csproj">
       <Name>Naggum.Runtime</Name>
       <Project>{402b5e79-e063-4833-ae4b-2986aeec1d75}</Project>
       <Private>True</Private>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="App.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 	     Other similar extension points exist, see Microsoft.Common.targets.

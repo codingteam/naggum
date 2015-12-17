@@ -11,4 +11,5 @@ that makes use of most of .Net's benefits.
 
 ## License
 
-Naggum is licensed under the terms of MIT License.
+Naggum is licensed under the terms of MIT License. See License.md file for
+details.

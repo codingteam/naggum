@@ -1,10 +1,12 @@
 ﻿namespace Naggum.Test
-open Naggum.Compiler
-open NUnit.Framework
+
 open System.Diagnostics
 open System.IO
 
-[<TestFixture>]
+open Xunit
+
+open Naggum.Compiler
+
 type CompilerTest() =
     static let testExtension = "naggum"
     static let resultExtension = "result"
@@ -28,9 +30,9 @@ type CompilerTest() =
         let result = ``process``.StandardOutput.ReadToEnd()
 
         let reference = File.ReadAllText resultPath
-        Assert.AreEqual(reference, result)
+        Assert.Equal(reference, result)
 
-    [<Test>]
+    [<Fact>]
     member this.RunTests() =
         filenames
-        |> List.iter CompilerTest.RunTest    
+        |> List.iter CompilerTest.RunTest

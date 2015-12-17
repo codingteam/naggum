@@ -1,8 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ngc", "ngc\ngc.fsproj", "{A4269C5E-E4AC-44BF-A06E-1B45248910AD}"
-EndProject
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test programs", "Test programs", "{2972575D-A421-4759-AE89-57560E0224AE}"
 	ProjectSection(SolutionItems) = preProject
 		tests\comment.naggum = tests\comment.naggum
@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test programs", "Test progr
 		tests\test.naggum = tests\test.naggum
 		tests\test.result = tests\test.result
 	EndProjectSection
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ngc", "ngc\ngc.fsproj", "{A4269C5E-E4AC-44BF-A06E-1B45248910AD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Naggum.Runtime", "Naggum.Runtime\Naggum.Runtime.csproj", "{402B5E79-E063-4833-AE4B-2986AEEC1D75}"
 EndProject
@@ -64,6 +66,7 @@ Global
 		{38230CBD-DE3E-4470-925F-DE966E8691AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{38230CBD-DE3E-4470-925F-DE966E8691AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38230CBD-DE3E-4470-925F-DE966E8691AA}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{38230CBD-DE3E-4470-925F-DE966E8691AA}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{38230CBD-DE3E-4470-925F-DE966E8691AA}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{38230CBD-DE3E-4470-925F-DE966E8691AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38230CBD-DE3E-4470-925F-DE966E8691AA}.Release|Any CPU.Build.0 = Release|Any CPU

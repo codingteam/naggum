@@ -27,9 +27,9 @@ type CompilerTest() =
         let startInfo = new ProcessStartInfo(executablePath, UseShellExecute = false, RedirectStandardOutput = true)
         let ``process`` = Process.Start startInfo
         ``process``.WaitForExit()
-        let result = ``process``.StandardOutput.ReadToEnd()
+        let result = ``process``.StandardOutput.ReadToEnd().Replace("\r\n", "\n")
 
-        let reference = File.ReadAllText resultPath
+        let reference = (File.ReadAllText resultPath).Replace("\r\n", "\n")
         Assert.Equal(reference, result)
 
     [<Fact>]

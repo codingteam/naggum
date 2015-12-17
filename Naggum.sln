@@ -25,6 +25,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{F85A1ACB-4A60-46A9-856D-92A3C9B97402}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		appveyor.yml = appveyor.yml
 		License.md = License.md
 		Readme.md = Readme.md
 	EndProjectSection

@@ -1,4 +1,4 @@
-Naggum [![Status Enfer][status-enfer]][andivionian-status-classifier]
+Naggum [![Status Enfer][status-enfer]][andivionian-status-classifier] [![Build status][build-status-appveyor]][appveyor]
 ======
 Naggum (named in honor of [Erik Naggum][eric-naggum]) /(is|will be)/ a Lisp
 dialect based on Common Language Infrastructure (aka .NET Framework / Mono).
@@ -14,6 +14,8 @@ that makes use of most of .Net's benefits.
 Naggum is licensed under the terms of MIT License. See License.md file for
 details.
 
+[build-status-appveyor]: https://ci.appveyor.com/api/projects/status/ulgo3ry7eudc5d7a/branch/develop?svg=true
 [status-enfer]: https://img.shields.io/badge/status-enfer-orange.svg
 
 [andivionian-status-classifier]: https://github.com/ForNeVeR/andivionian-status-classifier
+[appveyor]: https://ci.appveyor.com/project/ForNeVeR/naggum/branch/develop

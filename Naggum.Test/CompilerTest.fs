@@ -2,6 +2,7 @@
 
 open System.Diagnostics
 open System.IO
+open System.Reflection
 
 open Xunit
 
@@ -12,7 +13,7 @@ type CompilerTest() =
     static let resultExtension = "result"
     static let executableExtension = "exe"
     
-    static let directory = @"..\..\..\tests"
+    static let directory = Path.Combine ("..", "..", "..", "tests")
     static let filenames = [@"comment"; @"test"]
 
     static member private RunTest testName =

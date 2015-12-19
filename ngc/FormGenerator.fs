@@ -66,7 +66,7 @@ type BodyGenerator(context : Context,
                 ilGen.Emit(OpCodes.Ldnull)
             | [last] ->
                 let gen = gf.MakeGenerator context last
-                let stackType = Seq.head <| gen.ReturnTypes ()
+                let stackType = List.head <| gen.ReturnTypes ()
                 let returnType = methodBuilder.ReturnType
                 gen.Generate ilGen
                 match (stackType, returnType) with
@@ -133,6 +133,7 @@ type LetGenerator(context : Context,
             (gf.MakeBody type_subctx body).ReturnTypes()
 
 type ReducedIfGenerator(context:Context,typeBuilder:TypeBuilder,condition:SExp,if_true:SExp,gf:IGeneratorFactory) =
+    let returnTypes = (gf.MakeGenerator context if_true).ReturnTypes()
     interface IGenerator with
         member this.Generate ilGen =
             let cond_gen = gf.MakeGenerator context condition
@@ -141,13 +142,16 @@ type ReducedIfGenerator(context:Context,typeBuilder:TypeBuilder,condition:SExp,i
             let end_form = ilGen.DefineLabel()
             cond_gen.Generate ilGen
             ilGen.Emit (OpCodes.Brtrue, if_true_lbl)
-            ilGen.Emit OpCodes.Ldnull
-            ilGen.Emit (OpCodes.Br,end_form)
+            
+            if List.head returnTypes <> typeof<Void>
+            then ilGen.Emit OpCodes.Ldnull
+            
+            ilGen.Emit (OpCodes.Br, end_form)
             ilGen.MarkLabel if_true_lbl
             if_true_gen.Generate ilGen
             ilGen.MarkLabel end_form
         member this.ReturnTypes () =
-            (gf.MakeGenerator context if_true).ReturnTypes()
+            returnTypes
 
 type FullIfGenerator(context:Context,typeBuilder:TypeBuilder,condition:SExp,if_true:SExp,if_false:SExp,gf:IGeneratorFactory) =
     interface IGenerator with

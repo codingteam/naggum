@@ -36,7 +36,7 @@ let compile (source : Stream) (assemblyName : string) (fileName : string) (asmRe
     let methodBuilder = typeBuilder.DefineMethod ("Main",
                                                   MethodAttributes.Public ||| MethodAttributes.Static,
                                                   typeof<Void>,
-                                                  Array.Empty ())
+                                                  [| |])
     
     let gf = new GeneratorFactory(typeBuilder, methodBuilder) :> IGeneratorFactory
     assemblyBuilder.SetEntryPoint methodBuilder

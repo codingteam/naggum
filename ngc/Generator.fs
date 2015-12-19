@@ -2,17 +2,12 @@
 
 open System
 open System.IO
-open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
 
-open Naggum.Compiler.Globals
 open Naggum.Compiler.IGenerator
 open Naggum.Compiler.GeneratorFactory
 open Naggum.Compiler.Reader
-open Naggum.Runtime
-
-open Context
 
 let private prologue (ilGen : ILGenerator) =
     ilGen.BeginScope()
@@ -38,9 +33,12 @@ let compile (source : Stream) (assemblyName : string) (fileName : string) (asmRe
     let assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Save)
     Globals.ModuleBuilder <- assemblyBuilder.DefineDynamicModule(assemblyBuilder.GetName().Name, fileName)
     let typeBuilder = Globals.ModuleBuilder.DefineType("Program", TypeAttributes.Public ||| TypeAttributes.Class ||| TypeAttributes.BeforeFieldInit)
-    let methodBuilder = typeBuilder.DefineMethod("Main", MethodAttributes.Public ||| MethodAttributes.Static, typeof<int>, [| |])
+    let methodBuilder = typeBuilder.DefineMethod ("Main",
+                                                  MethodAttributes.Public ||| MethodAttributes.Static,
+                                                  typeof<Void>,
+                                                  Array.Empty ())
     
-    let gf = new GeneratorFactory(typeBuilder) :> IGeneratorFactory
+    let gf = new GeneratorFactory(typeBuilder, methodBuilder) :> IGeneratorFactory
     assemblyBuilder.SetEntryPoint methodBuilder
     
     let context = Context.create ()

@@ -28,9 +28,14 @@ let compileMethod context (generatorFactory : IGeneratorFactory) body (methodBui
 
     epilogue context ilGenerator
 
-let compile (source : Stream) (assemblyName : string) (fileName : string) (asmRefs:string list): unit =
-    let assemblyName = new AssemblyName(assemblyName)
-    let assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Save)
+let compile (source : Stream) (assemblyName : string) (filePath : string) (asmRefs:string list): unit =
+    let assemblyName = AssemblyName assemblyName
+    let path = Path.GetDirectoryName filePath
+    let assemblyPath = if path = "" then null else path
+    let fileName = Path.GetFileName filePath
+    let appDomain = AppDomain.CurrentDomain
+
+    let assemblyBuilder = appDomain.DefineDynamicAssembly (assemblyName, AssemblyBuilderAccess.Save, assemblyPath)
     Globals.ModuleBuilder <- assemblyBuilder.DefineDynamicModule(assemblyBuilder.GetName().Name, fileName)
     let typeBuilder = Globals.ModuleBuilder.DefineType("Program", TypeAttributes.Public ||| TypeAttributes.Class ||| TypeAttributes.BeforeFieldInit)
     let methodBuilder = typeBuilder.DefineMethod ("Main",

@@ -8,16 +8,26 @@ type MetadataItem =
 type Visibility =
     | Public
 
+type Type = System.Type
+
+type MethodSignature =
+    { Assembly : Assembly option
+      ContainingType : Type option
+      Name : string
+      ArgumentTypes : Type list
+      ReturnType : Type }
+
 type Instruction =
     | Ldstr of string
-    | Call of MethodInfo
+    | Call of MethodSignature
     | Ret
 
 type MethodDefinition =
     { Metadata : Set<MetadataItem>
       Visibility : Visibility
       Name : string
-      ReturnType : System.Type
+      ArgumentTypes : Type list
+      ReturnType : Type
       Body : Instruction list }
 
 type AssemblyUnit =

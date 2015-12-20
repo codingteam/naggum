@@ -1,6 +1,7 @@
 ﻿module Naggum.Assembler.Assembler
 
 open System
+open System.Reflection
 open System.Reflection.Emit
 
 open Naggum.Assembler.Representation
@@ -11,9 +12,40 @@ let processMetadataItem = function
     | Atom (Symbol ".entrypoint") -> EntryPoint
     | other -> failwithf "Unrecognized metadata item definition: %A" other
 
+let resolveAssembly _ =
+    Assembly.GetAssembly(typeof<Int32>) // TODO: Assembly resolver
+
+let resolveType name =
+    let result = Type.GetType name // TODO: Resolve types from the assembler context
+    if isNull result then
+        failwithf "Type %s could not be found" name
+
+    result
+
+let resolveTypes =
+    List.map (function 
+              | Atom (Symbol name) -> resolveType name
+              | other -> failwithf "Unrecognized type: %A" other)
+
+let processMethodSignature = function
+    | [Atom (Symbol assembly)
+       Atom (Symbol typeName)
+       Atom (Symbol methodName)
+       List argumentTypes
+       Atom (Symbol returnType)] ->
+        { Assembly = Some (resolveAssembly assembly) // TODO: Resolve types from current assembly
+          ContainingType = Some (resolveType typeName) // TODO: Resolve methods without a type (e.g. assembly methods)
+          Name = methodName
+          ArgumentTypes = resolveTypes argumentTypes
+          ReturnType = resolveType typeName }
+    | other -> failwithf "Unrecognized method signature: %A" other
+
 let processInstruction = function
-    | List ([Atom (Symbol "ldstr"); Atom (Symbol string)]) -> Ldstr string
-    | List ([Atom (Symbol "call"); Atom (Symbol methodName)]) -> failwithf "Method calls are not supported now"
+    | List ([Atom (Symbol "ldstr"); Atom (Object (:? string as s))]) ->
+        Ldstr s
+    | List ([Atom (Symbol "call"); List (calleeSignature)]) ->
+        let signature = processMethodSignature calleeSignature
+        Call signature
     | List ([Atom (Symbol "ret")]) -> Ret
     | other -> failwithf "Unrecognized instruction: %A" other
 
@@ -32,12 +64,18 @@ let addBody body method' =
               body
 
 let processAssemblyUnit = function
-    | List (Atom (Symbol ".method") :: Atom (Symbol name) :: List arguments :: List metadata :: body) ->
+    | List (Atom (Symbol ".method")
+            :: Atom (Symbol name)
+            :: List argumentTypes
+            :: Atom (Symbol returnType)
+            :: List metadata
+            :: body) ->
         let definition =
             { Metadata = Set.empty
               Visibility = Public // TODO: Determine method visibility
               Name = name
-              ReturnType = typeof<Void> // TODO: Determine method return type
+              ArgumentTypes = resolveTypes argumentTypes
+              ReturnType = resolveType returnType
               Body = List.empty }
         definition
         |> addMetadata metadata

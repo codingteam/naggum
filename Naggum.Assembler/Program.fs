@@ -25,7 +25,7 @@ let save (assembly : AssemblyBuilder) =
 
 let assemble fileName =
     use stream = File.OpenRead fileName
-    let repr = Assembler.prepare fileName stream
+    let repr = Processor.prepare fileName stream
     let assemblies = Assembler.assemble repr
     assemblies |> Seq.iter save
 

@@ -52,7 +52,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="packages.config" />
-    <Compile Include="AssemblerTests.fs" />
+    <Compile Include="ProcessorTests.fs" />
     <Compile Include="CompilerTest.fs" />
   </ItemGroup>
   <ItemGroup>

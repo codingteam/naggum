@@ -1,4 +1,4 @@
-﻿module Naggum.Test.AssemblerTest
+﻿module Naggum.Test.ProcessorTests
 
 open System
 open System.IO
@@ -29,7 +29,7 @@ let consoleWriteLine =
 
 let checkPreparationResult (source : string) (expected : Assembly list) =
     use stream = new MemoryStream(Encoding.UTF8.GetBytes source)
-    let actual = Assembler.prepare "file.ngi" stream |> Seq.toList
+    let actual = Processor.prepare "file.ngi" stream |> Seq.toList
 
     Assert.Equal (expected.ToString (), actual.ToString ()) // for diagnostic
     Assert.Equal<Assembly list> (expected, actual)

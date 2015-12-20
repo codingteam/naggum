@@ -51,6 +51,7 @@
     <None Include="App.config" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Representation.fs" />
+    <Compile Include="Processor.fs" />
     <Compile Include="Assembler.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

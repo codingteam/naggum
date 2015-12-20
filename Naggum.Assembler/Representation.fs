@@ -36,3 +36,4 @@ type AssemblyUnit =
 type Assembly =
     { Name : string
       Units : AssemblyUnit list }
+    override this.ToString () = sprintf "%A" this

@@ -37,7 +37,7 @@ let processMethodSignature = function
           ContainingType = Some (resolveType typeName) // TODO: Resolve methods without a type (e.g. assembly methods)
           Name = methodName
           ArgumentTypes = resolveTypes argumentTypes
-          ReturnType = resolveType typeName }
+          ReturnType = resolveType returnType }
     | other -> failwithf "Unrecognized method signature: %A" other
 
 let processInstruction = function

@@ -48,11 +48,12 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
-    <Compile Include="CompilerTest.fs" />
-    <Content Include="packages.config" />
     <Content Include="Naggum.Test.dll.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="packages.config" />
+    <Compile Include="AssemblerTests.fs" />
+    <Compile Include="CompilerTest.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -80,6 +81,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Naggum.Assembler\Naggum.Assembler.fsproj">
+      <Name>Naggum.Assembler</Name>
+      <Project>{40b84f1e-1823-4255-80d4-1297613025c1}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Naggum.Compiler\Naggum.Compiler.fsproj">
       <Name>Naggum.Compiler</Name>
       <Project>{a4269c5e-e4ac-44bf-a06e-1b45248910ad}</Project>

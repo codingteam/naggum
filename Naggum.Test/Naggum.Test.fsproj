@@ -52,8 +52,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="packages.config" />
-    <Compile Include="ProcessorTests.fs" />
     <Compile Include="CompilerTest.fs" />
+    <Compile Include="AssemblerTests.fs" />
+    <Compile Include="ProcessorTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

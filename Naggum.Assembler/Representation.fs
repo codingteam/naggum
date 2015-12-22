@@ -18,8 +18,8 @@ type MethodSignature =
       ReturnType : Type }
 
 type Instruction =
-    | Ldstr of string
     | Call of MethodSignature
+    | Ldstr of string
     | Ret
 
 type MethodDefinition =

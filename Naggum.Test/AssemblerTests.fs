@@ -35,4 +35,4 @@ let ``Hello world should be executed`` () =
     (ret)))
 "
     let output = execute source
-    Assert.Equal ("Hello, world!", output)
+    Assert.Equal ("Hello, world!\n", output)

@@ -26,10 +26,7 @@ type CompilerTest() =
         use stream = File.Open(testPath, FileMode.Open)
         Generator.compile stream testName executablePath []
 
-        let startInfo = new ProcessStartInfo(executablePath, UseShellExecute = false, RedirectStandardOutput = true)
-        let ``process`` = Process.Start startInfo
-        ``process``.WaitForExit()
-        let result = ``process``.StandardOutput.ReadToEnd().Replace("\r\n", "\n")
+        let result = Process.run executablePath
 
         let reference = (File.ReadAllText resultPath).Replace("\r\n", "\n")
         Assert.Equal(reference, result)

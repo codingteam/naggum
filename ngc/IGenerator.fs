@@ -1,7 +1,6 @@
 ﻿module Naggum.Compiler.IGenerator
 
 open System
-open System.Reflection
 open System.Reflection.Emit
 
 open Naggum.Compiler.Reader
@@ -19,5 +18,5 @@ type IGeneratorFactory =
         abstract MakeGenerator : Context -> SExp -> IGenerator
         abstract MakeSequence : Context -> SExp list -> IGenerator
         abstract MakeBody : Context -> SExp list -> IGenerator
-        abstract MakeGeneratorFactory : TypeBuilder -> IGeneratorFactory
+        abstract MakeGeneratorFactory : TypeBuilder -> MethodBuilder -> IGeneratorFactory
     end

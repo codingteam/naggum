@@ -5,11 +5,8 @@ open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
 open Naggum.Runtime
-open Naggum.Compiler.Globals
-open Naggum.Compiler.Reader
 open Naggum.Compiler.Context
 open Naggum.Compiler.IGenerator
-open Naggum.Util.MaybeMonad
 open Naggum.Compiler.Reader
 
 type FormGenerator() =
@@ -59,27 +56,34 @@ type SequenceGenerator(context:Context,typeBuilder:TypeBuilder,seq:SExp list, gf
         member this.ReturnTypes () =
             List.map (fun (sexp) -> List.head ((gf.MakeGenerator context sexp).ReturnTypes())) seq
 
-type BodyGenerator(context:Context,typeBuilder:TypeBuilder,body:SExp list, gf:IGeneratorFactory) =
-    member private this.gen_body (ilGen:ILGenerator,body:SExp list) =
+type BodyGenerator(context : Context,
+                   methodBuilder : MethodBuilder,
+                   body : SExp list,
+                   gf : IGeneratorFactory) =
+    let rec genBody (ilGen : ILGenerator) (body : SExp list) =
         match body with
             | [] ->
                 ilGen.Emit(OpCodes.Ldnull)
             | [last] ->
                 let gen = gf.MakeGenerator context last
-                let val_type = gen.ReturnTypes()
+                let stackType = List.head <| gen.ReturnTypes ()
+                let returnType = methodBuilder.ReturnType
                 gen.Generate ilGen
-                if ((List.head val_type) = typeof<System.Void>) then
-                    ilGen.Emit(OpCodes.Ldnull)
+                match (stackType, returnType) with
+                | (s, r) when s = typeof<Void> && r = typeof<Void> -> ()
+                | (s, r) when s = typeof<Void> && r <> typeof<Void> -> ilGen.Emit OpCodes.Ldnull
+                | (s, r) when s <> typeof<Void> && r = typeof<Void> -> ilGen.Emit OpCodes.Pop
+                | _ -> ()
             | sexp :: rest ->
                 let gen = gf.MakeGenerator context sexp
                 let val_type = gen.ReturnTypes()
                 gen.Generate ilGen
-                if not (List.head val_type = typeof<System.Void>) then
+                if List.head val_type <> typeof<Void> then
                     ilGen.Emit(OpCodes.Pop)
-                this.gen_body (ilGen,rest)
+                genBody ilGen rest
     interface IGenerator with
-        member this.Generate ilGen = 
-            this.gen_body (ilGen,body)
+        member __.Generate ilGen = 
+            genBody ilGen body
         member this.ReturnTypes () =
             match body with
             |[] -> [typeof<System.Void>]
@@ -89,7 +93,12 @@ type BodyGenerator(context:Context,typeBuilder:TypeBuilder,body:SExp list, gf:IG
                     [typeof<obj>]
                 else tail_type
 
-type LetGenerator(context:Context,typeBuilder:TypeBuilder,bindings:SExp,body:SExp list,gf:IGeneratorFactory) =
+type LetGenerator(context : Context,
+                  typeBuilder : TypeBuilder,
+                  methodBuilder : MethodBuilder,
+                  bindings:SExp,
+                  body : SExp list,
+                  gf : IGeneratorFactory) =
     interface IGenerator with
         member this.Generate ilGen =
             ilGen.BeginScope()
@@ -107,7 +116,7 @@ type LetGenerator(context:Context,typeBuilder:TypeBuilder,bindings:SExp,body:SEx
                         ilGen.Emit (OpCodes.Stloc,local)
                     | other -> failwithf "In let bindings: Expected: (name (form))\nGot: %A\n" other
             | other -> failwithf "In let form: expected: list of bindings\nGot: %A" other
-            let bodyGen = (new BodyGenerator (scope_subctx,typeBuilder,body,gf) :> IGenerator)
+            let bodyGen = new BodyGenerator (scope_subctx, methodBuilder, body, gf) :> IGenerator
             bodyGen.Generate ilGen
             ilGen.EndScope()
         member this.ReturnTypes () =
@@ -124,6 +133,7 @@ type LetGenerator(context:Context,typeBuilder:TypeBuilder,bindings:SExp,body:SEx
             (gf.MakeBody type_subctx body).ReturnTypes()
 
 type ReducedIfGenerator(context:Context,typeBuilder:TypeBuilder,condition:SExp,if_true:SExp,gf:IGeneratorFactory) =
+    let returnTypes = (gf.MakeGenerator context if_true).ReturnTypes()
     interface IGenerator with
         member this.Generate ilGen =
             let cond_gen = gf.MakeGenerator context condition
@@ -132,13 +142,16 @@ type ReducedIfGenerator(context:Context,typeBuilder:TypeBuilder,condition:SExp,i
             let end_form = ilGen.DefineLabel()
             cond_gen.Generate ilGen
             ilGen.Emit (OpCodes.Brtrue, if_true_lbl)
-            ilGen.Emit OpCodes.Ldnull
-            ilGen.Emit (OpCodes.Br,end_form)
+            
+            if List.head returnTypes <> typeof<Void>
+            then ilGen.Emit OpCodes.Ldnull
+            
+            ilGen.Emit (OpCodes.Br, end_form)
             ilGen.MarkLabel if_true_lbl
             if_true_gen.Generate ilGen
             ilGen.MarkLabel end_form
         member this.ReturnTypes () =
-            (gf.MakeGenerator context if_true).ReturnTypes()
+            returnTypes
 
 type FullIfGenerator(context:Context,typeBuilder:TypeBuilder,condition:SExp,if_true:SExp,if_false:SExp,gf:IGeneratorFactory) =
     interface IGenerator with
@@ -181,7 +194,8 @@ type DefunGenerator(context:Context,typeBuilder:TypeBuilder,fname:string,paramet
                                                     let parm_idx = (List.findIndex (fun (p) -> p = parm) parameters)
                                                     fun_ctx.locals.[new Symbol(parm_name)] <- Arg (parm_idx,arg_types.[parm_idx])
                                                 | other -> failwithf "In function %A parameter definition:\nExpected: Atom(Symbol)\nGot: %A" fname parm
-                                            let bodyGen = gf.MakeBody fun_ctx body
+                                            let methodFactory = gf.MakeGeneratorFactory typeBuilder methodGen
+                                            let bodyGen = methodFactory.MakeBody fun_ctx body
                                             bodyGen.Generate methodILGen
                                             methodILGen.Emit(OpCodes.Ret)
                                             methodGen :> MethodInfo)
@@ -249,7 +263,6 @@ type TypeGenerator(context : Context, typeBuilder : TypeBuilder, typeName : stri
             Globals.ModuleBuilder.DefineType(typeName, TypeAttributes.Class ||| TypeAttributes.Public, typeof<obj>)
         else
             Globals.ModuleBuilder.DefineType(typeName, TypeAttributes.Class ||| TypeAttributes.Public, context.types.[new Symbol(parentTypeName)])
-    let newGeneratorFactory = gf.MakeGeneratorFactory newTypeBuilder
     let mutable fields : string list = []
 
     let generate_field field_name =
@@ -266,6 +279,7 @@ type TypeGenerator(context : Context, typeBuilder : TypeBuilder, typeName : stri
                 let parm_idx = (List.findIndex (fun (p) -> p = parm) method_parms)
                 method_ctx.locals.[new Symbol(parm_name)] <- Arg (parm_idx,typeof<obj>)
             | other -> failwithf "In method %A%A parameter definition:\nExpected: Atom(Symbol)\nGot: %A" typeName method_name parm
+        let newGeneratorFactory = gf.MakeGeneratorFactory newTypeBuilder method_gen
         let body_gen = newGeneratorFactory.MakeBody method_ctx method_body
         body_gen.Generate (method_gen.GetILGenerator())
         (method_gen.GetILGenerator()).Emit(OpCodes.Ret)

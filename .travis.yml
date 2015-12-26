@@ -1,0 +1,9 @@
+language: csharp
+mono: latest
+solution: Naggum.sln
+install:
+    - nuget restore Naggum.sln
+    - nuget install xunit.runner.console -Version 2.1.0 -OutputDirectory testrunner
+script:
+    - xbuild /p:Configuration=Release /p:TargetFrameworkVersion="v4.5" Naggum.sln
+    - mono ./testrunner/xunit.runner.console.2.1.0/tools/xunit.console.exe ./Naggum.Test/bin/Release/Naggum.Test.dll

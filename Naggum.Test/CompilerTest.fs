@@ -1,5 +1,6 @@
 ﻿namespace Naggum.Test
 
+open System
 open System.Diagnostics
 open System.IO
 
@@ -12,14 +13,15 @@ type CompilerTest() =
     static let resultExtension = "result"
     static let executableExtension = "exe"
     
-    static let directory = @"..\..\..\tests"
+    static let directory = Path.Combine ("..", "..", "..", "tests")
     static let filenames = [@"comment"; @"test"]
 
     static member private RunTest testName =
         let basePath = Path.Combine(directory, testName)
         let testPath = Path.ChangeExtension(basePath, testExtension)
         let resultPath = Path.ChangeExtension(basePath, resultExtension)
-        let executablePath = Path.ChangeExtension(testName, executableExtension)
+        let executableName = Path.ChangeExtension (testName, executableExtension)
+        let executablePath = Path.Combine (Environment.CurrentDirectory, executableName)
 
         use stream = File.Open(testPath, FileMode.Open)
         Generator.compile stream testName executablePath []

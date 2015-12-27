@@ -27,7 +27,7 @@ let ``Empty assembly should be assembled`` () =
     Assert.Equal (1, result.Length)
 
 [<Fact>]
-let ``Hello world should be executed`` () =
+let ``Hello world program should be executed`` () =
     let source = "(.assembly Hello
   (.method Main () System.Void (.entrypoint)
     (ldstr \"Hello, world!\")
@@ -36,3 +36,18 @@ let ``Hello world should be executed`` () =
 "
     let output = execute source
     Assert.Equal ("Hello, world!\n", output)
+
+[<Fact>]
+let ``Sum program should be executed`` () =
+    let source = "(.assembly Sum
+  (.method Main () System.Void (.entrypoint)
+    (ldc.i4 10)
+    (ldc.i4 20)
+    (ldc.i4 30)
+    (add)
+    (add)
+    (call (mscorlib System.Console WriteLine (System.Int32) System.Void))
+    (ret)))
+"
+    let output = execute source
+    Assert.Equal ("60\n", output)

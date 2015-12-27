@@ -28,8 +28,9 @@ let private buildMethodBody (m : MethodDefinition) (builder : MethodBuilder) =
                   | Call signature ->
                       let methodInfo = findMethod signature
                       generator.Emit (OpCodes.Call, methodInfo)
+                  | LdcI4 i -> generator.Emit (OpCodes.Ldc_I4, i)
                   | Ldstr string -> generator.Emit (OpCodes.Ldstr, string)
-                  | Ret -> generator.Emit (OpCodes.Ret))
+                  | SimpleInstruction r -> generator.Emit r)
 
 let private assembleUnit (assemblyBuilder : AssemblyBuilder) (builder : ModuleBuilder) = function
     | Method m ->

@@ -3,10 +3,16 @@
 open System
 open System.IO
 open System.Reflection
+open System.Reflection.Emit
 
 open Naggum.Assembler.Representation
 open Naggum.Backend
 open Naggum.Backend.Matchers
+
+let private (|SimpleOpCode|_|) = function
+    | Symbol "add" -> Some (SimpleInstruction OpCodes.Add)
+    | Symbol "ret" -> Some (SimpleInstruction OpCodes.Ret)
+    | _ -> None
 
 let private processMetadataItem = function
     | Symbol ".entrypoint" -> EntryPoint
@@ -42,10 +48,11 @@ let private processMethodSignature = function
 
 let private processInstruction = function
     | List [Symbol "ldstr"; String s] -> Ldstr s
+    | List [Symbol "ldc.i4"; Integer i] -> LdcI4 i
     | List [Symbol "call"; List calleeSignature] ->
         let signature = processMethodSignature calleeSignature
         Call signature
-    | List [Symbol "ret"] -> Ret
+    | List [SimpleOpCode r] -> r
     | other -> failwithf "Unrecognized instruction: %A" other
 
 let private addMetadata metadata method' =

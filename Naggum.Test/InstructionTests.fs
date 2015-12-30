@@ -9,6 +9,7 @@ open Xunit
 open Naggum.Assembler
 
 let checkResult (body : string) (expectedResult : obj) =
+    // TODO: FSCheck tests
     let source =
         sprintf
         <| "(.assembly Hello
@@ -25,7 +26,10 @@ let checkResult (body : string) (expectedResult : obj) =
     let result = ``method``.Invoke (null, [| |])
     Assert.Equal (expectedResult, result)
 
-[<Fact>]
-let ``Add instruction test`` () =
-    checkResult "(ldc.i4 1) (ldc.i4 2) (add) (ret)" 3
-    // TODO: Use FSCheck?
+[<Theory>]
+[<InlineData("(ldc.i4 1) (ldc.i4 2) (add) (ret)", 3)>]
+[<InlineData("(ldc.i4 10) (ldc.i4 20) (sub) (ret)", -10)>]
+[<InlineData("(ldc.i4 5) (ldc.i4 30) (mul) (ret)", 150)>]
+[<InlineData("(ldc.i4 9) (ldc.i4 4) (div) (ret)", 2)>]
+let ``Integer math should work properly`` (code, result) =
+    checkResult code result

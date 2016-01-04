@@ -48,11 +48,14 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
-    <Compile Include="CompilerTest.fs" />
-    <Content Include="packages.config" />
     <Content Include="Naggum.Test.dll.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="packages.config" />
+    <Compile Include="Process.fs" />
+    <Compile Include="CompilerTest.fs" />
+    <Compile Include="AssemblerTests.fs" />
+    <Compile Include="ProcessorTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -66,11 +69,6 @@
       <HintPath>..\packages\xunit.abstractions.2.0.0\lib\net35\xunit.abstractions.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <ProjectReference Include="..\ngc\ngc.fsproj">
-      <Name>ngc</Name>
-      <Project>{a4269c5e-e4ac-44bf-a06e-1b45248910ad}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <Reference Include="xunit.assert">
       <HintPath>..\packages\xunit.assert.2.1.0\lib\dotnet\xunit.assert.dll</HintPath>
       <Private>True</Private>
@@ -83,6 +81,18 @@
       <HintPath>..\packages\xunit.extensibility.execution.2.1.0\lib\net45\xunit.execution.desktop.dll</HintPath>
       <Private>True</Private>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Naggum.Assembler\Naggum.Assembler.fsproj">
+      <Name>Naggum.Assembler</Name>
+      <Project>{40b84f1e-1823-4255-80d4-1297613025c1}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Naggum.Compiler\Naggum.Compiler.fsproj">
+      <Name>Naggum.Compiler</Name>
+      <Project>{a4269c5e-e4ac-44bf-a06e-1b45248910ad}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 	     Other similar extension points exist, see Microsoft.Common.targets.

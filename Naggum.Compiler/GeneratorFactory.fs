@@ -4,8 +4,10 @@ open System
 open System.Reflection.Emit
 open System.Text.RegularExpressions
 
+open Naggum.Backend
 open Naggum.Backend.MaybeMonad
 open Naggum.Backend.Reader
+open Naggum.Backend.Matchers
 open Naggum.Compiler.ClrGenerator
 open Naggum.Compiler.Context
 open Naggum.Compiler.FormGenerator
@@ -33,46 +35,46 @@ type GeneratorFactory(typeBuilder : TypeBuilder,
 
     member private this.makeValueGenerator (context: Context, value:Value) =
         match value with
-        | Symbol name ->
+        | Reader.Symbol name ->
             (new SymbolGenerator(context,name)) :> IGenerator
-        | Object o -> this.makeObjectGenerator o
+        | Reader.Object o -> this.makeObjectGenerator o
 
     member private this.MakeFormGenerator (context:Context, form:SExp list) =
         match form with
-        | (Atom (Symbol "defun") :: Atom (Symbol name) :: List args :: body) ->
+        | Symbol "defun" :: Symbol name :: List args :: body ->
             new DefunGenerator(context,typeBuilder,name,args,body,this) :> IGenerator
-        | Atom (Symbol "if") :: condition :: if_true :: if_false :: [] -> //full if form
+        | [Symbol "if"; condition; if_true; if_false] -> // full if form
             new FullIfGenerator(context,typeBuilder,condition,if_true,if_false,this) :> IGenerator
-        | Atom (Symbol "if") :: condition :: if_true :: [] -> //reduced if form
+        | [Symbol "if"; condition; if_true] -> // reduced if form
             new ReducedIfGenerator(context,typeBuilder,condition,if_true,this) :> IGenerator
-        | Atom (Symbol "let") :: bindings :: body -> // let form
+        | Symbol "let" :: bindings :: body -> // let form
             new LetGenerator(context,
                              typeBuilder,
                              methodBuilder,
                              bindings,
                              body,
                              this) :> IGenerator
-        | Atom (Symbol "quote") :: quotedExp :: [] ->
+        | [Symbol "quote"; quotedExp] ->
             new QuoteGenerator(context,typeBuilder,quotedExp,this) :> IGenerator
-        | Atom (Symbol "new") :: Atom (Symbol typeName) :: args ->
+        | Symbol "new" :: Symbol typeName :: args ->
             new NewObjGenerator(context,typeBuilder,typeName,args,this) :> IGenerator
-        | Atom (Symbol "+") :: args ->
+        | Symbol "+" :: args ->
             new ArithmeticGenerator(context,typeBuilder,args,OpCodes.Add,this) :> IGenerator
-        | Atom (Symbol "-") :: args ->
+        | Symbol "-" :: args ->
             new ArithmeticGenerator(context,typeBuilder,args,OpCodes.Sub,this) :> IGenerator
-        | Atom (Symbol "*") :: args ->
+        | Symbol "*" :: args ->
             new ArithmeticGenerator(context,typeBuilder,args,OpCodes.Mul,this) :> IGenerator
-        | Atom (Symbol "/") :: args ->
+        | Symbol "/" :: args ->
             new ArithmeticGenerator(context,typeBuilder,args,OpCodes.Div,this) :> IGenerator
-        | Atom (Symbol "=") :: arg_a :: arg_b :: [] ->
+        | Symbol "=" :: arg_a :: arg_b :: [] ->
             new SimpleLogicGenerator(context,typeBuilder,arg_a,arg_b,OpCodes.Ceq,this) :> IGenerator
-        | Atom (Symbol "<") :: arg_a :: arg_b :: [] ->
+        | Symbol "<" :: arg_a :: arg_b :: [] ->
             new SimpleLogicGenerator(context,typeBuilder,arg_a,arg_b,OpCodes.Clt,this) :> IGenerator
-        | Atom (Symbol ">") :: arg_a :: arg_b :: [] ->
+        | Symbol ">" :: arg_a :: arg_b :: [] ->
             new SimpleLogicGenerator(context,typeBuilder,arg_a,arg_b,OpCodes.Cgt,this) :> IGenerator
-        |Atom (Symbol "call") :: Atom (Symbol fname) :: instance :: args ->
+        | Symbol "call" :: Symbol fname :: instance :: args ->
             new InstanceCallGenerator(context, typeBuilder, instance, fname, args, this) :> IGenerator
-        | Atom (Symbol fname) :: args -> //generic funcall pattern
+        | Symbol fname :: args -> // generic funcall pattern
             let tryGetType typeName =
                 try Some (context.types.[new Symbol(typeName)]) with
                 | _ ->

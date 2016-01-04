@@ -45,7 +45,7 @@ let private processInstruction = function
     | List [Symbol "call"; List calleeSignature] ->
         let signature = processMethodSignature calleeSignature
         Call signature
-    | List ([Symbol "ret"]) -> Ret
+    | List [Symbol "ret"] -> Ret
     | other -> failwithf "Unrecognized instruction: %A" other
 
 let private addMetadata metadata method' =
@@ -63,11 +63,11 @@ let private addBody body method' =
               body
 
 let private processAssemblyUnit = function
-    | List ((Symbol ".method")
-            :: (Symbol name)
-            :: (List argumentTypes)
-            :: (Symbol returnType)
-            :: (List metadata)
+    | List (Symbol ".method"
+            :: Symbol name
+            :: List argumentTypes
+            :: Symbol returnType
+            :: List metadata
             :: body) ->
         let definition =
             { Metadata = Set.empty
@@ -83,7 +83,7 @@ let private processAssemblyUnit = function
     | other -> failwithf "Unrecognized assembly unit definition: %A" other
 
 let private prepareTopLevel = function
-    | List ((Symbol ".assembly") :: (Symbol name) :: units) ->
+    | List (Symbol ".assembly" :: Symbol name :: units) ->
         { Name = name
           Units = List.map processAssemblyUnit units }
     | other -> failwithf "Unknown top-level construct: %A" other

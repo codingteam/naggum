@@ -7,6 +7,7 @@ open System.Reflection.Emit
 
 open Naggum.Backend
 open Naggum.Backend.Reader
+open Naggum.Backend.Matchers
 open Naggum.Runtime
 open Naggum.Compiler.Context
 open Naggum.Compiler.IGenerator
@@ -108,7 +109,7 @@ type LetGenerator(context : Context,
             | List list ->
                 for binding in list do
                     match binding with
-                    | List [(Atom (Symbol name)); form] ->
+                    | List [Symbol name; form] ->
                         let generator = gf.MakeGenerator scope_subctx form
                         let local_type = List.head (generator.ReturnTypes())
                         let local = ilGen.DeclareLocal(local_type)
@@ -126,7 +127,7 @@ type LetGenerator(context : Context,
             | List list ->
                 for binding in list do
                     match binding with
-                    | List [(Atom (Symbol name)); form] ->
+                    | List [Symbol name; form] ->
                         let generator = gf.MakeGenerator type_subctx form
                         type_subctx.locals.[new Symbol(name)] <- Local (null,generator.ReturnTypes() |> List.head)
                     | other -> failwithf "In let bindings: Expected: (name (form))\nGot: %A\n" other
@@ -191,9 +192,9 @@ type DefunGenerator(context:Context,typeBuilder:TypeBuilder,fname:string,paramet
                                             let fun_ctx = new Context(context)
                                             for parm in parameters do
                                                 match parm with
-                                                | Atom(Symbol parm_name) ->
+                                                | Symbol paramName ->
                                                     let parm_idx = (List.findIndex (fun (p) -> p = parm) parameters)
-                                                    fun_ctx.locals.[new Symbol(parm_name)] <- Arg (parm_idx,arg_types.[parm_idx])
+                                                    fun_ctx.locals.[new Symbol(paramName)] <- Arg (parm_idx,arg_types.[parm_idx])
                                                 | other -> failwithf "In function %A parameter definition:\nExpected: Atom(Symbol)\nGot: %A" fname parm
                                             let methodFactory = gf.MakeGeneratorFactory typeBuilder methodGen
                                             let bodyGen = methodFactory.MakeBody fun_ctx body
@@ -218,8 +219,8 @@ type QuoteGenerator(context:Context,typeBuilder:TypeBuilder,quotedExp:SExp,gf:IG
         let generate_list_element e =
             match e with
             | List l -> generate_list ilGen l
-            | Atom (Object o) -> generate_object ilGen o
-            | Atom (Symbol s) -> generate_symbol ilGen s
+            | Object o -> generate_object ilGen o
+            | Symbol s -> generate_symbol ilGen s
             | other -> failwithf "Error: Unexpected form in quoted expression: %A" other
         let cons = (typeof<Naggum.Runtime.Cons>).GetConstructor(Array.create 2 typeof<obj>)
         List.rev elements |> List.head |> generate_list_element //last element
@@ -231,14 +232,14 @@ type QuoteGenerator(context:Context,typeBuilder:TypeBuilder,quotedExp:SExp,gf:IG
     interface IGenerator with
         member this.Generate ilGen =
             match quotedExp with
-            |List l -> generate_list ilGen l
-            |Atom (Object o) -> generate_object ilGen o
-            |Atom (Symbol s) -> generate_symbol ilGen s
+            | List l -> generate_list ilGen l
+            | Object o -> generate_object ilGen o
+            | Symbol s -> generate_symbol ilGen s
         member this.ReturnTypes () =
             match quotedExp with
-            |List l -> [typeof<Naggum.Runtime.Cons>]
-            |Atom (Object o) -> [typeof<System.Object>]
-            |Atom (Symbol s) -> [typeof<Naggum.Runtime.Symbol>]
+            | List _ -> [typeof<Naggum.Runtime.Cons>]
+            | Object _ -> [typeof<System.Object>]
+            | Symbol _ -> [typeof<Naggum.Runtime.Symbol>]
 
 type NewObjGenerator(context : Context, typeBuilder : TypeBuilder, typeName : string, arguments : SExp list, gf : IGeneratorFactory) =
     interface IGenerator with
@@ -276,9 +277,9 @@ type TypeGenerator(context : Context, typeBuilder : TypeBuilder, typeName : stri
         let method_ctx = new Context(context)
         for parm in method_parms do
             match parm with
-            | Atom(Symbol parm_name) ->
+            | Symbol paramName ->
                 let parm_idx = (List.findIndex (fun (p) -> p = parm) method_parms)
-                method_ctx.locals.[new Symbol(parm_name)] <- Arg (parm_idx,typeof<obj>)
+                method_ctx.locals.[new Symbol(paramName)] <- Arg (parm_idx,typeof<obj>)
             | other -> failwithf "In method %A%A parameter definition:\nExpected: Atom(Symbol)\nGot: %A" typeName method_name parm
         let newGeneratorFactory = gf.MakeGeneratorFactory newTypeBuilder method_gen
         let body_gen = newGeneratorFactory.MakeBody method_ctx method_body
@@ -289,10 +290,10 @@ type TypeGenerator(context : Context, typeBuilder : TypeBuilder, typeName : stri
         member this.Generate ilGen =
             for m in members do
                 match m with
-                | List (Atom (Symbol "field") :: Atom (Symbol name) :: []) -> generate_field name
-                | List (Atom (Symbol "field") :: Atom (Symbol access) :: Atom (Symbol name) :: []) -> generate_field name
-                | List (Atom (Symbol "method") :: Atom (Symbol name) :: List parms :: body) -> generate_method name parms body
-                | List (Atom (Symbol "method") :: Atom (Symbol name) :: Atom (Symbol access) :: List parms :: body) -> generate_method name parms body
+                | List [Symbol "field"; Symbol name] -> generate_field name
+                | List [Symbol "field"; Symbol access; Symbol name] -> generate_field name
+                | List (Symbol "method" :: Symbol name :: List parms :: body) -> generate_method name parms body
+                | List (Symbol "method" :: Symbol name :: Symbol access :: List parms :: body) -> generate_method name parms body
                 | other -> failwithf "In definition of type %A: \nUnknown member definition: %A" typeName other
         member this.ReturnTypes () =
             [typeof<System.Void>]

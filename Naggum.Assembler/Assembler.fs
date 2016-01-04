@@ -46,11 +46,12 @@ let private assembleUnit (assemblyBuilder : AssemblyBuilder) (builder : ModuleBu
             assemblyBuilder.SetEntryPoint methodBuilder
         buildMethodBody m methodBuilder
 
-let private assembleAssembly (assembly : Assembly) =
+/// Assembles the intermediate program representation. Returns an assembled
+/// module.
+let assemble (mode : AssemblyBuilderAccess) (assembly : Assembly) =
     let name = AssemblyName assembly.Name
     let domain = AppDomain.CurrentDomain
-    let builder = domain.DefineDynamicAssembly (name,
-                                                AssemblyBuilderAccess.Save)
+    let builder = domain.DefineDynamicAssembly (name, mode)
     let fileName = assembly.Name + ".dll" // TODO: Proper file naming
     let moduleBuilder = builder.DefineDynamicModule (assembly.Name, fileName)
     assembly.Units |> List.iter (assembleUnit builder moduleBuilder)
@@ -59,6 +60,7 @@ let private assembleAssembly (assembly : Assembly) =
 
 /// Assembles the intermediate program representation. Returns a list of
 /// assemblies ready for saving.
-let assemble (assemblies : Assembly seq) : AssemblyBuilder seq =
+let assembleAll (mode : AssemblyBuilderAccess)
+                (assemblies : Assembly seq) : AssemblyBuilder seq =
     assemblies
-    |> Seq.map assembleAssembly
+    |> Seq.map (assemble mode)

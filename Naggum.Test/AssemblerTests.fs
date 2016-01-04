@@ -1,6 +1,7 @@
 ﻿module Naggum.Test.AssemblerTests
 
 open System.IO
+open System.Reflection.Emit
 open System.Text
 
 open Xunit
@@ -10,12 +11,11 @@ open Naggum.Assembler
 let assemble (source : string) =
     use stream = new MemoryStream(Encoding.UTF8.GetBytes source)
     let repr = Processor.prepare "file.ngi" stream
-    let assemblies = Assembler.assemble repr
-    List.ofSeq assemblies
+    Assembler.assemble AssemblyBuilderAccess.Save (Seq.exactlyOne repr)
 
 let execute source =
     let fileName = "file.exe"
-    let assembly = (Seq.exactlyOne << assemble) source
+    let assembly = assemble source
     assembly.Save fileName
 
     Process.run fileName
@@ -24,7 +24,7 @@ let execute source =
 let ``Empty assembly should be assembled`` () =
     let source = "(.assembly Empty)"
     let result = assemble source
-    Assert.Equal (1, result.Length)
+    Assert.NotNull result
 
 [<Fact>]
 let ``Hello world program should be executed`` () =

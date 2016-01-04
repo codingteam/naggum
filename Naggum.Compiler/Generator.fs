@@ -5,9 +5,11 @@ open System.IO
 open System.Reflection
 open System.Reflection.Emit
 
+open Naggum.Backend
+open Naggum.Backend.Reader
+open Naggum.Compiler.Context
 open Naggum.Compiler.IGenerator
 open Naggum.Compiler.GeneratorFactory
-open Naggum.Compiler.Reader
 
 let private prologue (ilGen : ILGenerator) =
     ilGen.BeginScope()
@@ -18,7 +20,7 @@ let private epilogue context (ilGen : ILGenerator) =
 
 let compileMethod context (generatorFactory : IGeneratorFactory) body (methodBuilder : MethodBuilder) fileName =
     let ilGenerator = methodBuilder.GetILGenerator()
-    
+
     prologue ilGenerator
     try
         let gen = generatorFactory.MakeBody context body
@@ -42,10 +44,10 @@ let compile (source : Stream) (assemblyName : string) (filePath : string) (asmRe
                                                   MethodAttributes.Public ||| MethodAttributes.Static,
                                                   typeof<Void>,
                                                   [| |])
-    
+
     let gf = new GeneratorFactory(typeBuilder, methodBuilder) :> IGeneratorFactory
     assemblyBuilder.SetEntryPoint methodBuilder
-    
+
     let context = Context.create ()
 
     //loading language runtime

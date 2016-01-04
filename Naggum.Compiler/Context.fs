@@ -6,7 +6,6 @@ open System.Reflection
 open System.Reflection.Emit
 
 open Naggum.Runtime
-open Naggum.Compiler.Reader
 
 type ContextValue =
     |Local of LocalBuilder * Type
@@ -42,7 +41,7 @@ type Context =
                 this.locals.[localName] <- Field (field, t)
         | Field (fb,_) -> ()
         | Arg (_,_) -> failwithf "Unable to capture parameter %A" localName.Name
-        
+
 let create () =
     let context = new Context()
     context

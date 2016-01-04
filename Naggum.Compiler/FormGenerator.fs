@@ -4,10 +4,12 @@ open System
 open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
+
+open Naggum.Backend
+open Naggum.Backend.Reader
 open Naggum.Runtime
 open Naggum.Compiler.Context
 open Naggum.Compiler.IGenerator
-open Naggum.Compiler.Reader
 
 type FormGenerator() =
     interface IGenerator with
@@ -21,7 +23,7 @@ type ValueGenerator(context:Context,value:Value) =
         member this.ReturnTypes () = failwithf "Internal compiler error: inferring return type of unreified value"
 
 type SymbolGenerator(context:Context,name:string) =
-    inherit ValueGenerator(context,Symbol name)
+    inherit ValueGenerator(context, Reader.Symbol name)
     interface IGenerator with
         member this.Generate ilGen =
             try
@@ -37,12 +39,11 @@ type SymbolGenerator(context:Context,name:string) =
             match context.locals.[new Symbol(name)] with
             |Local (_,t) -> [t]
             |Arg (_,t) -> [t]
-            
 
 type SequenceGenerator(context:Context,typeBuilder:TypeBuilder,seq:SExp list, gf:IGeneratorFactory) =
     member private this.gen_seq (ilGen:ILGenerator,seq:SExp list) =
         match seq with
-            | [] -> 
+            | [] ->
                 ()
             | [last] ->
                 let gen = gf.MakeGenerator context last
@@ -82,12 +83,12 @@ type BodyGenerator(context : Context,
                     ilGen.Emit(OpCodes.Pop)
                 genBody ilGen rest
     interface IGenerator with
-        member __.Generate ilGen = 
+        member __.Generate ilGen =
             genBody ilGen body
         member this.ReturnTypes () =
             match body with
             |[] -> [typeof<System.Void>]
-            |somelist -> 
+            |somelist ->
                 let tail_type = (gf.MakeGenerator context (List.rev body |> List.head)).ReturnTypes()
                 if tail_type = [typeof<System.Void>] then
                     [typeof<obj>]
@@ -142,10 +143,10 @@ type ReducedIfGenerator(context:Context,typeBuilder:TypeBuilder,condition:SExp,i
             let end_form = ilGen.DefineLabel()
             cond_gen.Generate ilGen
             ilGen.Emit (OpCodes.Brtrue, if_true_lbl)
-            
+
             if List.head returnTypes <> typeof<Void>
             then ilGen.Emit OpCodes.Ldnull
-            
+
             ilGen.Emit (OpCodes.Br, end_form)
             ilGen.MarkLabel if_true_lbl
             if_true_gen.Generate ilGen
@@ -202,7 +203,7 @@ type DefunGenerator(context:Context,typeBuilder:TypeBuilder,fname:string,paramet
     interface IGenerator with
         member this.Generate ilGen =
             ()
-        member  this.ReturnTypes() = 
+        member  this.ReturnTypes() =
             [typeof<Void>]
 
 type QuoteGenerator(context:Context,typeBuilder:TypeBuilder,quotedExp:SExp,gf:IGeneratorFactory) =
@@ -244,7 +245,7 @@ type NewObjGenerator(context : Context, typeBuilder : TypeBuilder, typeName : st
         member this.Generate ilGen =
             let args_gen = gf.MakeSequence context arguments
             let argTypes = args_gen.ReturnTypes()
-            let objType = 
+            let objType =
                  if typeName.StartsWith "System" then
                     Type.GetType typeName
                  else
@@ -258,7 +259,7 @@ type NewObjGenerator(context : Context, typeBuilder : TypeBuilder, typeName : st
                 [context.types.[new Symbol(typeName)]]
 
 type TypeGenerator(context : Context, typeBuilder : TypeBuilder, typeName : string, parentTypeName: string, members : SExp list, gf : IGeneratorFactory) =
-    let newTypeBuilder = 
+    let newTypeBuilder =
         if parentTypeName = "" then
             Globals.ModuleBuilder.DefineType(typeName, TypeAttributes.Class ||| TypeAttributes.Public, typeof<obj>)
         else
@@ -285,7 +286,7 @@ type TypeGenerator(context : Context, typeBuilder : TypeBuilder, typeName : stri
         (method_gen.GetILGenerator()).Emit(OpCodes.Ret)
 
     interface IGenerator with
-        member this.Generate ilGen = 
+        member this.Generate ilGen =
             for m in members do
                 match m with
                 | List (Atom (Symbol "field") :: Atom (Symbol name) :: []) -> generate_field name

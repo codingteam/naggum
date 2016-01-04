@@ -1,18 +1,19 @@
 ﻿module Naggum.Compiler.GeneratorFactory
 
-open IGenerator
-open NumberGen
-open StringGen
-open FormGenerator
-open ClrGenerator
-open Context
-open Naggum.Runtime
-open Naggum.Util.MaybeMonad
-open Naggum.Compiler.Reader
-open Naggum.Compiler.MathGenerator
 open System
 open System.Reflection.Emit
 open System.Text.RegularExpressions
+
+open Naggum.Backend.MaybeMonad
+open Naggum.Backend.Reader
+open Naggum.Compiler.ClrGenerator
+open Naggum.Compiler.Context
+open Naggum.Compiler.FormGenerator
+open Naggum.Compiler.IGenerator
+open Naggum.Compiler.MathGenerator
+open Naggum.Compiler.NumberGen
+open Naggum.Compiler.StringGen
+open Naggum.Runtime
 
 type GeneratorFactory(typeBuilder : TypeBuilder,
                       methodBuilder : MethodBuilder) =
@@ -77,7 +78,7 @@ type GeneratorFactory(typeBuilder : TypeBuilder,
                 | _ ->
                     try Some (Type.GetType typeName) with
                     | _ -> None
-            
+
             let callRegex = new Regex(@"([\w\.]+)\.(\w+)", RegexOptions.Compiled)
             let callMatch = callRegex.Match fname
             let maybeClrType =

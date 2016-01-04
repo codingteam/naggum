@@ -1,13 +1,12 @@
-﻿module ClrGenerator
+﻿module Naggum.Compiler.ClrGenerator
 
 open System
-open System.Reflection
 open System.Reflection.Emit
-open Naggum.Runtime
-open Naggum.Compiler.Reader
+
+open Naggum.Backend.MaybeMonad
+open Naggum.Backend.Reader
 open Naggum.Compiler.Context
 open Naggum.Compiler.IGenerator
-open Naggum.Util.MaybeMonad
 
 let nearestOverload (clrType : Type) methodName types =
         let rec distanceBetweenTypes (derivedType : Type, baseType) =
@@ -54,14 +53,14 @@ let nearestOverload (clrType : Type) methodName types =
                 Some (List.head methods)
 
 type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Type, methodName : string, arguments : SExp list,
-                      gf : IGeneratorFactory) =   
+                      gf : IGeneratorFactory) =
     let args_seq = gf.MakeSequence context arguments
     let arg_types = args_seq.ReturnTypes()
     let clrMethod = nearestOverload clrType methodName arg_types
     interface IGenerator with
         member this.Generate ilGen =
 
-            args_seq.Generate ilGen            
+            args_seq.Generate ilGen
             ilGen.Emit(OpCodes.Call, Option.get clrMethod)
         member this.ReturnTypes() =
             [(Option.get clrMethod).ReturnType]

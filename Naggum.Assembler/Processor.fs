@@ -5,11 +5,11 @@ open System.IO
 open System.Reflection
 
 open Naggum.Assembler.Representation
-open Naggum.Compiler
-open Naggum.Compiler.Reader
+open Naggum.Backend
+open Naggum.Backend.Matchers
 
 let private processMetadataItem = function
-    | Atom (Symbol ".entrypoint") -> EntryPoint
+    | Symbol ".entrypoint" -> EntryPoint
     | other -> failwithf "Unrecognized metadata item definition: %A" other
 
 let private resolveAssembly _ =
@@ -24,15 +24,15 @@ let private resolveType name =
 
 let private resolveTypes =
     List.map (function
-              | Atom (Symbol name) -> resolveType name
+              | Symbol name -> resolveType name
               | other -> failwithf "Unrecognized type: %A" other)
 
 let private processMethodSignature = function
-    | [Atom (Symbol assembly)
-       Atom (Symbol typeName)
-       Atom (Symbol methodName)
+    | [Symbol assembly
+       Symbol typeName
+       Symbol methodName
        List argumentTypes
-       Atom (Symbol returnType)] ->
+       Symbol returnType] ->
         { Assembly = Some (resolveAssembly assembly) // TODO: Resolve types from current assembly
           ContainingType = Some (resolveType typeName) // TODO: Resolve methods without a type (e.g. assembly methods)
           Name = methodName
@@ -41,12 +41,11 @@ let private processMethodSignature = function
     | other -> failwithf "Unrecognized method signature: %A" other
 
 let private processInstruction = function
-    | List ([Atom (Symbol "ldstr"); Atom (Object (:? string as s))]) ->
-        Ldstr s
-    | List ([Atom (Symbol "call"); List (calleeSignature)]) ->
+    | List [Symbol "ldstr"; String s] -> Ldstr s
+    | List [Symbol "call"; List calleeSignature] ->
         let signature = processMethodSignature calleeSignature
         Call signature
-    | List ([Atom (Symbol "ret")]) -> Ret
+    | List ([Symbol "ret"]) -> Ret
     | other -> failwithf "Unrecognized instruction: %A" other
 
 let private addMetadata metadata method' =
@@ -64,11 +63,11 @@ let private addBody body method' =
               body
 
 let private processAssemblyUnit = function
-    | List (Atom (Symbol ".method")
-            :: Atom (Symbol name)
-            :: List argumentTypes
-            :: Atom (Symbol returnType)
-            :: List metadata
+    | List ((Symbol ".method")
+            :: (Symbol name)
+            :: (List argumentTypes)
+            :: (Symbol returnType)
+            :: (List metadata)
             :: body) ->
         let definition =
             { Metadata = Set.empty
@@ -84,7 +83,7 @@ let private processAssemblyUnit = function
     | other -> failwithf "Unrecognized assembly unit definition: %A" other
 
 let private prepareTopLevel = function
-    | List (Atom (Symbol ".assembly") :: Atom (Symbol name) :: units) ->
+    | List ((Symbol ".assembly") :: (Symbol name) :: units) ->
         { Name = name
           Units = List.map processAssemblyUnit units }
     | other -> failwithf "Unknown top-level construct: %A" other

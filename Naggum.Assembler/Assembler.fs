@@ -17,7 +17,6 @@ let private getMethodAttributes (m : MethodDefinition) =
     |> List.fold (|||) empty
 
 let private findMethod (signature : MethodSignature) =
-    // TODO: Add method overload resolution etc. (see ClrGenerator module)
     let ``type`` = signature.ContainingType.Value
     ``type``.GetMethod (signature.Name, Array.ofList signature.ArgumentTypes)
 
@@ -38,7 +37,6 @@ let private assembleUnit (assemblyBuilder : AssemblyBuilder) (builder : ModuleBu
         let attributes = getMethodAttributes m
         let returnType = m.ReturnType
         let argumentTypes = Array.ofList m.ArgumentTypes
-        System.Diagnostics.Debug.Print (sprintf "%A" m)
         let methodBuilder = builder.DefineGlobalMethod (name,
                                                         attributes,
                                                         returnType,

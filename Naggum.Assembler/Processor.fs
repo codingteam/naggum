@@ -1,8 +1,8 @@
 ﻿module Naggum.Assembler.Processor
 
 open System
+open System.IO
 open System.Reflection
-open System.Reflection.Emit
 
 open Naggum.Assembler.Representation
 open Naggum.Compiler
@@ -23,7 +23,7 @@ let private resolveType name =
     result
 
 let private resolveTypes =
-    List.map (function 
+    List.map (function
               | Atom (Symbol name) -> resolveType name
               | other -> failwithf "Unrecognized type: %A" other)
 
@@ -91,6 +91,6 @@ let private prepareTopLevel = function
 
 /// Prepares the source file for assembling. Returns the intermediate
 /// representation of the source code.
-let prepare fileName stream : Assembly seq =
+let prepare (fileName : string) (stream : Stream) : Assembly seq =
     let forms = Reader.parse fileName stream
     forms |> Seq.map prepareTopLevel

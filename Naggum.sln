@@ -33,6 +33,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution 
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Naggum.Assembler", "Naggum.Assembler\Naggum.Assembler.fsproj", "{40B84F1E-1823-4255-80D4-1297613025C1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{AFA24DE4-7328-448D-B0BE-1ABF4812B315}"
+	ProjectSection(SolutionItems) = preProject
+		docs\Build.md = docs\Build.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,5 +67,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AFA24DE4-7328-448D-B0BE-1ABF4812B315} = {F85A1ACB-4A60-46A9-856D-92A3C9B97402}
 	EndGlobalSection
 EndGlobal

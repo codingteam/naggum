@@ -9,6 +9,11 @@ Naggum does not aim to be yet another Common Lisp or Scheme or Emacs Lisp or
 whatever implementation. Instead, we are trying to deliver a modern Lisp dialect
 that makes use of most of .Net's benefits.
 
+## Build
+
+To build the project under various environments, see [build
+instructions][build-instructions].
+
 ## License
 
 Naggum is licensed under the terms of MIT License. See License.md file for
@@ -16,6 +21,7 @@ details.
 
 [andivionian-status-classifier]: https://github.com/ForNeVeR/andivionian-status-classifier
 [appveyor]: https://ci.appveyor.com/project/ForNeVeR/naggum/branch/develop
+[build-instructions]: docs/Build.md
 [eric-naggum]: https://en.wikipedia.org/wiki/Erik_Naggum
 [travis]: https://travis-ci.org/codingteam/naggum
 

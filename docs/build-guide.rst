@@ -70,8 +70,8 @@ Documentation
 -------------
 
 You can build a local copy of Naggum documentation. To do that, install
-`Python`_ 2.7 and `Sphinx`_. After that just execute ``make html`` on Linux or
-``.\make.bat html`` on Windows.
+`Python`_ 2.7 and `Sphinx`_. After that go to `docs` directory and execute
+``make html`` on Linux or ``.\make.bat html`` on Windows.
 
 Ensure you have ``sphinx-build`` binary in your ``PATH`` or define
 ``SPHINXBUILD`` environment variable to choose an alternative Sphinx builder.

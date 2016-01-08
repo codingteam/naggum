@@ -66,9 +66,21 @@ After that, you can run ``Naggum.Compiler``, for example::
     $ mono Naggum.Compiler.exe ../../../tests/test.naggum
     $ mono test.exe
 
+Documentation
+-------------
+
+You can build a local copy of Naggum documentation. To do that, install
+`Python`_ 2.7 and `Sphinx`_. After that just execute ``make html`` on Linux or
+``.\make.bat html`` on Windows.
+
+Ensure you have ``sphinx-build`` binary in your ``PATH`` or define
+``SPHINXBUILD`` environment variable to choose an alternative Sphinx builder.
+
 .. _F# Compiler: http://fsharp.org/
 .. _Mono: http://www.mono-project.com/
 .. _NixOS Linux: http://nixos.org/
 .. _Nixpkgs: https://github.com/NixOS/nixpkgs
 .. _NuGet: http://www.nuget.org/
 .. _patch-fsharp-targets:  https://github.com/NixOS/nixpkgs/blob/d4681bf62672083f92545e02e00b8cf040247e8d/pkgs/build-support/dotnetbuildhelpers/patch-fsharp-targets.sh
+.. _Python: https://www.python.org/
+.. _Sphinx: http://sphinx-doc.org/

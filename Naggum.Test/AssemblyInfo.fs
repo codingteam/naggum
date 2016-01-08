@@ -3,11 +3,11 @@
 open System.Reflection
 open System.Runtime.InteropServices
 
-[<assembly: AssemblyTitle("Naggum.Backend")>]
+[<assembly: AssemblyTitle("Naggum.Test")>]
 [<assembly: AssemblyProduct("Naggum")>]
-[<assembly: AssemblyCopyright("Copyright © Naggum authors 2015–2016")>]
+[<assembly: AssemblyCopyright("Copyright © Naggum authors 2012–2016")>]
 [<assembly: ComVisible(false)>]
-[<assembly: Guid("243738f3-d798-4b09-8797-f90b21414b60")>]
+[<assembly: Guid("10a2f0db-3f68-48be-bd95-afc924329bc7")>]
 [<assembly: AssemblyVersion("0.0.1.0")>]
 
 ()

@@ -1,6 +1,12 @@
 Naggum documentation
 ====================
 
+.. toctree::
+   :maxdepth: 2
+
+   index
+   build-guide
+
 Naggum (named in honor of `Erik Naggum`_) is a modern statically typed Lisp
 variant that is targeting `Common Language Infrastructure`_ (CLI) runtime
 system.

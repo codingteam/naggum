@@ -27,9 +27,10 @@ add instructions for any other distributions.
 NixOS Linux
 ^^^^^^^^^^^
 
-First of all, install ``mono`` and ``fsharp`` packages to your environment::
+First of all, install ``mono``, ``fsharp`` and ``dotnetPackages.Nuget``::
 
     $ nix-env -i mono fsharp
+    $ nix-env -iA nixos.pkgs.dotnetPackages.Nuget
 
 Please note that you need ``fsharp`` >= 4.0 to build Naggum, which is currently
 in the unstable channel. So maybe you'll need to switch to the unstable channel
@@ -41,18 +42,12 @@ globally or locally::
 
     $ export FSharpTargetsPath=$(dirname $(which fsharpc))/../lib/mono/4.5/Microsoft.FSharp.Targets
 
-You'll need a NuGet executable. Unfortunately, there is no NixOS package for
-NuGet, so you have to download it manually::
-
-    $ nix-env -i wget # if not installed already
-    $ cd naggum
-    $ wget https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
-
 After that you can download the dependencies and build the project using
 ``xbuild``::
 
-    $ mono nuget.exe restore Naggum.sln
-    $ xbuild /p:Configuration=Release /p:TargetFrameworkVersion="v4.5" Naggum.sln
+    $ cd naggum
+    $ nuget restore
+    $ xbuild /p:Configuration=Release /p:TargetFrameworkVersion="v4.5"
 
 After that you should copy ``FSharp.Core.dll`` to the project output directory,
 because currently Nix have problems with concept of Mono global assembly cache::

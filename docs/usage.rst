@@ -159,7 +159,7 @@ Functions are defined using ``defun`` special form::
 For example::
 
     (defun println (arg)
-      (System.Console.WriteLine arg))
+        (System.Console.WriteLine arg))
 
 Currently executable statements may be one of the following.
 

@@ -1,6 +1,8 @@
+/.vs/
+/docs/_build/
+/packages/
+
+/*.user
+
 bin/
 obj/
-*.suo
-/_ReSharper.Naggum/
-/*.user
-/packages/

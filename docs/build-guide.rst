@@ -52,7 +52,8 @@ After that you can download the dependencies and build the project using
 After that you should copy ``FSharp.Core.dll`` to the project output directory,
 because currently Nix have problems with concept of Mono global assembly cache::
 
-    $ FSHARP_CORE=$HOME/.nix-profile/lib/mono/Reference\ Assemblies/Microsoft/FSharp/.NETFramework/v4.0/4.4.0.0/FSharp.Core.dll
+    $ FSHARP_CORE=$HOME/.nix-profile/lib/mono/Reference\ Assemblies/Microsoft/\
+    FSharp/.NETFramework/v4.0/4.4.0.0/FSharp.Core.dll
     $ echo Naggum.*/bin/Release | xargs -n 1 cp -f "$FSHARP_CORE"
 
 After that, you can run ``Naggum.Compiler``, for example::
@@ -65,11 +66,10 @@ Documentation
 -------------
 
 You can build a local copy of Naggum documentation. To do that, install
-`Python`_ 2.7 and `Sphinx`_. After that go to `docs` directory and execute
-``make html`` on Linux or ``.\make.bat html`` on Windows.
-
-Ensure you have ``sphinx-build`` binary in your ``PATH`` or define
-``SPHINXBUILD`` environment variable to choose an alternative Sphinx builder.
+`Python`_ 2.7 and `Sphinx`_. Ensure that you have ``sphinx-build`` binary in
+your ``PATH`` or define ``SPHINXBUILD`` environment variable to choose an
+alternative Sphinx builder. After that go to `docs` directory and execute ``make
+html`` (on Linux) or ``.\make.bat html`` (on Windows).
 
 .. _F# Compiler: http://fsharp.org/
 .. _Mono: http://www.mono-project.com/

@@ -11,8 +11,7 @@ that makes use of most of .Net's benefits.
 
 ## Documentation
 
-To read the build or usage documentation and get familiar with Naggum syntax
-visit [the documentation site][read-the-docs].
+The documentation is available on [ReadTheDocs][read-the-docs].
 
 ## License
 

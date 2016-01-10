@@ -1,7 +1,7 @@
 Naggum usage
 ============
 
-Currently there are two dialects of Naggum: high level *Compiler* and low-level
+Currently there are two dialects of Naggum: high-level *Compiler* and low-level
 *Assembler*.
 
 Naggum Compiler
@@ -9,25 +9,25 @@ Naggum Compiler
 
 Command line syntax for Naggum Compiler is::
 
-    $ Naggum.Compiler [source1.naggum] [source2.naggum] [/r:assembly1] [/r:assembly2]
+    $ Naggum.Compiler source.naggum... [/r:assembly]...
 
 Each input source file will be compiled to a separate executable assembly (i.e.
-an ``.exe`` file) in the current directory.
+an ``.exe`` file) in the current directory. You can also pass a list of files to
+be referenced by these assemblies.
 
-``.naggum`` extension is recommended for high level Naggum files.
+``.naggum`` extension is recommended for high-level Naggum files.
 
 Naggum Assembler
 ----------------
 
-Naggum Assembler uses low level Naggum dialect. Command line syntax is::
+Naggum Assembler uses low-level Naggum dialect. Command line syntax is::
 
-    $ Naggum.Assembler [source1.nga] [source2.nga]
+    $ Naggum.Assembler source.nga...
 
-Assembler output is determined based on input file content: each file may
-contain multiple (or none) assembly constructs. Each assembly will be saved to
-its own executable file in the current directory.
+Each input file may contain zero or more assembly constructs. Every assembly
+will be saved to its own executable file in the current directory.
 
-``.nga`` extension is recommended for low level Naggum files.
+``.nga`` extension is recommended for low-level Naggum files.
 
 S-expression syntax
 -------------------
@@ -42,9 +42,10 @@ Possible atom values are::
     1.4e-5 ; a number
     System.Console ; a symbol
 
-A symbol may consist of any letter, digit or ``+-*/=<>!?.`` character sequence.
+A symbol is a sequence of letters, digits, and any of the following characters:
+``+-*/=<>!?.``.
 
-Lists are simply sequences of s-expression in parens::
+Lists are simply sequences of s-expressions in parens::
 
     (this is a list)
 
@@ -55,12 +56,12 @@ will be ignored till the end of the line::
 
     (valid atom) ; this is a comment
 
-Low level syntax
+Low-level syntax
 ----------------
 
-Naggum low level syntax is closer to `CIL`_. It may be used to define CLI
+Naggum low-level syntax is closer to `CIL`_. It may be used to define CLI
 constructs such as assemblies, modules, types and methods. Every ``.nga`` file
-may contain multiple (including zero) assembly definitions.
+may contain zero or more assembly definitions.
 
 Assembly definition
 ^^^^^^^^^^^^^^^^^^^
@@ -75,7 +76,7 @@ Assembly defitinion should have the following form::
 Assembly items can be methods and types. Top level methods defined in an
 ``.assembly`` form will be compiled to global CIL functions.
 
-Currently there is no support for type definition inside an assembly.
+Type definitions are not supported yet.
 
 Each assembly may contain one entry point method (either a static type method or
 an assembly global function marked by ``.entrypoint`` property).
@@ -115,8 +116,7 @@ Naggum. This set will be extended in future.
     (call (assembly type-name method-name (argument types) return-type))
 
    Currently assembly name is ignored; only ``mscorlib`` methods can be called.
-   Static assembly function calls are not supported, but will be supported in
-   future.
+   Static assembly function calls are not supported yet.
 
    Method argument and return types should be fully-qualified.
 
@@ -124,7 +124,7 @@ Naggum. This set will be extended in future.
 
     (ldstr "Hello, world")
 
-   Loads a string to CLI stack.
+   Loads a string onto a CLI stack.
 
 #. Return instruction::
 
@@ -137,24 +137,29 @@ Example assembly definition
 
 ::
 
-    (.method Main () System.Void (.entrypoint)
-        (ldstr "Hello, world!")
-        (call (mscorlib System.Console WriteLine (System.String) System.Void))
-        (ret)))
+    (.assembly Hello
+        (.method Main () System.Void (.entrypoint)
+            (ldstr \"Hello, world!\")
+            (call (mscorlib System.Console WriteLine (System.String) System.Void))
+            (ret)))
 
-High level syntax
+High-level syntax
 -----------------
 
-Every high level Naggum program is a sequence of function definitions or a
-top-level executable statements. Functions may be called from top-level
-statements and will be available as a public static methods outside of an
-compiled assembly.
+Every high-level Naggum program is a sequence of function definitions and a
+top-level executable statements. Functions defined in an assembly are also
+available as public static methods to be called by external assemblies.
 
 Functions are defined using ``defun`` special form::
 
     (defun function-name (arg1 arg2)
         statement1
         statement2)
+
+For example::
+
+    (defun println (arg)
+      (System.Console.WriteLine arg))
 
 Currently executable statements may be one of the following.
 

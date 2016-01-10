@@ -4,14 +4,14 @@ About
 Disclaimer
 ----------
 
-Naggum don't aim to be yet another Common Lisp or Scheme or whatever
+Naggum doesn't aim to be yet another Common Lisp or Scheme or whatever
 implementation. Instead, we are trying to deliver a modern Lisp dialect that
 makes use of most of CLI benefits.
 
 Features
 --------
 
-- low level and high level features coupled together
+- low-level and high-level features coupled
 - full support of all low-level features available on CLI (work in progress, see
   `#36`_ for details)
 

@@ -11,9 +11,10 @@ makes use of most of CLI benefits.
 Features
 --------
 
-- low-level and high-level features coupled
-- full support of all low-level features available on CLI (work in progress, see
-  `#36`_ for details)
+Naggum provides both direct access to low-level features of CLI, and allows its
+user to define types and functions just like any other high-level language. At
+the same time, it combines power of Lisp-inspired metaprogramming (macros) with
+strictness of strong-typed language.
 
 Contribute
 ----------
@@ -27,5 +28,4 @@ License
 Naggum is licensed under the terms of MIT License. See `License.md`_ for
 details.
 
-.. _#36: https://github.com/codingteam/naggum/issues/36
 .. _License.md: https://github.com/codingteam/naggum/blob/develop/License.md

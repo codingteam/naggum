@@ -139,7 +139,7 @@ Example assembly definition
 
     (.assembly Hello
         (.method Main () System.Void (.entrypoint)
-            (ldstr \"Hello, world!\")
+            (ldstr "Hello, world!")
             (call (mscorlib System.Console WriteLine (System.String) System.Void))
             (ret)))
 

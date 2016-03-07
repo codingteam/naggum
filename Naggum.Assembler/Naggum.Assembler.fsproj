@@ -56,9 +56,9 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Naggum.Compiler\Naggum.Compiler.fsproj">
-      <Name>Naggum.Compiler</Name>
-      <Project>{a4269c5e-e4ac-44bf-a06e-1b45248910ad}</Project>
+    <ProjectReference Include="..\Naggum.Backend\Naggum.Backend.fsproj">
+      <Name>Naggum.Backend</Name>
+      <Project>{243738f3-d798-4b09-8797-f90b21414b60}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

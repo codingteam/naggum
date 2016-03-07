@@ -3,7 +3,7 @@
 open System
 open System.Reflection.Emit
 
-open Naggum.Compiler.Reader
+open Naggum.Backend.Reader
 open Naggum.Compiler.Context
 
 //TODO: Add a method that returns generated values' types without actually emitting the code.

@@ -33,6 +33,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution 
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Naggum.Assembler", "Naggum.Assembler\Naggum.Assembler.fsproj", "{40B84F1E-1823-4255-80D4-1297613025C1}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Naggum.Backend", "Naggum.Backend\Naggum.Backend.fsproj", "{243738F3-D798-4B09-8797-F90B21414B60}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{40B84F1E-1823-4255-80D4-1297613025C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{40B84F1E-1823-4255-80D4-1297613025C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{40B84F1E-1823-4255-80D4-1297613025C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{243738F3-D798-4B09-8797-F90B21414B60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{243738F3-D798-4B09-8797-F90B21414B60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{243738F3-D798-4B09-8797-F90B21414B60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{243738F3-D798-4B09-8797-F90B21414B60}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

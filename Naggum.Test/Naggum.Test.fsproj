@@ -56,6 +56,7 @@
     <Compile Include="CompilerTest.fs" />
     <Compile Include="AssemblerTests.fs" />
     <Compile Include="ProcessorTests.fs" />
+    <Compile Include="MatchersTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -86,6 +87,11 @@
     <ProjectReference Include="..\Naggum.Assembler\Naggum.Assembler.fsproj">
       <Name>Naggum.Assembler</Name>
       <Project>{40b84f1e-1823-4255-80d4-1297613025c1}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Naggum.Backend\Naggum.Backend.fsproj">
+      <Name>Naggum.Backend</Name>
+      <Project>{243738f3-d798-4b09-8797-f90b21414b60}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Naggum.Compiler\Naggum.Compiler.fsproj">

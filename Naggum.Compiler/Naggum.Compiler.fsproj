@@ -58,6 +58,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="packages.config" />
+    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Globals.fs" />
     <Compile Include="Context.fs" />
     <Compile Include="IGenerator.fs" />

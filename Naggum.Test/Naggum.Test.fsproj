@@ -52,6 +52,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="packages.config" />
+    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Process.fs" />
     <Compile Include="CompilerTest.fs" />
     <Compile Include="AssemblerTests.fs" />

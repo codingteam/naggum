@@ -7,6 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test programs", "Test progr
 	ProjectSection(SolutionItems) = preProject
 		tests\comment.naggum = tests\comment.naggum
 		tests\comment.result = tests\comment.result
+		tests\let-funcall.naggum = tests\let-funcall.naggum
+		tests\let-funcall.result = tests\let-funcall.result
 		tests\test.naggum = tests\test.naggum
 		tests\test.result = tests\test.result
 	EndProjectSection

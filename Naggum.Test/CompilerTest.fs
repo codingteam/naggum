@@ -12,9 +12,9 @@ type CompilerTest() =
     static let testExtension = "naggum"
     static let resultExtension = "result"
     static let executableExtension = "exe"
-    
+
     static let directory = Path.Combine ("..", "..", "..", "tests")
-    static let filenames = [@"comment"; @"test"]
+    static let filenames = [@"comment"; @"test"; "let-funcall"]
 
     static member private RunTest testName =
         let basePath = Path.Combine(directory, testName)

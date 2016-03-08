@@ -1,0 +1,12 @@
+(defun test-let ()
+  (System.Console.Write "Let: ")
+  (let ((ok "OK"))
+    (System.Console.WriteLine ok)))
+(System.Console.WriteLine "Naggum test suite")
+
+(let ((thread (System.Threading.Thread.get_CurrentThread))
+      (culture (System.Globalization.CultureInfo.get_InvariantCulture)))
+    (System.Console.WriteLine "Setting up an environment...")
+    (call set_CurrentCulture thread culture))
+
+(test-let)

@@ -41,7 +41,7 @@ let string =
     let normalChar = satisfy (fun c -> c <> '\"')
     between (pstring "\"") (pstring "\"") (manyChars normalChar) |>> (fun str -> str :> obj) |>> Object
 
-let symChars = (anyOf "+-*/=<>!?.") //chars that are valid in the symbol name
+let symChars = (anyOf "+-*/=<>!?._") //chars that are valid in the symbol name
 let symbol = (many1Chars (letter <|> digit <|> symChars)) |>> Symbol
 let atom = (pnumber <|> string <|> symbol) |>> Atom
 let listElement = choice [ atom; list ]

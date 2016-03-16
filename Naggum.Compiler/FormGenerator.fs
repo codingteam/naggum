@@ -59,19 +59,19 @@ type SequenceGenerator(context:Context,typeBuilder:TypeBuilder,seq:SExp list, gf
             List.map (fun (sexp) -> List.head ((gf.MakeGenerator context sexp).ReturnTypes())) seq
 
 type BodyGenerator(context : Context,
-                   methodBuilder : MethodBuilder,
+                   resultType : Type,
                    body : SExp list,
                    gf : IGeneratorFactory) =
     let rec genBody (ilGen : ILGenerator) (body : SExp list) =
         match body with
             | [] ->
-                ilGen.Emit(OpCodes.Ldnull)
+                if resultType <> typeof<Void> then
+                    ilGen.Emit(OpCodes.Ldnull)
             | [last] ->
                 let gen = gf.MakeGenerator context last
                 let stackType = List.head <| gen.ReturnTypes ()
-                let returnType = methodBuilder.ReturnType
                 gen.Generate ilGen
-                match (stackType, returnType) with
+                match (stackType, resultType) with
                 | (s, r) when s = typeof<Void> && r = typeof<Void> -> ()
                 | (s, r) when s = typeof<Void> && r <> typeof<Void> -> ilGen.Emit OpCodes.Ldnull
                 | (s, r) when s <> typeof<Void> && r = typeof<Void> -> ilGen.Emit OpCodes.Pop
@@ -86,18 +86,13 @@ type BodyGenerator(context : Context,
     interface IGenerator with
         member __.Generate ilGen =
             genBody ilGen body
-        member this.ReturnTypes () =
+        member __.ReturnTypes () =
             match body with
-            |[] -> [typeof<System.Void>]
-            |somelist ->
-                let tail_type = (gf.MakeGenerator context (List.rev body |> List.head)).ReturnTypes()
-                if tail_type = [typeof<System.Void>] then
-                    [typeof<obj>]
-                else tail_type
+            | [] -> [typeof<System.Void>]
+            | _ -> (gf.MakeGenerator context (List.rev body |> List.head)).ReturnTypes()
 
 type LetGenerator(context : Context,
-                  typeBuilder : TypeBuilder,
-                  methodBuilder : MethodBuilder,
+                  resultType : Type,
                   bindings:SExp,
                   body : SExp list,
                   gf : IGeneratorFactory) =
@@ -118,7 +113,7 @@ type LetGenerator(context : Context,
                         ilGen.Emit (OpCodes.Stloc,local)
                     | other -> failwithf "In let bindings: Expected: (name (form))\nGot: %A\n" other
             | other -> failwithf "In let form: expected: list of bindings\nGot: %A" other
-            let bodyGen = new BodyGenerator (scope_subctx, methodBuilder, body, gf) :> IGenerator
+            let bodyGen = new BodyGenerator (scope_subctx, resultType, body, gf) :> IGenerator
             bodyGen.Generate ilGen
             ilGen.EndScope()
         member this.ReturnTypes () =

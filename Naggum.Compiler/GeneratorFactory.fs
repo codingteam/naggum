@@ -48,12 +48,11 @@ type GeneratorFactory(typeBuilder : TypeBuilder,
         | [Symbol "if"; condition; if_true] -> // reduced if form
             new ReducedIfGenerator(context,typeBuilder,condition,if_true,this) :> IGenerator
         | Symbol "let" :: bindings :: body -> // let form
-            new LetGenerator(context,
-                             typeBuilder,
-                             methodBuilder,
-                             bindings,
-                             body,
-                             this) :> IGenerator
+            upcast new LetGenerator(context,
+                                    typeof<Void>,
+                                    bindings,
+                                    body,
+                                    this)
         | [Symbol "quote"; quotedExp] ->
             new QuoteGenerator(context,typeBuilder,quotedExp,this) :> IGenerator
         | Symbol "new" :: Symbol typeName :: args ->
@@ -102,10 +101,7 @@ type GeneratorFactory(typeBuilder : TypeBuilder,
         new SequenceGenerator(context,typeBuilder,seq,(this :> IGeneratorFactory))
 
     member private this.makeBodyGenerator(context: Context,body:SExp list) =
-        new BodyGenerator(context,
-                          methodBuilder,
-                          body,
-                          (this :> IGeneratorFactory))
+        new BodyGenerator(context, methodBuilder.ReturnType, body, this)
 
     interface IGeneratorFactory with
         member this.MakeGenerator context sexp =

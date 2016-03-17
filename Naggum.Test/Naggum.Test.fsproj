@@ -55,8 +55,9 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Process.fs" />
     <Compile Include="CompilerTest.fs" />
-    <Compile Include="AssemblerTests.fs" />
+    <Compile Include="InstructionTests.fs" />
     <Compile Include="ProcessorTests.fs" />
+    <Compile Include="AssemblerTests.fs" />
     <Compile Include="MatchersTests.fs" />
   </ItemGroup>
   <ItemGroup>

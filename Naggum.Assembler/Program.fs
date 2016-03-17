@@ -26,7 +26,7 @@ let private save (assembly : AssemblyBuilder) =
 let private assemble fileName =
     use stream = File.OpenRead fileName
     let repr = Processor.prepare fileName stream
-    let assemblies = Assembler.assemble repr
+    let assemblies = Assembler.assembleAll AssemblyBuilderAccess.Save repr
     assemblies |> Seq.iter save
 
 let private nga =

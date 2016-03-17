@@ -3,6 +3,7 @@
 open System
 open System.IO
 open System.Reflection
+open System.Reflection.Emit
 open System.Text
 
 open Xunit
@@ -17,7 +18,7 @@ let mainMethodDefinition =
       Visibility = Public
       Name = "Main"
       ArgumentTypes = List.empty
-      ReturnType = typeof<Void> 
+      ReturnType = typeof<Void>
       Body = List.empty }
 
 let consoleWriteLine =
@@ -48,8 +49,8 @@ let ``Simplest method should be processed`` () =
 "
     let result =
         { Name = "Stub"
-          Units = [Method { mainMethodDefinition with 
-                                Body = [ Ret ] } ] }
+          Units = [Method { mainMethodDefinition with
+                                Body = [ SimpleInstruction OpCodes.Ret ] } ] }
     checkPreparationResult source [result]
 
 [<Fact>]
@@ -66,8 +67,8 @@ let ``Hello world assembly should be processed`` () =
                             Visibility = Public
                             Name = "Main"
                             ArgumentTypes = List.empty
-                            ReturnType = typeof<Void> 
+                            ReturnType = typeof<Void>
                             Body = [ Ldstr "Hello, world!"
                                      Call consoleWriteLine
-                                     Ret ] } ] }
+                                     SimpleInstruction OpCodes.Ret ] } ] }
     checkPreparationResult source [result]

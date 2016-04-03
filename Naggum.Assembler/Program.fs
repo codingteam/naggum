@@ -19,7 +19,7 @@ let private printError (error : Exception) =
     printfn "Error: %s" (error.ToString ())
 
 let private save (assembly : AssemblyBuilder) =
-    let name = assembly.FullName
+    let name = assembly.GetName().Name + ".exe" // TODO: See #45. ~ F
     assembly.Save name
     printfn "Assembly %s saved" name
 

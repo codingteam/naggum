@@ -52,7 +52,7 @@ let assemble (mode : AssemblyBuilderAccess) (assembly : Assembly) =
     let name = AssemblyName assembly.Name
     let domain = AppDomain.CurrentDomain
     let builder = domain.DefineDynamicAssembly (name, mode)
-    let fileName = assembly.Name + ".dll" // TODO: Proper file naming
+    let fileName = assembly.Name + ".exe" // TODO: Proper file naming
     let moduleBuilder = builder.DefineDynamicModule (assembly.Name, fileName)
     assembly.Units |> List.iter (assembleUnit builder moduleBuilder)
     moduleBuilder.CreateGlobalFunctions ()

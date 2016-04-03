@@ -89,7 +89,7 @@ type BodyGenerator(context : Context,
         member __.ReturnTypes () =
             match body with
             | [] -> [typeof<System.Void>]
-            | _ -> (gf.MakeGenerator context (List.rev body |> List.head)).ReturnTypes()
+            | _ -> (gf.MakeGenerator context (List.last body)).ReturnTypes()
 
 type LetGenerator(context : Context,
                   resultType : Type,
@@ -218,7 +218,7 @@ type QuoteGenerator(context:Context,typeBuilder:TypeBuilder,quotedExp:SExp,gf:IG
             | Symbol s -> generate_symbol ilGen s
             | other -> failwithf "Error: Unexpected form in quoted expression: %A" other
         let cons = (typeof<Naggum.Runtime.Cons>).GetConstructor(Array.create 2 typeof<obj>)
-        List.rev elements |> List.head |> generate_list_element //last element
+        List.last elements |> generate_list_element
         ilGen.Emit(OpCodes.Ldnull) //list terminator
         ilGen.Emit(OpCodes.Newobj,cons)
         List.rev elements |> List.tail |> List.iter (fun (e) ->

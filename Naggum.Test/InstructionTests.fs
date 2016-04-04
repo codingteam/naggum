@@ -12,7 +12,7 @@ let checkResult (body : string) (expectedResult : obj) =
     // TODO: FSCheck tests
     let source =
         sprintf
-        <| "(.assembly Hello
+        <| "(.assembly TestAssembly
   (.method Test () %s ()
     %s)
 )"
@@ -21,7 +21,13 @@ let checkResult (body : string) (expectedResult : obj) =
     use stream = new MemoryStream(Encoding.UTF8.GetBytes source)
     let repr = Processor.prepare "file.ngi" stream |> Seq.exactlyOne
     let assembly = Assembler.assemble AssemblyBuilderAccess.RunAndCollect repr
-    let ``module`` = assembly.GetModules () |> Seq.last // TODO: More proper check for *our* module. Why are there 2?
+
+    // There's also a dymanic manifest module in a dynamic assembly; we need to filter that.
+    let ``module`` =
+        assembly.GetModules ()
+        |> Seq.filter (fun m -> m.ScopeName = assembly.GetName().Name)
+        |> Seq.exactlyOne
+
     let ``method`` = ``module``.GetMethod "Test"
     let result = ``method``.Invoke (null, [| |])
     Assert.Equal (expectedResult, result)

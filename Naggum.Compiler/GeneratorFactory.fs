@@ -39,48 +39,48 @@ type GeneratorFactory(typeBuilder : TypeBuilder,
             (new SymbolGenerator(context,name)) :> IGenerator
         | Reader.Object o -> this.makeObjectGenerator o
 
-    member private this.MakeFormGenerator (context:Context, form:SExp list) =
+    member private this.MakeFormGenerator (context : Context, form : SExp list) : IGenerator =
         match form with
         | Symbol "defun" :: Symbol name :: List args :: body ->
-            new DefunGenerator(context,typeBuilder,name,args,body,this) :> IGenerator
-        | [Symbol "if"; condition; if_true; if_false] -> // full if form
-            new FullIfGenerator(context,typeBuilder,condition,if_true,if_false,this) :> IGenerator
-        | [Symbol "if"; condition; if_true] -> // reduced if form
-            new ReducedIfGenerator(context,typeBuilder,condition,if_true,this) :> IGenerator
+            upcast new DefunGenerator (context, typeBuilder, name, args, body, this)
+        | [Symbol "if"; condition; ifTrue; ifFalse] -> // full if form
+            upcast new FullIfGenerator (context, condition, ifTrue, ifFalse, this)
+        | [Symbol "if"; condition; ifTrue] -> // reduced if form
+            upcast new ReducedIfGenerator (context,  condition, ifTrue, this)
         | Symbol "let" :: bindings :: body -> // let form
-            upcast new LetGenerator(context,
-                                    typeof<Void>,
-                                    bindings,
-                                    body,
-                                    this)
+            upcast new LetGenerator (context,
+                                     typeof<Void>,
+                                     bindings,
+                                     body,
+                                     this)
         | [Symbol "quote"; quotedExp] ->
-            new QuoteGenerator(context,typeBuilder,quotedExp,this) :> IGenerator
+            upcast new QuoteGenerator (context, quotedExp, this)
         | Symbol "new" :: Symbol typeName :: args ->
-            new NewObjGenerator(context,typeBuilder,typeName,args,this) :> IGenerator
+            upcast new NewObjGenerator(context,  typeName, args, this)
         | Symbol "+" :: args ->
-            new ArithmeticGenerator(context,typeBuilder,args,OpCodes.Add,this) :> IGenerator
+            upcast new ArithmeticGenerator (context, args, Add, this)
         | Symbol "-" :: args ->
-            new ArithmeticGenerator(context,typeBuilder,args,OpCodes.Sub,this) :> IGenerator
+            upcast new ArithmeticGenerator (context, args, Sub, this)
         | Symbol "*" :: args ->
-            new ArithmeticGenerator(context,typeBuilder,args,OpCodes.Mul,this) :> IGenerator
+            upcast new ArithmeticGenerator (context, args, Mul, this)
         | Symbol "/" :: args ->
-            new ArithmeticGenerator(context,typeBuilder,args,OpCodes.Div,this) :> IGenerator
-        | Symbol "=" :: arg_a :: arg_b :: [] ->
-            new SimpleLogicGenerator(context,typeBuilder,arg_a,arg_b,OpCodes.Ceq,this) :> IGenerator
-        | Symbol "<" :: arg_a :: arg_b :: [] ->
-            new SimpleLogicGenerator(context,typeBuilder,arg_a,arg_b,OpCodes.Clt,this) :> IGenerator
-        | Symbol ">" :: arg_a :: arg_b :: [] ->
-            new SimpleLogicGenerator(context,typeBuilder,arg_a,arg_b,OpCodes.Cgt,this) :> IGenerator
+            upcast new ArithmeticGenerator (context, args, Div, this)
+        | Symbol "=" :: argA :: argB :: [] ->
+            upcast new SimpleLogicGenerator (context, argA, argB, Ceq, this)
+        | Symbol "<" :: argA :: argB :: [] ->
+            upcast new SimpleLogicGenerator (context, argA, argB, Clt, this)
+        | Symbol ">" :: argA :: argB :: [] ->
+            upcast new SimpleLogicGenerator (context, argA, argB, Cgt, this)
         | Symbol "call" :: Symbol fname :: instance :: args ->
-            new InstanceCallGenerator(context, typeBuilder, instance, fname, args, this) :> IGenerator
+            upcast new InstanceCallGenerator (context, instance, fname, args, this)
         | Symbol fname :: args -> // generic funcall pattern
             let tryGetType typeName =
-                try Some (context.types.[new Symbol(typeName)]) with
+                try Some (context.types.[Symbol(typeName)]) with
                 | _ ->
                     try Some (Type.GetType typeName) with
                     | _ -> None
 
-            let callRegex = new Regex(@"([\w\.]+)\.(\w+)", RegexOptions.Compiled)
+            let callRegex = Regex(@"([\w\.]+)\.(\w+)", RegexOptions.Compiled)
             let callMatch = callRegex.Match fname
             let maybeClrType =
                 maybe {
@@ -92,16 +92,16 @@ type GeneratorFactory(typeBuilder : TypeBuilder,
             if Option.isSome maybeClrType then
                 let clrType = Option.get maybeClrType
                 let methodName = callMatch.Groups.[2].Value
-                new ClrCallGenerator(context, typeBuilder, clrType, methodName, args, this) :> IGenerator
+                upcast new ClrCallGenerator (context, clrType, methodName, args, this)
             else
-                new FunCallGenerator(context,typeBuilder,fname,args,this) :> IGenerator
+                upcast new FunCallGenerator(context, fname, args, this)
         | _ -> failwithf "Form %A is not supported yet" list
 
-    member private this.makeSequenceGenerator(context: Context,seq:SExp list) =
-        new SequenceGenerator(context,typeBuilder,seq,(this :> IGeneratorFactory))
+    member private this.MakeSequenceGenerator (context: Context, seq : SExp list) =
+        new SequenceGenerator (context, seq, (this :> IGeneratorFactory))
 
-    member private this.makeBodyGenerator(context: Context,body:SExp list) =
-        new BodyGenerator(context, methodBuilder.ReturnType, body, this)
+    member private this.MakeBodyGenerator (context : Context, body : SExp list) =
+        new BodyGenerator (context, methodBuilder.ReturnType, body, this)
 
     interface IGeneratorFactory with
         member this.MakeGenerator context sexp =
@@ -109,9 +109,9 @@ type GeneratorFactory(typeBuilder : TypeBuilder,
             | Atom value -> this.makeValueGenerator (context, value)
             | List form -> this.MakeFormGenerator (context,form)
 
-        member this.MakeSequence context seq = this.makeSequenceGenerator (context,seq) :> IGenerator
+        member this.MakeSequence context seq = this.MakeSequenceGenerator (context,seq) :> IGenerator
 
-        member this.MakeBody context body = this.makeBodyGenerator (context,body) :> IGenerator
+        member this.MakeBody context body = this.MakeBodyGenerator (context,body) :> IGenerator
 
         member this.MakeGeneratorFactory newTypeBuilder newMethodBuilder =
             new GeneratorFactory(newTypeBuilder,

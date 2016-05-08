@@ -1,7 +1,6 @@
 ﻿module Naggum.Compiler.ClrGenerator
 
 open System
-open System.Reflection.Emit
 
 open Naggum.Backend.MaybeMonad
 open Naggum.Backend.Reader
@@ -52,30 +51,38 @@ let nearestOverload (clrType : Type) methodName types =
             else
                 Some (List.head methods)
 
-type ClrCallGenerator(context : Context, typeBuilder : TypeBuilder, clrType : Type, methodName : string, arguments : SExp list,
-                      gf : IGeneratorFactory) =
-    let args_seq = gf.MakeSequence context arguments
-    let arg_types = args_seq.ReturnTypes()
+type ClrCallGenerator (context : Context,
+                       clrType : Type,
+                       methodName : string,
+                       arguments : SExp list,
+                       gf : IGeneratorFactory) =
+    let args = gf.MakeSequence context arguments
+    let arg_types = args.ReturnTypes()
     let clrMethod = nearestOverload clrType methodName arg_types
     interface IGenerator with
-        member this.Generate ilGen =
+        member __.Generate il =
+            args.Generate il
+            il.Call (Option.get clrMethod)
 
-            args_seq.Generate ilGen
-            ilGen.Emit(OpCodes.Call, Option.get clrMethod)
         member this.ReturnTypes() =
             [(Option.get clrMethod).ReturnType]
 
-type InstanceCallGenerator(context : Context, typeBuilder : TypeBuilder, instance : SExp, methodName : string, arguments : SExp list, gf : IGeneratorFactory) =
+type InstanceCallGenerator (context : Context,
+                            instance : SExp,
+                            methodName : string,
+                            arguments : SExp list,
+                            gf : IGeneratorFactory) =
     interface IGenerator with
-        member this.Generate ilGen =
-            let inst_gen = gf.MakeGenerator context instance
-            let args_gen = gf.MakeSequence context arguments
-            let methodInfo = nearestOverload (inst_gen.ReturnTypes() |> List.head) methodName (args_gen.ReturnTypes())
+        member __.Generate il =
+            let instGen = gf.MakeGenerator context instance
+            let argsGen = gf.MakeSequence context arguments
+            let methodInfo = nearestOverload (instGen.ReturnTypes() |> List.head) methodName (argsGen.ReturnTypes())
             if Option.isSome methodInfo then
-                inst_gen.Generate ilGen
-                args_gen.Generate ilGen
-                ilGen.Emit(OpCodes.Callvirt,Option.get methodInfo)
-            else failwithf "No overload found for method %A with types %A" methodName (args_gen.ReturnTypes())
+                instGen.Generate il
+                argsGen.Generate il
+                il.Call (Option.get methodInfo)
+            else failwithf "No overload found for method %A with types %A" methodName (argsGen.ReturnTypes())
+
         member this.ReturnTypes () =
             let inst_gen = gf.MakeGenerator context instance
             let args_gen = gf.MakeSequence context arguments

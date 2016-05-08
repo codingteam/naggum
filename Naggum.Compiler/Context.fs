@@ -5,12 +5,14 @@ open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
 
+open GrEmit
+
 open Naggum.Runtime
 
 type ContextValue =
-    |Local of LocalBuilder * Type
-    |Field of FieldBuilder * Type
-    |Arg of int * Type
+    | Local of GroboIL.Local * Type
+    | Field of FieldBuilder * Type
+    | Arg of int * Type
 
 type Context =
     val types : Dictionary<Symbol,Type>

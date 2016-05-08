@@ -5,30 +5,22 @@ open System.IO
 open System.Reflection
 open System.Reflection.Emit
 
+open GrEmit
+
 open Naggum.Backend
 open Naggum.Backend.Reader
-open Naggum.Compiler.Context
 open Naggum.Compiler.IGenerator
 open Naggum.Compiler.GeneratorFactory
 
-let private prologue (ilGen : ILGenerator) =
-    ilGen.BeginScope()
-
-let private epilogue context (ilGen : ILGenerator) =
-    ilGen.Emit OpCodes.Ret
-    ilGen.EndScope()
-
 let compileMethod context (generatorFactory : IGeneratorFactory) body (methodBuilder : MethodBuilder) fileName =
-    let ilGenerator = methodBuilder.GetILGenerator()
-
-    prologue ilGenerator
+    use il = new GroboIL (methodBuilder)
     try
         let gen = generatorFactory.MakeBody context body
-        gen.Generate ilGenerator
+        gen.Generate il
     with
     | ex -> printfn "File: %A\nForm: %A\nError: %A" fileName sexp ex.Source
 
-    epilogue context ilGenerator
+    il.Ret ()
 
 let compile (source : Stream) (assemblyName : string) (filePath : string) (asmRefs:string list): unit =
     let assemblyName = AssemblyName assemblyName

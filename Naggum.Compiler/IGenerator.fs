@@ -3,6 +3,8 @@
 open System
 open System.Reflection.Emit
 
+open GrEmit
+
 open Naggum.Backend.Reader
 open Naggum.Compiler.Context
 
@@ -10,7 +12,7 @@ open Naggum.Compiler.Context
 type IGenerator =
     interface
         abstract ReturnTypes : unit -> Type list
-        abstract Generate : ILGenerator -> unit
+        abstract Generate : GroboIL -> unit
     end
 
 type IGeneratorFactory =

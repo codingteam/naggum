@@ -3,18 +3,17 @@
 open System
 open System.IO
 open System.Reflection
-open System.Reflection.Emit
 
 open Naggum.Assembler.Representation
 open Naggum.Backend
 open Naggum.Backend.Matchers
 
 let private (|SimpleOpCode|_|) = function
-    | Symbol "add" -> Some (SimpleInstruction OpCodes.Add)
-    | Symbol "div" -> Some (SimpleInstruction OpCodes.Div)
-    | Symbol "mul" -> Some (SimpleInstruction OpCodes.Mul)
-    | Symbol "ret" -> Some (SimpleInstruction OpCodes.Ret)
-    | Symbol "sub" -> Some (SimpleInstruction OpCodes.Sub)
+    | Symbol "add" -> Some (Simple Add)
+    | Symbol "div" -> Some (Simple Div)
+    | Symbol "mul" -> Some (Simple Mul)
+    | Symbol "ret" -> Some (Simple Ret)
+    | Symbol "sub" -> Some (Simple Sub)
     | _ -> None
 
 let private processMetadataItem = function

@@ -1,7 +1,6 @@
 ﻿namespace Naggum.Assembler.Representation
 
 open System.Reflection
-open System.Reflection.Emit
 
 type MetadataItem =
     | EntryPoint
@@ -18,11 +17,18 @@ type MethodSignature =
       ArgumentTypes : Type list
       ReturnType : Type }
 
+type SimpleInstruction =
+    | Add
+    | Div
+    | Mul
+    | Ret
+    | Sub
+
 type Instruction =
     | Call of MethodSignature
     | Ldstr of string
     | LdcI4 of int
-    | SimpleInstruction of OpCode
+    | Simple of SimpleInstruction
 
 type MethodDefinition =
     { Metadata : Set<MetadataItem>

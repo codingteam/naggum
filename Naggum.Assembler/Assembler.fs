@@ -21,16 +21,20 @@ let private findMethod (signature : MethodSignature) =
     ``type``.GetMethod (signature.Name, Array.ofList signature.ArgumentTypes)
 
 let private buildMethodBody (m : MethodDefinition) (builder : MethodBuilder) =
-    let generator = builder.GetILGenerator ()
+    use generator = new GrEmit.GroboIL (builder)
 
     m.Body
     |> List.iter (function
                   | Call signature ->
                       let methodInfo = findMethod signature
-                      generator.Emit (OpCodes.Call, methodInfo)
-                  | LdcI4 i -> generator.Emit (OpCodes.Ldc_I4, i)
-                  | Ldstr string -> generator.Emit (OpCodes.Ldstr, string)
-                  | SimpleInstruction r -> generator.Emit r)
+                      generator.Call methodInfo
+                  | LdcI4 i -> generator.Ldc_I4 i
+                  | Ldstr string -> generator.Ldstr string
+                  | Simple Add -> generator.Add ()
+                  | Simple Div -> generator.Div (false) // TODO: Signed division support
+                  | Simple Mul -> generator.Mul ()
+                  | Simple Ret -> generator.Ret ()
+                  | Simple Sub -> generator.Sub ())
 
 let private assembleUnit (assemblyBuilder : AssemblyBuilder) (builder : ModuleBuilder) = function
     | Method m ->

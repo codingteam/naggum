@@ -3,7 +3,6 @@
 open System
 open System.IO
 open System.Reflection
-open System.Reflection.Emit
 open System.Text
 
 open Xunit
@@ -50,7 +49,7 @@ let ``Simplest method should be processed`` () =
     let result =
         { Name = "Stub"
           Units = [Method { mainMethodDefinition with
-                                Body = [ SimpleInstruction OpCodes.Ret ] } ] }
+                                Body = [ Simple Ret ] } ] }
     checkPreparationResult source [result]
 
 [<Fact>]
@@ -70,5 +69,5 @@ let ``Hello world assembly should be processed`` () =
                             ReturnType = typeof<Void>
                             Body = [ Ldstr "Hello, world!"
                                      Call consoleWriteLine
-                                     SimpleInstruction OpCodes.Ret ] } ] }
+                                     Simple Ret ] } ] }
     checkPreparationResult source [result]

@@ -27,8 +27,7 @@ add instructions for any other distributions.
 NixOS Linux
 ^^^^^^^^^^^
 
-*The instructions has been verified on NixOS 16.03. If something
- doesn't work, please file an issue.*
+*The instructions have been verified on NixOS 16.03. If something doesn't work, please file an issue.*
 
 Enter the development environment::
 

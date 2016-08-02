@@ -58,8 +58,6 @@ html`` (on Linux) or ``.\make.bat html`` (on Windows).
 .. _F# Compiler: http://fsharp.org/
 .. _Mono: http://www.mono-project.com/
 .. _NixOS Linux: http://nixos.org/
-.. _Nixpkgs: https://github.com/NixOS/nixpkgs
 .. _NuGet: http://www.nuget.org/
-.. _patch-fsharp-targets:  https://github.com/NixOS/nixpkgs/blob/d4681bf62672083f92545e02e00b8cf040247e8d/pkgs/build-support/dotnetbuildhelpers/patch-fsharp-targets.sh
 .. _Python: https://www.python.org/
 .. _Sphinx: http://sphinx-doc.org/

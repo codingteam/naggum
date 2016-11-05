@@ -1,5 +1,5 @@
 language: csharp
-mono: latest
+mono: 4.4.2
 solution: Naggum.sln
 install:
     - nuget restore Naggum.sln

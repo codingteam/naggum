@@ -21,7 +21,7 @@ Naggum source directory.
 You'll need `Mono`_, `NuGet`_ and `F# Compiler`_ installed. Some of them may or
 may not be part of your Mono installation; just make sure you've got them all.
 
-Please note that currently the project is compatible with Mono 4.4.2.
+Please note that currently the project is compatible with Mono 4.4.2+.
 
 Below is an example of setting up these tools on `NixOS Linux`_; feel free to
 add instructions for any other distributions.

@@ -69,7 +69,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="GrEmit">
-      <HintPath>..\packages\GrEmit.2.1.6\lib\net40\GrEmit.dll</HintPath>
+      <HintPath>..\packages\GrEmit.2.1.7\lib\net40\GrEmit.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />

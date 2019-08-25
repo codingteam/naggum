@@ -161,7 +161,22 @@ For example::
     (defun println (arg)
         (System.Console.WriteLine arg))
 
+Naggum is a Lisp-2, henceforth a function and a variable can share their names.
+
 Currently executable statements may be one of the following.
+
+#. Let bindings::
+
+    (let ((variable-name expression)
+          (variable-name-2 expression-2))
+         body
+         statements)
+
+Creates a lexical scope, evaluates initial values, binds them to corresponding
+names and evaluates the body, returning the value of last expression.
+
+Naggum's ``let`` is a loner: every one is inherently iterative (like ``let*``)
+and recursive (like `let rec`).
 
 #. Arithmetic statements::
 
@@ -177,26 +192,27 @@ Currently executable statements may be one of the following.
 
     (System.Console.WriteLine "Math:")
 
-#. If statements::
+#. Conditional statements::
 
     (if condition
         true-statement
         false-statement)
+
+If the ``condition`` is true (as in "not null, not zero, not false") it
+evaluates the ``true-statement`` form and returns its result. If the
+``condition`` evaluates to false, null or zero, then the ``false-statement``
+form is evaluated and its result is returned from ``if``.
 
 #. Reduced if statements::
 
     (if condition
         true-statement)
 
-#. Let bindings::
-
-    (let ((variable-name expression)
-          (variable-name-2 expression-2))
-         body
-         statements)
-
 #. Constructor calls::
 
     (new Naggum.Runtime.Cons "OK" "FAILURE")
+
+Calls an applicable constructor of a type named `Naggum.Runtime.Cons` with the
+given arguments and returns an object created.
 
 .. _CIL: https://en.wikipedia.org/wiki/Common_Intermediate_Language

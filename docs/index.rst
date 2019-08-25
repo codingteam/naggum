@@ -7,6 +7,7 @@ Naggum documentation
    about
    build-guide
    usage
+   specification
 
 Naggum (named in honor of `Erik Naggum`_) is a modern statically typed Lisp
 variant that is targeting `Common Language Infrastructure`_ (CLI) runtime
